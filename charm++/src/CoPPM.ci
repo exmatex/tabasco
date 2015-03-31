@@ -1,0 +1,41 @@
+mainmodule CoPPM {
+
+  include "types.hpp";
+
+  readonly CProxy_Main mainProxy;                    // central controller
+  readonly CProxy_Domain domainArray;                // array of domains of elements
+  readonly CProxy_CoarseScaleModel coarseScaleArray; // array of domain coarse scale models
+  readonly CProxy_FineScaleModel fineScaleArray;     // array of fine scale models
+  readonly CProxy_DBInterface DBArray;               // array of DB interfaces
+
+  // Main driver
+  mainchare Main {
+    entry Main(CkArgMsg *msg);
+    entry [threaded] void go(Input in);
+    entry void done();
+  };
+
+  // Domains of elements
+  array [3D] Domain {
+    entry Domain();
+    entry void run();
+  };
+
+  // Coarse scale model - Lulesh
+  array [3D] CoarseScaleModel {
+    entry CoarseScaleModel();
+    entry void run(int ntimesteps, int nelems);
+  };
+
+  // Fine scale model
+  array [4D] FineScaleModel {
+    entry FineScaleModel();
+    entry void run(int iter);
+  };
+
+  // DB interface
+  array [3D] DBInterface {
+    entry DBInterface();
+    entry void run();
+  };
+};
