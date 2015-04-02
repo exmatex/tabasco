@@ -1,4 +1,4 @@
-#include "CoPPM.decl.h"
+#include "CoM4.decl.h"
 #include "FineScaleModel.hpp"
 
 extern CProxy_Main mainProxy;

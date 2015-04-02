@@ -1,7 +1,7 @@
 #ifndef _COARSE_SCALE_MODEL_H_
 #define _COARSE_SCALE_MODEL_H_
 
-#include "CoPPM.decl.h"
+#include "CoM4.decl.h"
 
 class CoarseScaleModel : public CBase_CoarseScaleModel {
   private:

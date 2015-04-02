@@ -1,4 +1,4 @@
-#include "CoPPM.decl.h"
+#include "CoM4.decl.h"
 #include "CoarseScaleModel.hpp"
 #include "FineScaleModel.hpp"
 

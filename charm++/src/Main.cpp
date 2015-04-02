@@ -1,10 +1,10 @@
-#include "CoPPM.decl.h"
+#include "CoM4.decl.h"
 #include "Main.hpp"
 #include "Domain.hpp"
 #include "CoarseScaleModel.hpp"
 #include "FineScaleModel.hpp"
 #include "DBInterface.hpp"
-#include "CoPPM.hpp"
+#include "CoM4.hpp"
 #include "input.hpp"
 
 #include <cstring>
@@ -43,7 +43,7 @@ Main::Main(CkArgMsg* msg)
   CkPrintf("**************************************************\n");
   CkPrintf("**                                              **\n");
   CkPrintf("**                                              **\n");
-  CkPrintf("**   Running \"Charm++ 3D CoPPM %d processors     **\n", CkNumPes());
+  CkPrintf("**   Running \"Charm++ 3D CoM4 %d processors     **\n", CkNumPes());
   CkPrintf("**                                              **\n");
   CkPrintf("**                                              **\n");
   CkPrintf("**************************************************\n");
@@ -166,13 +166,13 @@ void Main::done()
   if (doneCount >= totalChares)
     CkExit();
 }
-// Executes main of CoPPM
+// Executes main of CoM4
 // and exits charm after successful run
 void Main::go(Input in)
 {
-  main_CoPPM(in, domainArray);
+  main_CoM4(in, domainArray);
 
   CkExit();
 }
 
-#include "CoPPM.def.h"
+#include "CoM4.def.h"

@@ -30,13 +30,13 @@ endif
 BOOSTLIB=$(BOOST_INCLUDES)/../lib
 BOOST_LDFLAG=-L$(BOOSTLIB)
 
-#OBJS:=$(addprefix $(OBJDIR)/, CoPPM.o domain.o lulesh.o taylor.o output.o input.o main.o)
-OBJS:=$(addprefix $(OBJDIR)/, CoPPM.o Domain.o CoarseScaleModel.o FineScaleModel.o DBInterface.o input.o Main.o)
+#OBJS:=$(addprefix $(OBJDIR)/, CoM4.o domain.o lulesh.o taylor.o output.o input.o main.o)
+OBJS:=$(addprefix $(OBJDIR)/, CoM4.o Domain.o CoarseScaleModel.o FineScaleModel.o DBInterface.o input.o Main.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
 LDFLAGS= -lm -lrt 
 
 #target
-NAME=$(BINDIR)/CoPPM
+NAME=$(BINDIR)/CoM4
 default: all
 all: $(SUBDIRS) $(OBJDIR) $(NAME)
 

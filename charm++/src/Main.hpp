@@ -1,7 +1,7 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-#include "CoPPM.decl.h"
+#include "CoM4.decl.h"
 #include "types.hpp"
 
 class Main : public CBase_Main {

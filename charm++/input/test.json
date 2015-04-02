@@ -1,6 +1,6 @@
 {"parameter": {
-    "header": "CoPPM Test Input File",
-    "CoPPM": [
+    "header": "CoM4 Test Input File",
+    "CoM4": [
         {"id": "domain",                    "value": "3D grid"}
     ],
     "domain": [

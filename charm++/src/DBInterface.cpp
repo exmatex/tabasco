@@ -1,4 +1,4 @@
-#include "CoPPM.decl.h"
+#include "CoM4.decl.h"
 #include "DBInterface.hpp"
 
 extern CProxy_Main mainProxy;

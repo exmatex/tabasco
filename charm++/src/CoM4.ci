@@ -1,4 +1,4 @@
-mainmodule CoPPM {
+mainmodule CoM4 {
 
   include "types.hpp";
 
