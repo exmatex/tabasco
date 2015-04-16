@@ -3,6 +3,7 @@
 #include "Domain.hpp"
 #include "CoarseScaleModel.hpp"
 #include "FineScaleModel.hpp"
+#include "Interpolate.hpp"
 #include "DBInterface.hpp"
 #include "CoM4.hpp"
 #include "input.hpp"
@@ -13,6 +14,7 @@
 /* readonly */ CProxy_Domain domainArray;
 /* readonly */ CProxy_CoarseScaleModel coarseScaleArray;
 /* readonly */ CProxy_FineScaleModel fineScaleArray;
+/* readonly */ CProxy_Interpolate interpolateArray;
 /* readonly */ CProxy_DBInterface DBArray;
 
 /*readonly*/ int elemDimX;
@@ -121,6 +123,9 @@ Main::Main(CkArgMsg* msg)
   // Create DB interfaces, 1 per domain
   DBArray = CProxy_DBInterface::ckNew(opts);
 
+  // Create interpolates, 1 per domain
+  interpolateArray = CProxy_Interpolate::ckNew(opts);
+
   // Create fine scale models
   fineScaleArray = CProxy_FineScaleModel::ckNew();  
 
@@ -166,6 +171,7 @@ void Main::done()
   if (doneCount >= totalChares)
     CkExit();
 }
+
 // Executes main of CoM4
 // and exits charm after successful run
 void Main::go(Input in)

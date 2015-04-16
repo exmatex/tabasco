@@ -1,5 +1,6 @@
 #include "CoM4.decl.h"
 #include "CoarseScaleModel.hpp"
+#include "DBInterface.hpp"
 #include "FineScaleModel.hpp"
 
 extern CProxy_Main mainProxy;

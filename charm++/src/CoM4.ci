@@ -6,6 +6,7 @@ mainmodule CoM4 {
   readonly CProxy_Domain domainArray;                // array of domains of elements
   readonly CProxy_CoarseScaleModel coarseScaleArray; // array of domain coarse scale models
   readonly CProxy_FineScaleModel fineScaleArray;     // array of fine scale models
+  readonly CProxy_Interpolate interpolateArray;      // array of interpolations
   readonly CProxy_DBInterface DBArray;               // array of DB interfaces
 
   // Main driver
@@ -30,6 +31,12 @@ mainmodule CoM4 {
   // Fine scale model
   array [4D] FineScaleModel {
     entry FineScaleModel();
+    entry void run(int iter);
+  };
+
+  // Interpolate 
+  array [3D] Interpolate {
+    entry Interpolate();
     entry void run(int iter);
   };
 
