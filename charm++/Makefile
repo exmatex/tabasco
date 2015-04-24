@@ -1,7 +1,7 @@
 SRCDIR=src
 
 ##############CHARM##########
-CHARM_ROOT=/usr/projects/infmodels/smm/charm/charm-6.5.1
+#CHARM_ROOT=/usr/projects/infmodels/smm/charm/charm-6.5.1
 CHARMINC=$(CHARM_ROOT)/include/
 ifeq (,$(CHARM_ROOT))
 $(info Please establish Charmm++ environment variables before using this Makefile.)
