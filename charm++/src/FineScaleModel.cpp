@@ -1,9 +1,11 @@
 #include "CoM4.decl.h"
 #include "FineScaleModel.hpp"
+#include "NearestNeighborSearch.hpp"
 #include "Interpolate.hpp"
 #include "DBInterface.hpp"
 
 extern CProxy_Main mainProxy;
+extern CProxy_NearestNeighborSearch nnsArray;
 extern CProxy_Interpolate interpolateArray;
 extern CProxy_DBInterface DBArray;
 
@@ -33,6 +35,8 @@ void FineScaleModel::run(int iter)
 {
   printf("FineScaleModel %d %d %d %d running iter %d\n",
     thisIndex.w, thisIndex.x, thisIndex.y, thisIndex.z, iter);
+
+  nnsArray(thisIndex.w, thisIndex.x, thisIndex.y).run(iter);
 
   interpolateArray(thisIndex.w, thisIndex.x, thisIndex.y).run(iter);
 
