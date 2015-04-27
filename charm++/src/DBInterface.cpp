@@ -25,7 +25,12 @@ void DBInterface::pup(PUP::er &p)
 
 }
 
-void DBInterface::run()
+void DBInterface::get()
 {
-  printf("DBInterface running\n");
+  printf("DBInterface get\n");
+}
+
+void DBInterface::put()
+{
+  printf("DBInterface put\n");
 }

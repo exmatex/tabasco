@@ -21,35 +21,72 @@ mainmodule CoM4 {
   array [3D] Domain {
     entry Domain();
     entry void run();
+    entry void haloExchange();
   };
 
   // Coarse scale model - Lulesh
   array [3D] CoarseScaleModel {
     entry CoarseScaleModel();
-    entry void run(int ntimesteps, int nelems);
+    entry void startElementFineScaleQuery(int nstep, int nelems);
+    entry void receiveNewPoint(int whichEl, int whichIter, int newPt);
+    entry void updateElement(int whichEl, int whichIter, int newPt);
+
+    entry void run(int ntimesteps, int nelems)
+    {
+      for (tstep = 0; tstep < ntimesteps; tstep++) {
+        // Start queries for all elements
+        atomic {
+          startElementFineScaleQuery(tstep, nelems);
+        }
+
+        // Process new points
+        for (e = 0; e < nelems; e++) {
+          when receiveNewPoint(int whichEl, int whichIter, int newPt) atomic {
+            updateElement(whichEl, whichIter, newPt);
+          }
+        }
+      } 
+
+      // Time steps done
+      atomic {
+        mainProxy.done();
+      }
+    };
   };
 
   // Fine scale model
   array [4D] FineScaleModel {
     entry FineScaleModel();
-    entry void run(int iter);
+    entry void evaluate();
+    entry void query2(int iter);
+
+    entry void query(int iter)
+    {
+      atomic {
+        query2(iter);
+      }
+    };
   };
 
   // Nearest Neighbor Search 
   array [3D] NearestNeighborSearch {
     entry NearestNeighborSearch();
-    entry void run(int iter);
+    entry void getIndex();
+    entry void putIndex();
+    entry void getNeighbors();
+    entry void get();
   };
 
   // Interpolate 
   array [3D] Interpolate {
     entry Interpolate();
-    entry void run(int iter);
+    entry void run();
   };
 
   // DB interface
   array [3D] DBInterface {
     entry DBInterface();
-    entry void run();
+    entry void get();
+    entry void put();
   };
 };

@@ -1,13 +1,12 @@
 SRCDIR=src
 
 ##############CHARM##########
-#CHARM_ROOT=/usr/projects/infmodels/smm/charm/charm-6.5.1
-CHARMINC=$(CHARM_ROOT)/include/
 ifeq (,$(CHARM_ROOT))
 $(info Please establish Charmm++ environment variables before using this Makefile.)
 $(info E.g. by running setting CHARM_ROOT pr run 'module load charm++')
 $(error CHARM_ROOT is not set)
 endif
+CHARMINC=$(CHARM_ROOT)/include/
 CHARMBIN=$(CHARM_ROOT)/bin
 CXX=$(CHARMBIN)/charmc
 OBJDIR=charm_obj
@@ -19,7 +18,7 @@ OPTFLAGS=-O3
 #DEFS=-DTRACE
 
 ifneq ($(wildcard /usr/include/boost/foreach.hpp), )
-#BOOST_INCLUDES=/usr/include
+BOOST_INCLUDES=/usr/include
 endif
 ifeq ($(BOOST_INCLUDES), )
 $(error Set BOOST_INCLUDES or run 'module load boost' first)
@@ -30,7 +29,6 @@ endif
 BOOSTLIB=$(BOOST_INCLUDES)/../lib
 BOOST_LDFLAG=-L$(BOOSTLIB)
 
-#OBJS:=$(addprefix $(OBJDIR)/, CoM4.o domain.o lulesh.o taylor.o output.o input.o main.o)
 OBJS:=$(addprefix $(OBJDIR)/, CoM4.o Domain.o CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
 LDFLAGS= -lm -lrt 

@@ -14,7 +14,7 @@ class Interpolate : public CBase_Interpolate {
   void pup(PUP::er &p);
 
   // Entry methods
-  void run(int iter);
+  void run();
 };
 
 #endif

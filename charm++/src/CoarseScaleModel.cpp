@@ -25,24 +25,33 @@ CoarseScaleModel::~CoarseScaleModel()
 
 void CoarseScaleModel::pup(PUP::er &p)
 {
-
+  CBase_CoarseScaleModel::pup(p);
+  p|maxTimesteps;
+  p|numElems;
+  p|nstep;
+  p|tstep;
+  p|e;
+  p|currentPt;
 }
 
-void CoarseScaleModel::run(int ntimesteps, int nelems)
+void CoarseScaleModel::startElementFineScaleQuery(int step, int nelems)
 {
-  maxTimesteps = ntimesteps;
+  nstep = step;
   numElems = nelems;
-  //printf("CoarseScaleModel running\n");
+  printf("CoarseScaleModel startElementFineScaleQuery\n");
 
-  for (int i = 0; i < maxTimesteps;i++)
+  for (int j = 0; j < numElems; j++)
   {
-    for (int j = 0; j < numElems; j++)
-    {
-      fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).run(i);
-    }
+    fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(nstep);
   }
 
   // This chare is done
   //printf("CoarseScaleModel is done\n");
-  mainProxy.done();
+  //mainProxy.done();
+}
+
+void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
+{
+  int currentPt = newPt;
+  printf("Iter %d Element %d %d %d %d update newPt %d\n", whichIter, thisIndex.x, thisIndex.y, thisIndex.z, whichEl, newPt);
 }

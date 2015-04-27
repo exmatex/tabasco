@@ -21,6 +21,7 @@ class Domain : public CBase_Domain {
 
   // Entry methods
   void run();
+  void haloExchange();
 };
 
 #endif

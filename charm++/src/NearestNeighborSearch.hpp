@@ -14,7 +14,10 @@ class NearestNeighborSearch : public CBase_NearestNeighborSearch {
   void pup(PUP::er &p);
 
   // Entry methods
-  void run(int iter);
+  void getIndex();
+  void putIndex();
+  void getNeighbors();
+  void get();
 };
 
 #endif

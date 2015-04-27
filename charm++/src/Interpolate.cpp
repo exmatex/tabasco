@@ -25,7 +25,7 @@ void Interpolate::pup(PUP::er &p)
 
 }
 
-void Interpolate::run(int iter)
+void Interpolate::run()
 {
-  printf("Interpolate running iter %d\n", iter);
+  printf("Interpolate run\n");
 }

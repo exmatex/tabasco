@@ -14,7 +14,8 @@ class DBInterface : public CBase_DBInterface {
   void pup(PUP::er &p);
 
   // Entry methods
-  void run();
+  void get();
+  void put();
 };
 
 #endif

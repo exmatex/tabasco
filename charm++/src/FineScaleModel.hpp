@@ -5,6 +5,9 @@
 
 class FineScaleModel : public CBase_FineScaleModel {
   private:
+    FineScaleModel_SDAG_CODE
+    int newPt;
+    int currentIter;
        
   public:
   
@@ -14,7 +17,8 @@ class FineScaleModel : public CBase_FineScaleModel {
   void pup(PUP::er &p);
 
   // Entry methods
-  void run(int iter);
+  void evaluate();
+  void query2(int iter);
 };
 
 #endif

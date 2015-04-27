@@ -29,3 +29,8 @@ void Domain::run()
 {
 
 }
+
+void Domain::haloExchange()
+{
+
+}

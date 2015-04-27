@@ -5,8 +5,13 @@
 
 class CoarseScaleModel : public CBase_CoarseScaleModel {
   private:
+    CoarseScaleModel_SDAG_CODE
     int maxTimesteps;
     int numElems;
+    int nstep;
+    int tstep;
+    int e;
+    int currentPt;
      
   public:
   
@@ -16,7 +21,8 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void pup(PUP::er &p);
 
   // Entry methods
-  void run(int ntimesteps, int nelems);
+  void startElementFineScaleQuery(int step, int nelems);
+  void updateElement(int whichEl, int whichIter, int newPt);
 };
 
 #endif
