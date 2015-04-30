@@ -3,6 +3,16 @@
 
 #include "CoM4.decl.h"
 
+class Msg : public CMessage_Msg
+{
+  public:
+    int whichEl;
+    int whichIter;
+    int newPt;
+    static void *pack(Msg *);
+    static Msg *unpack(void *);
+};
+
 class CoarseScaleModel : public CBase_CoarseScaleModel {
   private:
     CoarseScaleModel_SDAG_CODE

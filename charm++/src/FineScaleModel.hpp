@@ -8,6 +8,8 @@ class FineScaleModel : public CBase_FineScaleModel {
     FineScaleModel_SDAG_CODE
     int newPt;
     int currentIter;
+    int nbrCount;
+    int nbrData;
        
   public:
   
@@ -17,8 +19,13 @@ class FineScaleModel : public CBase_FineScaleModel {
   void pup(PUP::er &p);
 
   // Entry methods
-  void evaluate();
-  void query2(int iter);
+  void evaluate(int qPt);
+  void query2(int iter, int qPt);
+  void requestNeighbors(int qPt);
+  void requestInterpolation(int nbrCount, int nbrData, int qPt);
+  void requestDBStore(int cPt);
+  void sendNewPoint2Coarse(int elnum, int iter, int cPt);
+
 };
 
 #endif

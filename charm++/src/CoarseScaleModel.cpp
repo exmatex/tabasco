@@ -6,6 +6,31 @@
 extern CProxy_Main mainProxy;
 extern CProxy_FineScaleModel fineScaleArray;
 
+void *
+Msg::pack(Msg* m)
+{
+  int *p = (int *) CkAllocBuffer(m, 3*sizeof(int));
+  int *t = p;
+
+  *t = m->whichEl; t++;
+  *t = m->whichIter; t++;
+  *t = m->newPt; t++;
+  CkFreeMsg(m);
+  return(p);
+}
+
+Msg *
+Msg::unpack(void *buf)
+{
+   int *in = (int *) buf;
+   Msg *t = new (CkAllocBuffer(in, sizeof(Msg))) Msg;
+   t->whichEl = in[0];
+   t->whichIter = in[1];
+   t->newPt = in[2];
+   CkFreeMsg(buf);
+   return t;
+}
+
 CoarseScaleModel::CoarseScaleModel()
 {
   
@@ -40,14 +65,12 @@ void CoarseScaleModel::startElementFineScaleQuery(int step, int nelems)
   numElems = nelems;
   printf("CoarseScaleModel startElementFineScaleQuery\n");
 
+  CkCallback cb(CkIndex_CoarseScaleModel::receiveNewPoint((Msg*)NULL), thisProxy);
   for (int j = 0; j < numElems; j++)
   {
-    fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(nstep);
+    fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(j, nstep, currentPt, cb);
   }
 
-  // This chare is done
-  //printf("CoarseScaleModel is done\n");
-  //mainProxy.done();
 }
 
 void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)

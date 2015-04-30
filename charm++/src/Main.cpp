@@ -6,7 +6,6 @@
 #include "NearestNeighborSearch.hpp"
 #include "Interpolate.hpp"
 #include "DBInterface.hpp"
-#include "CoM4.hpp"
 #include "input.hpp"
 
 #include <cstring>
@@ -35,6 +34,7 @@
 /*readonly*/ int numElems;
 /*readonly*/ int numNodes;
 /*readonly*/ int ghostElems;
+/*readonly*/ int NBR_LIMIT;
 
 // Entry point of Charm++ application
 Main::Main(CkArgMsg* msg)
@@ -72,6 +72,8 @@ Main::Main(CkArgMsg* msg)
   blockDimX = in.blockDimX;
   blockDimY = in.blockDimY;
   blockDimZ = in.blockDimZ;
+
+  NBR_LIMIT = 10;
 
   if ((elemDimX < 1) || (elemDimY < 1) || (elemDimZ < 1) ||
       (blockDimZ < 1) || (blockDimY < 1) || (blockDimZ < 1)) {
@@ -133,34 +135,11 @@ Main::Main(CkArgMsg* msg)
 
   // Create fine scale models
   fineScaleArray = CProxy_FineScaleModel::ckNew();  
-
-  // For Round Robin insertion
-  int numPes = CkNumPes();
-  int currPE = -1;
-
-  for (int i = 0; i < chareDimX; i++)
-  {
-    for (int j = 0; j < chareDimY; j++)
-    {
-      for (int k = 0; k < chareDimZ; k++)
-      {
-        for (int l = 0; l < numElems; l++)
-        {
-          fineScaleArray(i, j, k, l).insert( (++currPE) % numPes);
-        }
-      }
-    }
-  }
-
   fineScaleArray.doneInserting();
 
   // Start coarse scale models
   coarseScaleArray.run(in.maxTimesteps, numElems);
 
-  // Start main program
-  //mainProxy.go(in);
-  // Print exit msg after sucessful run
-  //CkPrintf("Exiting charm++\n");
 }
   
 // Constructor needed for chare object migration (ignore for now)
@@ -175,15 +154,6 @@ void Main::done()
   doneCount++;
   if (doneCount >= totalChares)
     CkExit();
-}
-
-// Executes main of CoM4
-// and exits charm after successful run
-void Main::go(Input in)
-{
-  main_CoM4(in, domainArray);
-
-  CkExit();
 }
 
 #include "CoM4.def.h"

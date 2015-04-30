@@ -2,6 +2,7 @@
 #include "DBInterface.hpp"
 
 extern CProxy_Main mainProxy;
+extern CProxy_NearestNeighborSearch nnsArray;
 
 DBInterface::DBInterface()
 {
@@ -25,12 +26,16 @@ void DBInterface::pup(PUP::er &p)
 
 }
 
-void DBInterface::get()
+void DBInterface::get(int pCount, int pIndex, int pData)
 {
   printf("DBInterface get\n");
+
+  // Call to DB
+
+  nnsArray(thisIndex.x, thisIndex.y, thisIndex.z).receiveData(pCount, pData);
 }
 
-void DBInterface::put()
+void DBInterface::put(int pCount, int pData)
 {
   printf("DBInterface put\n");
 }

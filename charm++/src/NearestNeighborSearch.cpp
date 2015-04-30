@@ -4,6 +4,8 @@
 
 extern CProxy_Main mainProxy;
 extern CProxy_DBInterface DBArray;
+extern CProxy_FineScaleModel fineScaleArray;
+extern int NBR_LIMIT;
 
 NearestNeighborSearch::NearestNeighborSearch()
 {
@@ -24,32 +26,33 @@ NearestNeighborSearch::~NearestNeighborSearch()
 
 void NearestNeighborSearch::pup(PUP::er &p)
 {
-
+  CBase_NearestNeighborSearch::pup(p);
+  p|nbrCount;
+  p|nbrIndex;
+  p|nbrData;
 }
 
-void NearestNeighborSearch::getIndex()
+void NearestNeighborSearch::getIndex(int qPt, int nbrCount, int nbrIndex)
 {
   printf("NearestNeighborSearch getIndex\n");
 }
 
-void NearestNeighborSearch::putIndex()
+void NearestNeighborSearch::putIndex(int qPt, int nbrIndex)
 {
   printf("NearestNeighborSearch putIndex\n");
 }
 
-void NearestNeighborSearch::getNeighbors()
+void NearestNeighborSearch::requestDBGet(int nbrCount, int nbrIndex, int nbrData)
 {
-  printf("NearestNeighborSearch getNeighbors\n");
+  printf("NearestNeighborSearch requestDBGet\n");
 
-  // Check for neighbor indices
-  getIndex();
-  
-  // Get data from DB for each neighbor
-  DBArray.get();
+  if (nbrCount == NBR_LIMIT)
+    DBArray(thisIndex.x, thisIndex.y, thisIndex.z).get(nbrCount, nbrIndex, nbrData);
 }
 
-void NearestNeighborSearch::get()
+void NearestNeighborSearch::sendNeighbors(int elnum, int nbrCount, int nbrData)
 {
-  printf("NearestNeighborSearch get\n");
-}
+  printf("NearestNeighborSearch sendNeighbors\n");
 
+  fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, elnum).receiveNeighbors(nbrCount, nbrData);
+}

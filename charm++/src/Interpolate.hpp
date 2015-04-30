@@ -5,7 +5,8 @@
 
 class Interpolate : public CBase_Interpolate {
   private:
-       
+    int newPt;
+     
   public:
   
   Interpolate();
@@ -14,7 +15,7 @@ class Interpolate : public CBase_Interpolate {
   void pup(PUP::er &p);
 
   // Entry methods
-  void run();
+  void run(int elnum, int nbrCount, int nbrData, int qPt);
 };
 
 #endif

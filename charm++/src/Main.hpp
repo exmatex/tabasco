@@ -17,7 +17,6 @@ class Main : public CBase_Main {
   Main(CkMigrateMessage* msg);
 
   /// Entry Methods ///
-  void go(Input in);
   void done();
 };
 #endif //__MAIN_H__

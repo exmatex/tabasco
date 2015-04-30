@@ -10,10 +10,11 @@ mainmodule CoM4 {
   readonly CProxy_Interpolate interpolateArray;      // array of interpolations
   readonly CProxy_DBInterface DBArray;               // array of DB interfaces
 
+  message Msg;
+
   // Main driver
   mainchare Main {
     entry Main(CkArgMsg *msg);
-    entry [threaded] void go(Input in);
     entry void done();
   };
 
@@ -28,7 +29,8 @@ mainmodule CoM4 {
   array [3D] CoarseScaleModel {
     entry CoarseScaleModel();
     entry void startElementFineScaleQuery(int nstep, int nelems);
-    entry void receiveNewPoint(int whichEl, int whichIter, int newPt);
+    //entry void receiveNewPoint(int whichEl, int whichIter, int newPt);
+    entry [nokeep] void receiveNewPoint(Msg *m);
     entry void updateElement(int whichEl, int whichIter, int newPt);
 
     entry void run(int ntimesteps, int nelems)
@@ -41,8 +43,9 @@ mainmodule CoM4 {
 
         // Process new points
         for (e = 0; e < nelems; e++) {
-          when receiveNewPoint(int whichEl, int whichIter, int newPt) atomic {
-            updateElement(whichEl, whichIter, newPt);
+          //when receiveNewPoint(int whichEl, int whichIter, int newPt) atomic {
+          when receiveNewPoint(Msg *m) atomic {
+            updateElement(m->whichEl, m->whichIter, m->newPt);
           }
         }
       } 
@@ -57,36 +60,78 @@ mainmodule CoM4 {
   // Fine scale model
   array [4D] FineScaleModel {
     entry FineScaleModel();
-    entry void evaluate();
-    entry void query2(int iter);
+    entry void evaluate(int qPt);
+    entry void query2(int iter, int qPt);
+    entry void requestNeighbors(int qPt);
+    entry void receiveNeighbors(int nbrCount, int nbrData);
+    entry void requestInterpolation(int nbrCount, int nbrData, int qPt);
+    entry void requestDBStore(int newPt);
+    entry void receivePoint(int newPt);
+    entry void sendNewPoint2Coarse(int elnum, int iter, int newPt);
 
-    entry void query(int iter)
+    entry [createhome] void query(int elnum, int iter, int qPt, CkCallback cb)
+
     {
+      // Do nearest neighbor search
       atomic {
-        query2(iter);
+        requestNeighbors(qPt);
       }
+
+      // Receive nearest neighbors, do interpolation if enough, else evaluation
+      when receiveNeighbors(int nbrCount, int nbrData) atomic {
+        if (nbrCount == NBR_LIMIT)
+          requestInterpolation(nbrCount, nbrData, qPt);
+        else
+          evaluate(qPt);
+      }
+
+      // Receive results of interpolation or evaluate
+      //  Save to DB and send back to Coarse Scale model
+      when receivePoint(int cPt) atomic { 
+        requestDBStore(cPt);
+        Msg *m = new Msg();
+        m->whichEl = elnum; m->whichIter = iter; m->newPt = cPt;
+        cb.send(m);
+      }
+
     };
   };
 
   // Nearest Neighbor Search 
   array [3D] NearestNeighborSearch {
     entry NearestNeighborSearch();
-    entry void getIndex();
-    entry void putIndex();
-    entry void getNeighbors();
-    entry void get();
+    entry void getIndex(int qPt, int nbrCount, int nbrIndex);
+    entry void putIndex(int qPt, int nbrIndex);
+    entry void requestDBGet(int nbrCount, int nbrIndex, int nbrData);
+    entry void receiveData(int nbrCount, int nbrData);
+    entry void sendNeighbors(int elnum, int nbrCount, int nbrData);
+
+    entry void getNeighbors(int elnum, int qPt)
+    {
+      // Get available neighbors and their data
+      atomic {
+        getIndex(qPt, nbrCount, nbrIndex);
+        requestDBGet(nbrCount, nbrIndex, nbrData);
+      }
+
+      // Once neighbor data is receive from DB, send to requestor
+      when receiveData(int nbrCount, int nbrData) atomic {
+        sendNeighbors(elnum, nbrCount, nbrData);
+      }    
+        
+    };
   };
 
   // Interpolate 
   array [3D] Interpolate {
     entry Interpolate();
-    entry void run();
+    entry void run(int elnum, int nbrCount, int nbrData, int qPt);
   };
 
   // DB interface
   array [3D] DBInterface {
     entry DBInterface();
-    entry void get();
-    entry void put();
+    entry void put(int pcount, int pData);
+    entry void get(int pCount, int pIndex, int pData);
   };
 };
