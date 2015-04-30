@@ -89,6 +89,8 @@ mainmodule CoM4 {
       //  Save to DB and send back to Coarse Scale model
       when receivePoint(int cPt) atomic { 
         requestDBStore(cPt);
+     
+        // Send new point back to CoarseScaleModel
         Msg *m = new Msg();
         m->whichEl = elnum; m->whichIter = iter; m->newPt = cPt;
         cb.send(m);
