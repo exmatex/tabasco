@@ -1,5 +1,5 @@
 #include "CoM4.decl.h"
-#include "DBInterface.hpp"
+#include "DBInterface.h"
 
 extern CProxy_Main mainProxy;
 extern CProxy_NearestNeighborSearch nnsArray;

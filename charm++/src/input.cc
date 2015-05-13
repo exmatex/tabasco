@@ -3,9 +3,7 @@
  * **/
 
 #include <iostream>
-//#include "domain.hpp"
-//#include "domain.decl.h"
-#include "types.hpp"
+#include "types.h"
 
 #include <string>
 #include <cstring>
@@ -29,7 +27,7 @@ void parse_input(string input_file, Input *in)
     }
   try
     {
-      BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.Domain"))
+      BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.CoarseScaleModel"))
       {
         if (v.second.get<std::string>("id") == "element dim x")
           {
@@ -61,10 +59,6 @@ void parse_input(string input_file, Input *in)
             in->blockDimZ = v.second.get<int>("value");
             CkPrintf("set block dim z                   %d\n", in->blockDimZ);
           }
-      }
-
-      BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.CoarseScaleModel"))
-      {
         if (v.second.get<std::string>("id") == "max timesteps")
           {
             in->maxTimesteps = v.second.get<int>("value");

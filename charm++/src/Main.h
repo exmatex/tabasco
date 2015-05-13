@@ -2,7 +2,7 @@
 #define _MAIN_H_
 
 #include "CoM4.decl.h"
-#include "types.hpp"
+#include "types.h"
 
 class Main : public CBase_Main {
 

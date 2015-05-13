@@ -1,5 +1,5 @@
 #include "CoM4.decl.h"
-#include "Interpolate.hpp"
+#include "Interpolate.h"
 
 extern CProxy_Main mainProxy;
 extern CProxy_FineScaleModel fineScaleArray;

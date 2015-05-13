@@ -1,7 +1,7 @@
 #include "CoM4.decl.h"
-#include "CoarseScaleModel.hpp"
-#include "DBInterface.hpp"
-#include "FineScaleModel.hpp"
+#include "CoarseScaleModel.h"
+#include "DBInterface.h"
+#include "FineScaleModel.h"
 
 extern CProxy_Main mainProxy;
 extern CProxy_FineScaleModel fineScaleArray;
@@ -51,24 +51,28 @@ CoarseScaleModel::~CoarseScaleModel()
 void CoarseScaleModel::pup(PUP::er &p)
 {
   CBase_CoarseScaleModel::pup(p);
+  p|numElemGhosts;
+  p|numNodeGhosts;
+  p|ghostNodeCount;
+  p|ghostElemCount;
   p|maxTimesteps;
   p|numElems;
   p|nstep;
   p|tstep;
   p|e;
   p|currentPt;
+  p|count;
 }
 
 void CoarseScaleModel::startElementFineScaleQuery(int step, int nelems)
 {
   nstep = step;
-  numElems = nelems;
-  printf("CoarseScaleModel startElementFineScaleQuery\n");
 
-  CkCallback cb(CkIndex_CoarseScaleModel::receiveNewPoint((Msg*)NULL), thisProxy);
-  for (int j = 0; j < numElems; j++)
+  //CkCallback cb(CkIndex_CoarseScaleModel::receiveNewPoint((Msg*)NULL), thisProxy);
+  for (int j = 0; j < nelems; j++)
   {
-    fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(j, nstep, currentPt, cb);
+    //fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(j, nstep, currentPt, cb);
+    fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(j, nstep, currentPt);
   }
 
 }
@@ -76,5 +80,10 @@ void CoarseScaleModel::startElementFineScaleQuery(int step, int nelems)
 void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
 {
   int currentPt = newPt;
-  printf("Iter %d Element %d %d %d %d update newPt %d\n", whichIter, thisIndex.x, thisIndex.y, thisIndex.z, whichEl, newPt);
+  printf("Iter %d Coarse %d %d %d Element %d update newPt %d\n", whichIter, thisIndex.x, thisIndex.y, thisIndex.z, whichEl, newPt);
+}
+
+void CoarseScaleModel::haloExchange()
+{
+  printf("halo exchange\n");
 }

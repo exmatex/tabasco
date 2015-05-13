@@ -6,9 +6,11 @@
 class Msg : public CMessage_Msg
 {
   public:
+
     int whichEl;
     int whichIter;
     int newPt;
+
     static void *pack(Msg *);
     static Msg *unpack(void *);
 };
@@ -16,12 +18,19 @@ class Msg : public CMessage_Msg
 class CoarseScaleModel : public CBase_CoarseScaleModel {
   private:
     CoarseScaleModel_SDAG_CODE
+
+    int numElemGhosts;
+    int numNodeGhosts;
+    int ghostNodeCount;
+    int ghostElemCount;
+
     int maxTimesteps;
     int numElems;
     int nstep;
     int tstep;
     int e;
     int currentPt;
+    int count;
      
   public:
   
@@ -33,6 +42,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   // Entry methods
   void startElementFineScaleQuery(int step, int nelems);
   void updateElement(int whichEl, int whichIter, int newPt);
+  void haloExchange();
 };
 
 #endif

@@ -29,7 +29,7 @@ endif
 BOOSTLIB=$(BOOST_INCLUDES)/../lib
 BOOST_LDFLAG=-L$(BOOSTLIB)
 
-OBJS:=$(addprefix $(OBJDIR)/, Domain.o CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
+OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
 LDFLAGS= -lm -lrt 
 
@@ -38,7 +38,7 @@ NAME=$(BINDIR)/CoM4
 default: all
 all: $(SUBDIRS) $(OBJDIR) $(NAME)
 
-$(OBJDIR)/%.d: $(SRCDIR)/%.cpp
+$(OBJDIR)/%.d: $(SRCDIR)/%.cc
 	@#1. sed:  put one file per line * * -> *\\\n*
 	@#2. sed gcc -MG does not know that missing files will be in $(SRCDIR)
 	@# no path -> SRCDIR
@@ -76,7 +76,7 @@ $(NAME): $(OBJS)
 	@mv charmrun $(BINDIR)/
 
 #GNU make implicit rule
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 .PHONY: $(SUBDIRS)

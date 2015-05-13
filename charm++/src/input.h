@@ -3,7 +3,7 @@
 
 #ifndef INPUT_HPP
 #define INPUT_HPP
-#include "types.hpp"
+#include "types.h"
 //#include <string>
 //#include <cstring>
 

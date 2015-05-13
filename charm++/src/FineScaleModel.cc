@@ -1,8 +1,8 @@
 #include "CoM4.decl.h"
-#include "FineScaleModel.hpp"
-#include "NearestNeighborSearch.hpp"
-#include "Interpolate.hpp"
-#include "DBInterface.hpp"
+#include "FineScaleModel.h"
+#include "NearestNeighborSearch.h"
+#include "Interpolate.h"
+#include "DBInterface.h"
 
 extern CProxy_Main mainProxy;
 extern CProxy_CoarseScaleModel coarseScaleArray;

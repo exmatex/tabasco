@@ -1,17 +1,15 @@
 #include "CoM4.decl.h"
-#include "Main.hpp"
-#include "Domain.hpp"
-#include "CoarseScaleModel.hpp"
-#include "FineScaleModel.hpp"
-#include "NearestNeighborSearch.hpp"
-#include "Interpolate.hpp"
-#include "DBInterface.hpp"
-#include "input.hpp"
+#include "Main.h"
+#include "CoarseScaleModel.h"
+#include "FineScaleModel.h"
+#include "NearestNeighborSearch.h"
+#include "Interpolate.h"
+#include "DBInterface.h"
+#include "input.h"
 
 #include <cstring>
 
 /* readonly */ CProxy_Main mainProxy;
-/* readonly */ CProxy_Domain domainArray;
 /* readonly */ CProxy_CoarseScaleModel coarseScaleArray;
 /* readonly */ CProxy_FineScaleModel fineScaleArray;
 /* readonly */ CProxy_NearestNeighborSearch nnsArray;
@@ -104,11 +102,13 @@ Main::Main(CkArgMsg* msg)
   // Chares breakdown [number of chares per processor]
   CkPrintf("Lulesh (Charm++)\n"
            "  Elements: %d (%d x %d x %d)\n"
-           "  Chares: %d [%.2g] (%d x %d x %d)\n",
+           "  Chares: %d [%.2g] (%d x %d x %d)\n"
+           "  Num Elements = %d\n",
            elemDimX*elemDimY*elemDimZ,
            elemDimX, elemDimY, elemDimZ,
            chareDimX*chareDimY*chareDimZ, charesPerPE,
-           chareDimX, chareDimY, chareDimZ);
+           chareDimX, chareDimY, chareDimZ,
+           numElems);
 
   totalChares = chareDimX*chareDimY*chareDimZ;
   
@@ -118,19 +118,16 @@ Main::Main(CkArgMsg* msg)
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
   opts.setMap(rrMap);
   
-  // Create domain chare array
-  domainArray = CProxy_Domain::ckNew(opts);
-  
-  // Create coarse scale models, 1 per domain
+  // Create coarse scale model
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(opts);
 
-  // Create DB interfaces, 1 per domain
+  // Create DB interfaces
   DBArray = CProxy_DBInterface::ckNew(opts);
 
-  // Create Nearest Neighbor Searches, 1 per domain
+  // Create Nearest Neighbor Searches
   nnsArray = CProxy_NearestNeighborSearch::ckNew(opts);
 
-  // Create interpolates, 1 per domain
+  // Create interpolates
   interpolateArray = CProxy_Interpolate::ckNew(opts);
 
   // Create fine scale models
