@@ -4,6 +4,7 @@
 #include "FineScaleModel.h"
 
 extern CProxy_Main mainProxy;
+extern CProxy_Domain domainArray;
 extern CProxy_FineScaleModel fineScaleArray;
 
 void *
@@ -51,10 +52,6 @@ CoarseScaleModel::~CoarseScaleModel()
 void CoarseScaleModel::pup(PUP::er &p)
 {
   CBase_CoarseScaleModel::pup(p);
-  p|numElemGhosts;
-  p|numNodeGhosts;
-  p|ghostNodeCount;
-  p|ghostElemCount;
   p|maxTimesteps;
   p|numElems;
   p|nstep;
@@ -81,9 +78,4 @@ void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
 {
   int currentPt = newPt;
   printf("Iter %d Coarse %d %d %d Element %d update newPt %d\n", whichIter, thisIndex.x, thisIndex.y, thisIndex.z, whichEl, newPt);
-}
-
-void CoarseScaleModel::haloExchange()
-{
-  printf("halo exchange\n");
 }

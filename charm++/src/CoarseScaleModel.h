@@ -19,11 +19,6 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   private:
     CoarseScaleModel_SDAG_CODE
 
-    int numElemGhosts;
-    int numNodeGhosts;
-    int ghostNodeCount;
-    int ghostElemCount;
-
     int maxTimesteps;
     int numElems;
     int nstep;
@@ -42,7 +37,6 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   // Entry methods
   void startElementFineScaleQuery(int step, int nelems);
   void updateElement(int whichEl, int whichIter, int newPt);
-  void haloExchange();
 };
 
 #endif

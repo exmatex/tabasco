@@ -1,5 +1,6 @@
 #include "CoM4.decl.h"
 #include "Main.h"
+#include "Domain.h"
 #include "CoarseScaleModel.h"
 #include "FineScaleModel.h"
 #include "NearestNeighborSearch.h"
@@ -10,6 +11,7 @@
 #include <cstring>
 
 /* readonly */ CProxy_Main mainProxy;
+/* readonly */ CProxy_Domain domainArray;
 /* readonly */ CProxy_CoarseScaleModel coarseScaleArray;
 /* readonly */ CProxy_FineScaleModel fineScaleArray;
 /* readonly */ CProxy_NearestNeighborSearch nnsArray;
@@ -118,6 +120,9 @@ Main::Main(CkArgMsg* msg)
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
   opts.setMap(rrMap);
   
+  // Create domains
+  domainArray = CProxy_Domain::ckNew(opts);
+
   // Create coarse scale model
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(opts);
 
