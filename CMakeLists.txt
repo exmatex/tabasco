@@ -45,6 +45,9 @@ option(BUILD_SHARED_LIBS "Build shared libs" OFF)
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
 
+set(BUILD_DOC OFF)
+add_subdirectory(flann)
+
 ########################################################################
 # Basic system tests (standard libraries, headers, functions, types)   #
 ########################################################################
@@ -73,6 +76,7 @@ foreach(FUNC sqrt)
     message(FATAL_ERROR "Could not find needed math function - ${FUNC}")
   endif(NOT FOUND_${FUNC}_${MATH_LIBRARIES})
 endforeach(FUNC)
+
 
 ######################################
 # actual targets                     # 

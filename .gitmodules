@@ -1,3 +1,6 @@
 [submodule "CoEVP"]
 	path = CoEVP
 	url = git@github.com:exmatex/CoEVP.git
+[submodule "flann"]
+	path = flann
+	url = git@github.com:mariusmuja/flann.git 
