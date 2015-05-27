@@ -1,0 +1,3 @@
+[submodule "CoEVP"]
+	path = CoEVP
+	url = git@github.com:exmatex/CoEVP.git
