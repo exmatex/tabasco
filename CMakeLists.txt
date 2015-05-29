@@ -38,12 +38,21 @@ endif()
 # User input options                                                   #
 ########################################################################
 option(BUILD_SHARED_LIBS "Build shared libs" OFF)
+option(WIT_MPI "Build mpi version" OFF)
 
 ########################################################################
 #Find external packages
 ########################################################################
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
+
+if(WITH_MPI)
+  find_package(MPI REQUIRED)
+  add_definitions(-DCOEVP_MPI)
+  include_directories(MPI_CXX_INCLUDE_PATH)
+else()
+  set(MPI_CXX_LIBRARIES)
+endif()
 
 set(BUILD_DOC OFF)
 add_subdirectory(flann)
@@ -102,4 +111,5 @@ add_library(cm ${CM_SOURCES})
 
 file(GLOB LULESH_SOURCES CoEVP/LULESH/*.cc)
 add_executable(lulesh ${LULESH_SOURCES})
-target_link_libraries(lulesh cm ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+target_link_libraries(lulesh cm ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}
+	${MPI_CXX_LIBRARIES})
