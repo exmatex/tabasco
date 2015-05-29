@@ -38,22 +38,10 @@ endif()
 # User input options                                                   #
 ########################################################################
 option(BUILD_SHARED_LIBS "Build shared libs" OFF)
-option(WIT_MPI "Build mpi version" OFF)
 
 ########################################################################
 #Find external packages
 ########################################################################
-find_package(BLAS REQUIRED)
-find_package(LAPACK REQUIRED)
-
-if(WITH_MPI)
-  find_package(MPI REQUIRED)
-  add_definitions(-DCOEVP_MPI)
-  include_directories(MPI_CXX_INCLUDE_PATH)
-else()
-  set(MPI_CXX_LIBRARIES)
-endif()
-
 set(BUILD_DOC OFF)
 add_subdirectory(flann)
 
@@ -103,28 +91,5 @@ endforeach(FUNC)
 ######################################
 # actual targets                     # 
 ######################################
-include_directories(${CMAKE_BINARY_DIR})
-file(GLOB_RECURSE CM_SOURCES CoEVP/CM/*.cc)
-file(GLOB_RECURSE CM_HEADERS CoEVP/CM/*.h)
-set(CM_INCLUDE_DIRS)
-foreach(_HEADER ${CM_HEADERS})
-	get_filename_component(_DIR ${_HEADER} DIRECTORY)
-	list(APPEND CM_INCLUDE_DIRS ${_DIR})
-endforeach()
-list(REMOVE_DUPLICATES CM_INCLUDE_DIRS)
-include_directories(${CM_INCLUDE_DIRS}
-	CoEVP/CM/src/adaptive_sampling/interpolation_database
-	CoEVP/CM/src/adaptive_sampling/interpolation
-	CoEVP/CM/src/adaptive_sampling/mtl_headers
-	CoEVP/CM/src/adaptive_sampling/database
-	CoEVP/CM/src/adaptive_sampling/utils)
-
-add_definitions(-DDBL_SNAN_IS_BROKEN -DFLT_SNAN_IS_BROKEN)
-add_library(cm ${CM_SOURCES})
-
-file(GLOB LULESH_SOURCES CoEVP/LULESH/*.cc)
-add_executable(lulesh ${LULESH_SOURCES})
-target_link_libraries(lulesh cm ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}
-	${MPI_CXX_LIBRARIES})
-
+add_subdirectory(CoEVP)
 add_subdirectory(charm++/src)

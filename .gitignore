@@ -6,3 +6,5 @@ libcm.a
 build
 lulesh
 *~
+CPackConfig.cmake
+CPackSourceConfig.cmake
