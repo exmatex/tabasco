@@ -126,3 +126,5 @@ file(GLOB LULESH_SOURCES CoEVP/LULESH/*.cc)
 add_executable(lulesh ${LULESH_SOURCES})
 target_link_libraries(lulesh cm ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}
 	${MPI_CXX_LIBRARIES})
+
+add_subdirectory(charm++/src)
