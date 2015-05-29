@@ -1,4 +1,4 @@
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 #include "FineScaleModel.h"
 #include "NearestNeighborSearch.h"
 #include "Interpolate.h"

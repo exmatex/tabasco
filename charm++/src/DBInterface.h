@@ -1,7 +1,7 @@
 #ifndef _DB_INTERFACE_H_
 #define _DB_INTERFACE_H_
 
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 
 class DBInterface : public CBase_DBInterface {
   private:

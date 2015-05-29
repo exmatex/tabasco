@@ -1,4 +1,4 @@
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 #include "Main.h"
 #include "Domain.h"
 #include "CoarseScaleModel.h"
@@ -47,7 +47,7 @@ Main::Main(CkArgMsg* msg)
   CkPrintf("**************************************************\n");
   CkPrintf("**                                              **\n");
   CkPrintf("**                                              **\n");
-  CkPrintf("**   Running \"Charm++ 3D CoM4 %d processors     **\n", CkNumPes());
+  CkPrintf("**   Running \"Charm++ 3D TabaSCo %d processors     **\n", CkNumPes());
   CkPrintf("**                                              **\n");
   CkPrintf("**                                              **\n");
   CkPrintf("**************************************************\n");
@@ -158,4 +158,4 @@ void Main::done()
     CkExit();
 }
 
-#include "CoM4.def.h"
+#include "TabaSCo.def.h"

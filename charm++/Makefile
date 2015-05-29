@@ -34,7 +34,7 @@ CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
 LDFLAGS= -lm -lrt 
 
 #target
-NAME=$(BINDIR)/CoM4
+NAME=$(BINDIR)/TabaSCo
 default: all
 all: $(SUBDIRS) $(OBJDIR) $(NAME)
 

@@ -1,7 +1,7 @@
 #ifndef _NEARESTNEIGHBORSEARCH_H_
 #define _NEARESTNEIGHBORSEARCH_H_
 
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 
 class NearestNeighborSearch : public CBase_NearestNeighborSearch {
   private:

@@ -1,5 +1,5 @@
 {"parameter": {
-    "header": "CoM4 Test Input File",
+    "header": "TabaSCo Test Input File",
     "CoarseScaleModel": [
         {"id": "element dim x",        "value": 4},
         {"id": "element dim y",        "value": 4},

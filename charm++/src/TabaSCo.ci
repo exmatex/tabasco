@@ -1,4 +1,4 @@
-mainmodule CoM4 {
+mainmodule TabaSCo {
 
   include "types.h";
 

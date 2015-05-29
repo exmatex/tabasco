@@ -1,7 +1,7 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 #include "types.h"
 
 class Main : public CBase_Main {

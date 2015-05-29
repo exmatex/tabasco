@@ -1,4 +1,4 @@
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 #include "CoarseScaleModel.h"
 #include "DBInterface.h"
 #include "FineScaleModel.h"

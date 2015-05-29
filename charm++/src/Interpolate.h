@@ -1,7 +1,7 @@
 #ifndef _INTERPOLATE_H_
 #define _INTERPOLATE_H_
 
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 
 class Interpolate : public CBase_Interpolate {
   private:

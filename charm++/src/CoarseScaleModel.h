@@ -1,7 +1,7 @@
 #ifndef _COARSE_SCALE_MODEL_H_
 #define _COARSE_SCALE_MODEL_H_
 
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 
 class Msg : public CMessage_Msg
 {

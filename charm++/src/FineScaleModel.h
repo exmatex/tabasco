@@ -1,7 +1,7 @@
 #ifndef _FINE_SCALE_MODEL_H_
 #define _FINE_SCALE_MODEL_H_
 
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 
 class FineScaleModel : public CBase_FineScaleModel {
   private:

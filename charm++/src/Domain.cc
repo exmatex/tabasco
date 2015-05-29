@@ -1,4 +1,4 @@
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 #include "Domain.h"
 
 extern CProxy_Main mainProxy;

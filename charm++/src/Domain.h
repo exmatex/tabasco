@@ -1,7 +1,7 @@
 #ifndef _DOMAIN_H_
 #define _DOMAIN_H_
 
-#include "CoM4.decl.h"
+#include "TabaSCo.decl.h"
 
 class Domain : public CBase_Domain {
   private:
