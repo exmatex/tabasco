@@ -57,6 +57,19 @@ endif()
 set(BUILD_DOC OFF)
 add_subdirectory(flann)
 
+find_program(CHARMC NAMES charmc DOC "path to charmc")
+if(CHARMC)
+  message("Found charm++ compiler: ${CHARMC}")
+else()
+  message("Didn't find a charm++ compiler, run 'make charmc' to build one")
+  add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/charm/bin/charmc
+	COMMAND ./build charm++ net-linux-x86_64
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/charm
+	COMMENT "Building a charmc")
+  set(CHARMC ${CMAKE_SOURCE_DIR}/charm/bin/charmc CACHE FILEPATH "path to build-in charmc" FORCE)
+endif()
+add_custom_target(charmc DEPENDS ${CHARMC})
+
 ########################################################################
 # Basic system tests (standard libraries, headers, functions, types)   #
 ########################################################################
