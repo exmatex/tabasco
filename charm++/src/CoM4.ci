@@ -1,0 +1,143 @@
+mainmodule CoM4 {
+
+  include "types.h";
+
+  readonly CProxy_Main mainProxy;                    // central controller
+  readonly CProxy_Domain domainArray;                // array of domains
+  readonly CProxy_CoarseScaleModel coarseScaleArray; // array of domain coarse scale models
+  readonly CProxy_FineScaleModel fineScaleArray;     // array of fine scale models
+  readonly CProxy_NearestNeighborSearch nnsArray;    // array of nearest neighbor searches
+  readonly CProxy_Interpolate interpolateArray;      // array of interpolations
+  readonly CProxy_DBInterface DBArray;               // array of DB interfaces
+
+  message Msg;
+
+  // Main driver
+  mainchare Main {
+    entry Main(CkArgMsg *msg);
+    entry void done();
+  };
+
+  // Domain - physics system
+  array [3D] Domain {
+    entry Domain();
+    entry void run();
+    entry void haloExchange();
+  };
+
+  // Coarse scale model - Lulesh
+  array [3D] CoarseScaleModel {
+    entry CoarseScaleModel();
+    entry void startElementFineScaleQuery(int nstep, int nelems);
+    //entry void receiveNewPoint(int whichEl, int whichIter, int newPt);
+    entry void receiveNewPoint(int whichIter, int whichEl, int newPt);
+    //entry [nokeep] void receiveNewPoint(Msg *m);
+    entry void updateElement(int whichEl, int whichIter, int newPt);
+
+    entry void run(int ntimesteps, int nelems)
+    {
+      serial { numElems = nelems; printf("nelems = %d\n", nelems); }
+      for (tstep = 0; tstep < ntimesteps; tstep++) {
+        // Start queries for all elements
+        serial {
+          startElementFineScaleQuery(tstep, nelems);
+        }
+
+        // Process new points
+        serial { count = 0; }
+        while(count < nelems) {
+        //for (e = 0; e < nelems; e++) {
+          when receiveNewPoint[tstep](int whichIter, int whichEl, int newPt) serial {
+            //updateElement(m->whichEl, m->whichIter, m->newPt);
+            updateElement(whichEl, whichIter, newPt);
+            count++;
+          }
+        }
+      } 
+
+      // Time steps done
+      serial {
+        mainProxy.done();
+      }
+    };
+  };
+
+  // Fine scale model
+  array [4D] FineScaleModel {
+    entry FineScaleModel();
+    entry void evaluate(int qPt);
+    entry void query2(int iter, int qPt);
+    entry void requestNeighbors(int qPt);
+    entry void receiveNeighbors(int nbrCount, int nbrData);
+    entry void requestInterpolation(int nbrCount, int nbrData, int qPt);
+    entry void requestDBStore(int newPt);
+    entry void receivePoint(int newPt);
+    entry void sendNewPoint2Coarse(int elnum, int iter, int newPt);
+
+    //entry [createhome] void query(int elnum, int iter, int qPt, CkCallback cb)
+    entry [createhome] void query(int elnum, int iter, int qPt)
+    {
+      // Do nearest neighbor search
+      serial {
+        requestNeighbors(qPt);
+      }
+
+      // Receive nearest neighbors, do interpolation if enough, else evaluation
+      when receiveNeighbors(int nbrCount, int nbrData) serial {
+        if (nbrCount == NBR_LIMIT)
+          requestInterpolation(nbrCount, nbrData, qPt);
+        else
+          evaluate(qPt);
+      }
+
+      // Receive results of interpolation or evaluate
+      // Save to DB and send back to Coarse Scale model
+      when receivePoint(int cPt) serial { 
+        requestDBStore(cPt);
+        //Msg *m = new Msg();
+        //m->whichEl = elnum; m->whichIter = iter; m->newPt = cPt;
+        //cb.send(m);
+        coarseScaleArray(thisIndex.w, thisIndex.x, thisIndex.y).receiveNewPoint(iter, elnum, cPt);
+      }
+
+    };
+  };
+
+  // Nearest Neighbor Search 
+  array [3D] NearestNeighborSearch {
+    entry NearestNeighborSearch();
+    entry void getIndex(int qPt, int nbrCount, int nbrIndex);
+    entry void putIndex(int qPt, int nbrIndex);
+    entry void requestDBGet(int nbrCount, int nbrIndex, int nbrData);
+    entry void receiveData(int nbrCount, int nbrData);
+    entry void sendNeighbors(int elnum, int nbrCount, int nbrData);
+
+    entry void getNeighbors(int elnum, int qPt)
+    {
+      // Get available neighbors and their data
+      serial {
+        getIndex(qPt, nbrCount, nbrIndex);
+        requestDBGet(nbrCount, nbrIndex, nbrData);
+      }
+
+      // Once neighbor data is receive from DB, send to requestor
+      when receiveData(int nbrCount, int nbrData) serial {
+        sendNeighbors(elnum, nbrCount, nbrData);
+      }    
+        
+    };
+  };
+
+  // Interpolate 
+  array [3D] Interpolate {
+    entry Interpolate();
+    entry void run(int elnum, int nbrCount, int nbrData, int qPt);
+  };
+
+  // DB interface
+  array [3D] DBInterface {
+    entry DBInterface();
+    entry void put(int pcount, int pData);
+    entry void get(int pCount, int pIndex, int pData);
+  };
+};

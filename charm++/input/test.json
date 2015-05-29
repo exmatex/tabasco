@@ -1,0 +1,15 @@
+{"parameter": {
+    "header": "CoM4 Test Input File",
+    "CoM4": [
+        {"id": "domain",                    "value": "3D grid"}
+    ],
+    "domain": [
+        {"id": "element dim x",                     "value": 50},
+        {"id": "element dim y",                     "value": 50},
+        {"id": "element dim z",                     "value": 50},
+        {"id": "block dim x",                    "value": 10},
+        {"id": "block dim y",                    "value": 10},
+        {"id": "block dim z",                    "value": 10}
+    ]
+  }
+}
