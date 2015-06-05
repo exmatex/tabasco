@@ -4,6 +4,3 @@
 [submodule "flann"]
 	path = flann
 	url = git@github.com:mariusmuja/flann.git 
-[submodule "charm"]
-	path = charm
-	url = http://charm.cs.uiuc.edu/gerrit/charm
