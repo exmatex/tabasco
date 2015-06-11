@@ -37,13 +37,16 @@ endif()
 ########################################################################
 # User input options                                                   #
 ########################################################################
-option(BUILD_SHARED_LIBS "Build shared libs" OFF)
+option(BUILD_SHARED_LIBS "Build shared libs" ON)
 
 ########################################################################
 #Find external packages
 ########################################################################
 option(BUILD_DOC "Build documentation" OFF)
+find_package(HDF5)
 add_subdirectory(flann)
+include_directories(${CMAKE_SOURCE_DIR}/flann/src/cpp)
+set(FLANN_LIBRARIES flann_cpp ${HDF5_LIBRARIES})
 
 find_program(CHARMC NAMES charmc DOC "path to charmc")
 if(CHARMC)
