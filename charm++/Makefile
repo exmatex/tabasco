@@ -13,7 +13,7 @@ OBJDIR=charm_obj
 BINDIR=charm_bin
 
 #OPTFLAGS=-g
-OPTFLAGS=-O3
+OPTFLAGS=-O3 -I../CoEVP -I../CoEVP/CM/include 
 #other features
 #DEFS=-DTRACE
 
@@ -29,9 +29,12 @@ endif
 BOOSTLIB=$(BOOST_INCLUDES)/../lib
 BOOST_LDFLAG=-L$(BOOSTLIB)
 
-OBJS:=$(addprefix $(OBJDIR)/, Domain.o CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
+OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
+# ../CoEVP/LULESH/lulesh.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
-LDFLAGS= -lm -lrt 
+LDFLAGS= -L../CoEVP/CM/lib -lcm -llapack -lblas -lm -lrt 
+
+LULESH_OBJ=../CoEVP/LULESH/lulesh.o
 
 #target
 NAME=$(BINDIR)/TabaSCo
@@ -71,7 +74,7 @@ $(OBJDIR):
 
 ##--- Executable ---##
 
-$(NAME): $(OBJS)
+$(NAME): $(OBJS) $(LULESH_OBJ)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 	@mv charmrun $(BINDIR)/
 

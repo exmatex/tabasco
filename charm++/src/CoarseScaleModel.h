@@ -3,6 +3,8 @@
 
 #include "TabaSCo.decl.h"
 
+#include "LULESH/lulesh.h"
+
 class Msg : public CMessage_Msg
 {
   public:
@@ -18,6 +20,8 @@ class Msg : public CMessage_Msg
 class CoarseScaleModel : public CBase_CoarseScaleModel {
   private:
     CoarseScaleModel_SDAG_CODE
+
+    Lulesh *lulesh;
 
     int maxTimesteps;
     int numElems;
@@ -37,6 +41,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   // Entry methods
   void startElementFineScaleQuery(int step, int nelems);
   void updateElement(int whichEl, int whichIter, int newPt);
+  void go();
 };
 
 #endif

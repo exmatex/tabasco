@@ -4,7 +4,6 @@
 #include "FineScaleModel.h"
 
 extern CProxy_Main mainProxy;
-extern CProxy_Domain domainArray;
 extern CProxy_FineScaleModel fineScaleArray;
 
 void *
@@ -35,8 +34,11 @@ Msg::unpack(void *buf)
 CoarseScaleModel::CoarseScaleModel()
 {
   
-  printf("CoarseScaleModel created on PE %d Index %d %d %d\n", 
-      CkMyPe(), thisIndex.x, thisIndex.y, thisIndex.z);
+  printf("CoarseScaleModel created on PE %d Index %d\n", 
+      CkMyPe(), thisIndex.x);
+
+  lulesh = new Lulesh();
+
 }
 
 CoarseScaleModel::CoarseScaleModel(CkMigrateMessage *msg)
@@ -46,7 +48,7 @@ CoarseScaleModel::CoarseScaleModel(CkMigrateMessage *msg)
 
 CoarseScaleModel::~CoarseScaleModel()
 {
-
+ free(lulesh);
 }
 
 void CoarseScaleModel::pup(PUP::er &p)
@@ -66,16 +68,22 @@ void CoarseScaleModel::startElementFineScaleQuery(int step, int nelems)
   nstep = step;
 
   //CkCallback cb(CkIndex_CoarseScaleModel::receiveNewPoint((Msg*)NULL), thisProxy);
+/*
   for (int j = 0; j < nelems; j++)
   {
     //fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(j, nstep, currentPt, cb);
-    fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(j, nstep, currentPt);
+    fineScaleArray(thisIndex.x, j).query(j, nstep, currentPt);
   }
-
+*/
 }
 
 void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
 {
   int currentPt = newPt;
-  printf("Iter %d Coarse %d %d %d Element %d update newPt %d\n", whichIter, thisIndex.x, thisIndex.y, thisIndex.z, whichEl, newPt);
+  printf("Iter %d Coarse %d Element %d update newPt %d\n", whichIter, thisIndex.x, whichEl, newPt);
+}
+
+void CoarseScaleModel::go()
+{
+  lulesh->go();
 }

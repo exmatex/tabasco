@@ -55,7 +55,7 @@ typedef struct {
   int blockDimX;
   int blockDimY;
   int blockDimZ;
-
+  int coarseCount;
   int maxTimesteps;
 } Save_Input;
 /** struct containing the 2D field
@@ -67,12 +67,7 @@ public:
 void pup(PUP::er &p)
 {
   //pipe arguments
-  p | elemDimX;
-  p | elemDimY;
-  p | elemDimZ;
-  p | blockDimX;
-  p | blockDimY;
-  p | blockDimZ;
+  p | coarseCount;
   p | maxTimesteps;
 }
 };

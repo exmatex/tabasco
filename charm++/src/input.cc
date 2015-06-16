@@ -64,6 +64,11 @@ void parse_input(string input_file, Input *in)
             in->maxTimesteps = v.second.get<int>("value");
             CkPrintf("max timesteps:                    %d\n", in->maxTimesteps);
           }
+        if (v.second.get<std::string>("id") == "count")
+          {
+            in->coarseCount = v.second.get<int>("value");
+            CkPrintf("count                             %d\n", in->coarseCount);
+          }
       }
     }
   catch (std::exception const& e)

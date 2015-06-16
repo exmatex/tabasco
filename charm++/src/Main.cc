@@ -1,6 +1,5 @@
 #include "TabaSCo.decl.h"
 #include "Main.h"
-#include "Domain.h"
 #include "CoarseScaleModel.h"
 #include "FineScaleModel.h"
 #include "NearestNeighborSearch.h"
@@ -11,29 +10,13 @@
 #include <cstring>
 
 /* readonly */ CProxy_Main mainProxy;
-/* readonly */ CProxy_Domain domainArray;
 /* readonly */ CProxy_CoarseScaleModel coarseScaleArray;
 /* readonly */ CProxy_FineScaleModel fineScaleArray;
 /* readonly */ CProxy_NearestNeighborSearch nnsArray;
 /* readonly */ CProxy_Interpolate interpolateArray;
 /* readonly */ CProxy_DBInterface DBArray;
 
-/*readonly*/ int elemDimX;
-/*readonly*/ int elemDimY;
-/*readonly*/ int elemDimZ;
-/*readonly*/ int blockDimX;
-/*readonly*/ int blockDimY;
-/*readonly*/ int blockDimZ;
-/*readonly*/ int ghostDimX;
-/*readonly*/ int ghostDimY;
-/*readonly*/ int ghostDimZ;
-/*readonly*/ int chareDimX;
-/*readonly*/ int chareDimY;
-/*readonly*/ int chareDimZ;
-/*readonly*/ double charesPerPE;
-/*readonly*/ int numElems;
-/*readonly*/ int numNodes;
-/*readonly*/ int ghostElems;
+/*readonly*/ int coarseCount;
 /*readonly*/ int NBR_LIMIT;
 
 // Entry point of Charm++ application
@@ -65,67 +48,29 @@ Main::Main(CkArgMsg* msg)
   parse_input((string)input_file, &in);
 
   // Get element and block dimension sizes
-  elemDimX = in.elemDimX;
-  elemDimY = in.elemDimY;
-  elemDimZ = in.elemDimZ;
-
-  blockDimX = in.blockDimX;
-  blockDimY = in.blockDimY;
-  blockDimZ = in.blockDimZ;
+  coarseCount = in.coarseCount;
 
   NBR_LIMIT = 10;
 
-  if ((elemDimX < 1) || (elemDimY < 1) || (elemDimZ < 1) ||
-      (blockDimZ < 1) || (blockDimY < 1) || (blockDimZ < 1)) {
-    CkPrintf("Usage: elemDim and blockDim must take positive values\n");
-    CkExit();
-  }
-  if ((elemDimX % blockDimX) || (elemDimY % blockDimY) || (elemDimZ % blockDimZ)) {
-    CkPrintf("Usage: elemDim must be divided evenly by blockDim\n");
-    CkExit();
-  }
 
   // Set other parameters
-  ghostDimX = blockDimX+1;
-  ghostDimY = blockDimY+1;
-  ghostDimZ = blockDimZ+1;
-  chareDimX = elemDimX/blockDimX;
-  chareDimY = elemDimY/blockDimY;
-  chareDimZ = elemDimZ/blockDimZ;
-  charesPerPE = (double)(chareDimX*chareDimY*chareDimZ)/CkNumPes();
-  if(charesPerPE < 1) { charesPerPE = 1; }
-  numElems = blockDimX*blockDimY*blockDimZ;
-  numNodes = ghostDimX*ghostDimY*ghostDimZ;
-  ghostElems = numElems + 2*blockDimY*blockDimZ
-               + 2*blockDimX*blockDimZ + 2*blockDimX*blockDimY;
 
   // Display of some basic information
   // Elements breakdown
   // Chares breakdown [number of chares per processor]
   CkPrintf("Lulesh (Charm++)\n"
-           "  Elements: %d (%d x %d x %d)\n"
-           "  Chares: %d [%.2g] (%d x %d x %d)\n"
-           "  Num Elements = %d\n",
-           elemDimX*elemDimY*elemDimZ,
-           elemDimX, elemDimY, elemDimZ,
-           chareDimX*chareDimY*chareDimZ, charesPerPE,
-           chareDimX, chareDimY, chareDimZ,
-           numElems);
+           "  Coarse: %d\n", coarseCount);
 
-  totalChares = chareDimX*chareDimY*chareDimZ;
-  
   // Setup chare array size
-  CkArrayOptions opts(chareDimX, chareDimY, chareDimZ);
+  CkArrayOptions opts(coarseCount);
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
   opts.setMap(rrMap);
   
-  // Create domains
-  domainArray = CProxy_Domain::ckNew(opts);
-
   // Create coarse scale model
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(opts);
 
+/*
   // Create DB interfaces
   DBArray = CProxy_DBInterface::ckNew(opts);
 
@@ -138,9 +83,10 @@ Main::Main(CkArgMsg* msg)
   // Create fine scale models
   fineScaleArray = CProxy_FineScaleModel::ckNew();  
   fineScaleArray.doneInserting();
+*/
 
   // Start coarse scale models
-  coarseScaleArray.run(in.maxTimesteps, numElems);
+  coarseScaleArray.run(in.maxTimesteps);
 
 }
   
@@ -154,7 +100,7 @@ Main::Main(CkMigrateMessage* msg)
 void Main::done()
 {
   doneCount++;
-  if (doneCount >= totalChares)
+  if (doneCount >= coarseCount)
     CkExit();
 }
 
