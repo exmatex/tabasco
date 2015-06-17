@@ -24,9 +24,10 @@ mainmodule TabaSCo {
     //entry void receiveNewPoint(int whichIter, int whichEl, int newPt);
     entry void updateElement(int whichEl, int whichIter, int newPt);
 
-    entry void run(int ntimesteps)
+    //entry void run(int ntimesteps)
+    entry void run(int myRank, int numRanks)
     {
-      serial { go(); }
+      serial { go(myRank, numRanks); }
 /*
       serial { numElems = nelems; printf("nelems = %d\n", nelems); }
       for (tstep = 0; tstep < ntimesteps; tstep++) {

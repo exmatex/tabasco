@@ -83,7 +83,7 @@ void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
   printf("Iter %d Coarse %d Element %d update newPt %d\n", whichIter, thisIndex.x, whichEl, newPt);
 }
 
-void CoarseScaleModel::go()
+void CoarseScaleModel::go(int myRank, int numRanks)
 {
-  lulesh->go();
+  lulesh->go(myRank, numRanks);
 }

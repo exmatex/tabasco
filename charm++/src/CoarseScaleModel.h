@@ -41,7 +41,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   // Entry methods
   void startElementFineScaleQuery(int step, int nelems);
   void updateElement(int whichEl, int whichIter, int newPt);
-  void go();
+  void go(int myRank, int numRanks);
 };
 
 #endif

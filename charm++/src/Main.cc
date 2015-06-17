@@ -86,7 +86,10 @@ Main::Main(CkArgMsg* msg)
 */
 
   // Start coarse scale models
-  coarseScaleArray.run(in.maxTimesteps);
+  for (int i = 0; i < coarseCount; i++)
+  {
+    coarseScaleArray.run(i, coarseCount);
+  }
 
 }
   

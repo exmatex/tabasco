@@ -8,7 +8,7 @@
         {"id": "block dim y",          "value": 2},
         {"id": "block dim z",          "value": 2},
         {"id": "type",                 "value": "Lulesh"},
-        {"id": "count",                "value": "1"},
+        {"id": "count",                "value": "2"},
         {"id": "max timesteps",        "value": "10"}
     ],
     "FineScaleModel": [
