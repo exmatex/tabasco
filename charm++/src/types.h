@@ -11,6 +11,9 @@
 #include <stdio.h>
 
 using std::string;
+
+typedef double Real_t;
+
 /** struct containing the fluxes
  * **/
 typedef struct {
@@ -49,14 +52,8 @@ typedef struct {
 /** struct containing the 2D field
  * **/
 typedef struct {
-  int elemDimX;
-  int elemDimY;
-  int elemDimZ;
-  int blockDimX;
-  int blockDimY;
-  int blockDimZ;
   int coarseCount;
-  int maxTimesteps;
+  int useAdaptiveSampling;
 } Save_Input;
 /** struct containing the 2D field
  * **/
@@ -68,7 +65,7 @@ void pup(PUP::er &p)
 {
   //pipe arguments
   p | coarseCount;
-  p | maxTimesteps;
+  p | useAdaptiveSampling;
 }
 };
 

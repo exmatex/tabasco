@@ -18,6 +18,7 @@
 
 /*readonly*/ int coarseCount;
 /*readonly*/ int NBR_LIMIT;
+/*readonly*/ bool useAdaptiveSampling;
 
 // Entry point of Charm++ application
 Main::Main(CkArgMsg* msg)
@@ -50,6 +51,9 @@ Main::Main(CkArgMsg* msg)
   // Get element and block dimension sizes
   coarseCount = in.coarseCount;
 
+  // Check for adaptive sampling flag
+  useAdaptiveSampling = (in.useAdaptiveSampling == 1) ? true : false; 
+
   NBR_LIMIT = 10;
 
 
@@ -59,7 +63,9 @@ Main::Main(CkArgMsg* msg)
   // Elements breakdown
   // Chares breakdown [number of chares per processor]
   CkPrintf("Lulesh (Charm++)\n"
-           "  Coarse: %d\n", coarseCount);
+           "  Coarse: %d\n"
+           "  UseAdaptiveSampling: %d\n", 
+          coarseCount, ((useAdaptiveSampling == true) ? 1 : 0) );
 
   // Setup chare array size
   CkArrayOptions opts(coarseCount);
@@ -86,10 +92,7 @@ Main::Main(CkArgMsg* msg)
 */
 
   // Start coarse scale models
-  for (int i = 0; i < coarseCount; i++)
-  {
-    coarseScaleArray.run(i, coarseCount);
-  }
+  coarseScaleArray.run(coarseCount, useAdaptiveSampling);
 
 }
   

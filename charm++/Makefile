@@ -13,7 +13,7 @@ OBJDIR=charm_obj
 BINDIR=charm_bin
 
 #OPTFLAGS=-g
-OPTFLAGS=-O3 -I../CoEVP -I../CoEVP/CM/include 
+OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include 
 #other features
 #DEFS=-DTRACE
 

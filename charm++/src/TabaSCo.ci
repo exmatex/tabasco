@@ -18,16 +18,89 @@ mainmodule TabaSCo {
   };
 
   // Coarse scale model - Lulesh
-  array [3D] CoarseScaleModel {
+  array [1D] CoarseScaleModel {
     entry CoarseScaleModel();
+    entry [reductiontarget] void timeReduce(Real_t newdt);
+    entry void initialize(int numRanks, bool useAdaptiveSampling);
+    entry void go(int numRanks, bool useAdaptiveSampling);
     entry void startElementFineScaleQuery(int nstep, int nelems);
     //entry void receiveNewPoint(int whichIter, int whichEl, int newPt);
     entry void updateElement(int whichEl, int whichIter, int newPt);
+    entry void sendNodalMass();
+    entry void receiveNodalMass(int msgType, int rsize, Real_t rdata[rsize]);
+    entry void updateNodalMass(int msgType, int rsize, Real_t rdata[rsize]);
+    entry void TimeIncrement();
+    entry void LagrangeNodal1();
+    entry void LagrangeNodal2();
+    entry void LagrangeElements();
+    entry void CalcTimeConstraintsForElems();
+    entry void UpdateStressForElems();
+    entry void sendForce();
+    entry void receiveForce(int msgType, int rsize, Real_t rdata[rsize]);
+    entry void updateForce(int msgType, int rsize, Real_t rdata[rsize]);
+    entry void sendPositionVelocity();
+    entry void receivePositionVelocity(int msgType, int rsize, Real_t rdata[rsize]);
+    entry void updatePositionVelocity(int msgType, int rsize, Real_t rdata[rsize]);
 
-    //entry void run(int ntimesteps)
-    entry void run(int myRank, int numRanks)
+    entry void run(int numRanks, bool useAdaptiveSampling)
     {
-      serial { go(myRank, numRanks); }
+      serial { 
+        initialize(numRanks, useAdaptiveSampling);
+        sendNodalMass();
+      }
+
+      serial {
+        count = (thisIndex > 0 && thisIndex < (numRanks-1) ? 2 : 1);
+      }
+
+      if (numRanks > 1) {
+        for (tstep = 0; tstep < count; tstep++) {
+          when receiveNodalMass(int msgType, int rsize, Real_t rdata[rsize]) serial { 
+            updateNodalMass(msgType, rsize, rdata); 
+          }
+        }
+      }
+
+      serial { printf("%d %e %e\n", thisIndex, lulesh->domain.time(), lulesh->domain.stoptime()); }
+
+      while (lulesh->domain.time() < lulesh->domain.stoptime()) {
+        serial {
+          TimeIncrement();
+          LagrangeNodal1();
+          sendForce();
+        }
+
+        if (numRanks > 1) {     
+          for (tstep = 0; tstep < count; tstep++) {
+            when receiveForce(int msgType, int rsize, Real_t rdata[rsize]) serial {
+              updateForce(msgType, rsize, rdata);
+            }
+          }
+        }
+
+        serial {
+          LagrangeNodal2();
+          sendPositionVelocity();
+        }
+
+        if (numRanks > 1 && thisIndex < numRanks-1) {
+          when receivePositionVelocity(int msgType, int rsize, Real_t rdata[rsize]) serial {
+            updatePositionVelocity(msgType, rsize, rdata);
+          }
+        }
+
+        serial {
+          LagrangeElements();
+          CalcTimeConstraintsForElems();
+          UpdateStressForElems();
+        }
+
+        if (thisIndex == 0) serial {
+          printf("step = %d, time = %e, dt=%e\n",
+              lulesh->domain.cycle(), double(lulesh->domain.time()), double(lulesh->domain.deltatime()) ) ;
+        }
+      }
+
 /*
       serial { numElems = nelems; printf("nelems = %d\n", nelems); }
       for (tstep = 0; tstep < ntimesteps; tstep++) {

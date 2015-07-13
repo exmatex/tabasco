@@ -38,10 +38,35 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   ~CoarseScaleModel();
   void pup(PUP::er &p);
 
+  void timeReduce(Real_t newdt);
+
   // Entry methods
+  void initialize(int numRanks, bool useAdaptiveSampling);
+  void LagrangeNodal1();
+  void LagrangeNodal2();
+  void LagrangeElements();
+  void CalcTimeConstraintsForElems();
+  void TimeIncrement();
+  void UpdateStressForElems();
+
+  void sendData(int xferFields, Real_t **fieldData);
+  void receiveData(int msgType, int size, int xferFields, Real_t **fieldData, Real_t rdata[]);
+
+  void sendNodalMass();
+  void updateNodalMass(int msgType, int rsize, Real_t rdata[]);
+  //void receiveNodalMass(int msgType, int size, Real_t rdata[]);
+
+  void sendForce();
+  void updateForce(int msgType, int rsize, Real_t rdata[]);
+  //void receiveForce(int msgType, int size, Real_t rdata[]);
+  
+  void sendPositionVelocity();
+  void updatePositionVelocity(int msgType, int rsize, Real_t rdata[]);
+  //void receivePositionVelocity(int msgType, int size, Real_t rdata[]);
+
   void startElementFineScaleQuery(int step, int nelems);
   void updateElement(int whichEl, int whichIter, int newPt);
-  void go(int myRank, int numRanks);
+  void go(int numRanks, bool useAdaptiveSampling);
 };
 
 #endif
