@@ -73,7 +73,7 @@ mainmodule TabaSCo {
         if (numRanks > 1 && lulesh->domain.cycle() > 1) {
           when reduceTimeIncrement(Real_t reducedt) serial {
             printf("%d before updateTimeInc %e\n", thisIndex, reducedt);
-            //updateTimeIncrement(reducedt);
+            updateTimeIncrement(reducedt);
           }
         }
 
