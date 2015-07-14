@@ -20,7 +20,8 @@ mainmodule TabaSCo {
   // Coarse scale model - Lulesh
   array [1D] CoarseScaleModel {
     entry CoarseScaleModel();
-    entry [reductiontarget] void timeReduce(Real_t newdt);
+    entry [reductiontarget] void reduceTimeIncrement(Real_t reducedt);
+    entry void updateTimeIncrement(Real_t reducedt);
     entry void initialize(int numRanks, bool useAdaptiveSampling);
     entry void go(int numRanks, bool useAdaptiveSampling);
     entry void startElementFineScaleQuery(int nstep, int nelems);
@@ -65,7 +66,18 @@ mainmodule TabaSCo {
 
       while (lulesh->domain.time() < lulesh->domain.stoptime()) {
         serial {
+          printf("%d before TimeInc\n", thisIndex);
           TimeIncrement();
+        }
+
+        if (numRanks > 1 && lulesh->domain.cycle() > 1) {
+          when reduceTimeIncrement(Real_t reducedt) serial {
+            printf("%d before updateTimeInc %e\n", thisIndex, reducedt);
+            //updateTimeIncrement(reducedt);
+          }
+        }
+
+        serial {
           LagrangeNodal1();
           sendForce();
         }

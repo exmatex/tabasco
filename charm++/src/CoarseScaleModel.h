@@ -17,6 +17,10 @@ class Msg : public CMessage_Msg
     static Msg *unpack(void *);
 };
 
+// Reduction Operations
+void registerMinReal(void);
+CkReductionMsg *minReal(int nMsg, CkReductionMsg **msgs);
+
 class CoarseScaleModel : public CBase_CoarseScaleModel {
   private:
     CoarseScaleModel_SDAG_CODE
@@ -38,8 +42,6 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   ~CoarseScaleModel();
   void pup(PUP::er &p);
 
-  void timeReduce(Real_t newdt);
-
   // Entry methods
   void initialize(int numRanks, bool useAdaptiveSampling);
   void LagrangeNodal1();
@@ -47,6 +49,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void LagrangeElements();
   void CalcTimeConstraintsForElems();
   void TimeIncrement();
+  void updateTimeIncrement(Real_t reducedt);
   void UpdateStressForElems();
 
   void sendData(int xferFields, Real_t **fieldData);

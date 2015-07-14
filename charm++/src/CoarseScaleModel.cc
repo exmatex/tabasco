@@ -32,9 +32,29 @@ Msg::unpack(void *buf)
    return t;
 }
 
-void CoarseScaleModel::timeReduce(Real_t newdt)
+CkReduction::reducerType min_real;
+/*initnode*/
+void registerMinReal(void) {
+  min_real = CkReduction::addReducer(minReal);
+}
+CkReductionMsg *minReal(int nMsg, CkReductionMsg **msgs) {
+  Real_t ret = 1e-2;
+  //CkPrintf("number of messages: %d\n", nMsg);
+  for (int i = 0; i < nMsg; i++) {
+    // Sanity check:
+    CkAssert(msgs[i]->getSize() == sizeof(Real_t));
+    // Extract data and reduce
+    Real_t m = *(Real_t *)msgs[i]->getData();
+    ret = std::min(ret,m);
+  }
+  return CkReductionMsg::buildNew(sizeof(Real_t),&ret);
+}
+ 
+void CoarseScaleModel::updateTimeIncrement(Real_t reducedt)
 {
   printf("%d In timeReduce\n", thisIndex);
+
+  Real_t newdt = reducedt;
 
   Real_t targetdt = lulesh->domain.stoptime() - lulesh->domain.time() ;
   Real_t olddt = lulesh->domain.deltatime() ;
@@ -149,16 +169,19 @@ void CoarseScaleModel::CalcTimeConstraintsForElems()
 
 void CoarseScaleModel::TimeIncrement()
 {
-  lulesh->TimeIncrement();
+  if (lulesh->domain.numSlices() == 1) {
+    lulesh->TimeIncrement();
+    return;
+  }
 
-/*
   Real_t targetdt = lulesh->domain.stoptime() - lulesh->domain.time() ;
-  Real_t olddt = lulesh->domain.deltatime() ;
 
   if ((lulesh->domain.dtfixed() <= Real_t(0.0)) && (lulesh->domain.cycle() != Int_t(0))) {
 
+    //Real_t olddt = lulesh->domain.deltatime() ;
+
     Real_t gnewdt = Real_t(1.0e+20) ;
-    Real_t newdt;
+    //Real_t newdt;
     if (lulesh->domain.dtcourant() < gnewdt) {
        gnewdt = lulesh->domain.dtcourant() / Real_t(2.0) ;
     }
@@ -169,14 +192,14 @@ void CoarseScaleModel::TimeIncrement()
     gnewdt *= Real_t(1.);
 
     // Reduction
-    if (lulesh->domain.numSlices() > 1) {
-    CkCallback cb(CkReductionTarget(CoarseScaleModel, timeReduce), thisProxy);
-    contribute(sizeof(Real_t), &gnewdt, CkReduction::min_double, cb);
-    }
-    else    
-    timeReduce(gnewdt);
+      //CkCallback *cb = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTimeIncrement), thisProxy);
+      //contribute(sizeof(Real_t), &gnewdt, CkReduction::min_double, *cb);
+      //contribute(sizeof(Real_t), (void *)&gnewdt, min_real);
+      printf("%d before contribute\n", thisIndex);
+      contribute(sizeof(double), (void *)&gnewdt, CkReduction::min_double);
   }
   else {
+  
  // * TRY TO PREVENT VERY SMALL SCALING ON THE NEXT CYCLE *
   if ((targetdt > lulesh->domain.deltatime()) &&
       (targetdt < (Real_t(4.0) * lulesh->domain.deltatime() / Real_t(3.0))) ) {
@@ -191,7 +214,6 @@ void CoarseScaleModel::TimeIncrement()
 
   ++lulesh->domain.cycle() ;
   }
-*/
 }
 
 void CoarseScaleModel::UpdateStressForElems()
