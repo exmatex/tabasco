@@ -50,6 +50,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void CalcTimeConstraintsForElems();
   void TimeIncrement();
   void updateTimeIncrement(Real_t reducedt);
+  void TimeIncrement2();
   void UpdateStressForElems();
 
   void sendData(int xferFields, Real_t **fieldData);

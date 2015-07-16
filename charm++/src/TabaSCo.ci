@@ -66,18 +66,17 @@ mainmodule TabaSCo {
 
       while (lulesh->domain.time() < lulesh->domain.stoptime()) {
         serial {
-          printf("%d before TimeInc\n", thisIndex);
           TimeIncrement();
         }
 
-        if (numRanks > 1 && lulesh->domain.cycle() > 1) {
+        if (numRanks > 1 && lulesh->domain.cycle() > 0) {
           when reduceTimeIncrement(Real_t reducedt) serial {
-            printf("%d before updateTimeInc %e\n", thisIndex, reducedt);
             updateTimeIncrement(reducedt);
           }
         }
 
         serial {
+          TimeIncrement2();
           LagrangeNodal1();
           sendForce();
         }
