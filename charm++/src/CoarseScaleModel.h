@@ -27,6 +27,9 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
     Lulesh *lulesh;
 
+    CkCallback *cbTime;
+    CkCallback *cbIters;
+
     int maxTimesteps;
     int numElems;
     int nstep;
@@ -52,6 +55,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void updateTimeIncrement(Real_t reducedt);
   void TimeIncrement2();
   void UpdateStressForElems();
+  void UpdateStressForElems2(int reducedIters);
 
   void sendData(int xferFields, Real_t **fieldData);
   void receiveData(int msgType, int size, int xferFields, Real_t **fieldData, Real_t rdata[]);

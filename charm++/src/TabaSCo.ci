@@ -21,6 +21,7 @@ mainmodule TabaSCo {
   array [1D] CoarseScaleModel {
     entry CoarseScaleModel();
     entry [reductiontarget] void reduceTimeIncrement(Real_t reducedt);
+    entry [reductiontarget] void reduceIters(int reducedIters);
     entry void updateTimeIncrement(Real_t reducedt);
     entry void initialize(int numRanks, bool useAdaptiveSampling);
     entry void go(int numRanks, bool useAdaptiveSampling);
@@ -76,7 +77,7 @@ mainmodule TabaSCo {
         }
 
         serial {
-          TimeIncrement2();
+          if (numRanks > 1) TimeIncrement2();
           LagrangeNodal1();
           sendForce();
         }
@@ -106,6 +107,12 @@ mainmodule TabaSCo {
           UpdateStressForElems();
         }
 
+        if (numRanks > 1) {
+          when reduceIters(int reducedIters) serial {
+            UpdateStressForElems2(reducedIters);
+          }
+        }
+     
         if (thisIndex == 0) serial {
           printf("step = %d, time = %e, dt=%e\n",
               lulesh->domain.cycle(), double(lulesh->domain.time()), double(lulesh->domain.deltatime()) ) ;

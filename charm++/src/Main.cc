@@ -76,9 +76,10 @@ Main::Main(CkArgMsg* msg)
   // Create coarse scale model
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(opts);
 
-  // Set time reduction
-  CkCallback *cb = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTimeIncrement), coarseScaleArray);
-  coarseScaleArray.ckSetReductionClient(cb);
+  // Set time reduction and iters reduction
+  //CkCallback *cbTime = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTimeIncrement), coarseScaleArray);
+  //CkCallback *cbIters = new CkCallback(CkReductionTarget(CoarseScaleModel, UpdateStressForElems2), coarseScaleArray);
+  //coarseScaleArray.ckSetReductionClient(cb);
 
 /*
   // Create DB interfaces
