@@ -58,13 +58,11 @@ mainmodule TabaSCo {
 
     entry void run(int numRanks, bool useAdaptiveSampling)
     {
+      // Nodal mass is sent to rank-1 and rank+1
       serial { 
+        count = (thisIndex > 0 && thisIndex < (numRanks-1) ? 2 : 1);
         initialize(numRanks, useAdaptiveSampling);
         sendNodalMass();
-      }
-
-      serial {
-        count = (thisIndex > 0 && thisIndex < (numRanks-1) ? 2 : 1);
       }
 
       if (numRanks > 1) {
@@ -82,12 +80,14 @@ mainmodule TabaSCo {
           TimeIncrement();
         }
 
+        // Global reduction of delta time
         if (numRanks > 1 && lulesh->domain.cycle() > 0) {
           when reduceTimeIncrement(Real_t reducedt) serial {
             updateTimeIncrement(reducedt);
           }
         }
 
+        // Send force to rank-1 and rank+1
         serial {
           TimeIncrement2();
           LagrangeNodal1();
@@ -102,6 +102,7 @@ mainmodule TabaSCo {
           }
         }
 
+        // Send position and velocity to rank-1
         serial {
           LagrangeNodal2();
           sendPositionVelocity();
@@ -113,16 +114,18 @@ mainmodule TabaSCo {
           }
         }
 
+        // Send velocity gradient to rank-1 and rank+1 
         serial {
           LagrangeElements();
           sendVelocityGrad();
         }
 
         if (numRanks > 1) {
-          when receiveVelocityGrad(int msgType, int rsize, Real_t rdata[rsize]) serial {
-            updateVelocityGrad(msgType, rsize, rdata);
+          for (tstep = 0; tstep < count; tstep++) {
+            when receiveVelocityGrad(int msgType, int rsize, Real_t rdata[rsize]) serial {
+              updateVelocityGrad(msgType, rsize, rdata);
+            }
           }
-
         }
 
         serial {
