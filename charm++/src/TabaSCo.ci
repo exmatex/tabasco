@@ -22,24 +22,36 @@ mainmodule TabaSCo {
     entry CoarseScaleModel();
     entry [reductiontarget] void reduceTimeIncrement(Real_t reducedt);
     entry [reductiontarget] void reduceIters(int reducedIters);
-    entry void updateTimeIncrement(Real_t reducedt);
+
     entry void initialize(int numRanks, bool useAdaptiveSampling);
+
     entry void go(int numRanks, bool useAdaptiveSampling);
     entry void startElementFineScaleQuery(int nstep, int nelems);
     //entry void receiveNewPoint(int whichIter, int whichEl, int newPt);
     entry void updateElement(int whichEl, int whichIter, int newPt);
-    entry void sendNodalMass();
-    entry void receiveNodalMass(int msgType, int rsize, Real_t rdata[rsize]);
-    entry void updateNodalMass(int msgType, int rsize, Real_t rdata[rsize]);
+
     entry void TimeIncrement();
+    entry void updateTimeIncrement(Real_t reducedt);
+    entry void TimeIncrement2();
     entry void LagrangeNodal1();
     entry void LagrangeNodal2();
     entry void LagrangeElements();
+    entry void LagrangeElements2();
     entry void CalcTimeConstraintsForElems();
     entry void UpdateStressForElems();
+
+    entry void sendNodalMass();
+    entry void receiveNodalMass(int msgType, int rsize, Real_t rdata[rsize]);
+    entry void updateNodalMass(int msgType, int rsize, Real_t rdata[rsize]);
+
     entry void sendForce();
     entry void receiveForce(int msgType, int rsize, Real_t rdata[rsize]);
     entry void updateForce(int msgType, int rsize, Real_t rdata[rsize]);
+
+    entry void sendVelocityGrad();
+    entry void receiveVelocityGrad(int msgType, int rsize, Real_t rdata[rsize]);
+    entry void updateVelocityGrad(int msgType, int rsize, Real_t rdata[rsize]);
+
     entry void sendPositionVelocity();
     entry void receivePositionVelocity(int msgType, int rsize, Real_t rdata[rsize]);
     entry void updatePositionVelocity(int msgType, int rsize, Real_t rdata[rsize]);
@@ -77,7 +89,7 @@ mainmodule TabaSCo {
         }
 
         serial {
-          if (numRanks > 1) TimeIncrement2();
+          TimeIncrement2();
           LagrangeNodal1();
           sendForce();
         }
@@ -103,6 +115,18 @@ mainmodule TabaSCo {
 
         serial {
           LagrangeElements();
+          sendVelocityGrad();
+        }
+
+        if (numRanks > 1) {
+          when receiveVelocityGrad(int msgType, int rsize, Real_t rdata[rsize]) serial {
+            updateVelocityGrad(msgType, rsize, rdata);
+          }
+
+        }
+
+        serial {
+          LagrangeElements2();
           CalcTimeConstraintsForElems();
           UpdateStressForElems();
         }

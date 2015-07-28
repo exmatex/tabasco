@@ -34,6 +34,8 @@ Msg::unpack(void *buf)
 
 void CoarseScaleModel::updateTimeIncrement(Real_t reducedt)
 {
+
+
   //printf("%d In timeReduce %e\n", thisIndex, reducedt);
 
   Real_t newdt = reducedt;
@@ -134,6 +136,11 @@ void CoarseScaleModel::LagrangeElements()
   lulesh->LagrangeElements();
 }
 
+void CoarseScaleModel::LagrangeElements2()
+{
+  lulesh->LagrangeElements2();
+}
+
 void CoarseScaleModel::CalcTimeConstraintsForElems()
 {
   lulesh->CalcTimeConstraintsForElems();
@@ -141,13 +148,6 @@ void CoarseScaleModel::CalcTimeConstraintsForElems()
 
 void CoarseScaleModel::TimeIncrement()
 {
-
-  if (lulesh->domain.numSlices() == 1) {
-    lulesh->TimeIncrement();
-    //--lulesh->domain.cycle();
-    return;
-  }
-
 
   if ((lulesh->domain.dtfixed() <= Real_t(0.0)) && (lulesh->domain.cycle() != Int_t(0))) {
 
@@ -159,12 +159,17 @@ void CoarseScaleModel::TimeIncrement()
        gnewdt = lulesh->domain.dthydro() * Real_t(2.0) / Real_t(3.0) ;
     }
 
-    //printf("%d fs_dt_mod = %e\n", thisIndex, lulesh->finescale_dt_modifier);
+    printf("%d fs_dt_mod = %e\n", thisIndex, lulesh->finescale_dt_modifier);
     gnewdt *= lulesh->finescale_dt_modifier;
 
     // Reduction
-    contribute(sizeof(double), (void *)&gnewdt, CkReduction::min_double, *cbTime);
+    if (lulesh->domain.numSlices() == 1)
+      updateTimeIncrement(gnewdt);
+    else
+      contribute(sizeof(double), (void *)&gnewdt, CkReduction::min_double, *cbTime);
+
   }
+
 }
 
 void CoarseScaleModel::TimeIncrement2()
@@ -184,80 +189,32 @@ void CoarseScaleModel::TimeIncrement2()
   lulesh->domain.time() += lulesh->domain.deltatime() ;
 
   ++lulesh->domain.cycle() ;
+
 }
 
 void CoarseScaleModel::UpdateStressForElems()
 {
+  
+  int new_iters = lulesh->UpdateStressForElems();
 
-    int max_nonlinear_iters = lulesh->UpdateStressForElems();
-
-    if (lulesh->domain.numSlices() == 1) {
-      lulesh->UpdateStressForElems2(max_nonlinear_iters);
-      return;
-    }
-
-/*
-  int max_nonlinear_iters = 0;
-  int numElem = lulesh->domain.numElem() ;
-
-  {
-    int max_local_newton_iters = 0;
-
-    for (Index_t k=0; k<numElem; ++k) {
-
-      // advance constitutive model
-      ConstitutiveData cm_data = lulesh->domain.cm(k)->advance(lulesh->domain.deltatime());
-         
-      int num_iters = cm_data.num_Newton_iters;
-      if (num_iters > max_local_newton_iters) max_local_newton_iters = num_iters;
-
-      const Tensor2Sym& sigma_prime = cm_data.sigma_prime;
-
-      lulesh->domain.sx(k) = sigma_prime(1,1);
-      lulesh->domain.sy(k) = sigma_prime(2,2);
-      lulesh->domain.txy(k) = sigma_prime(2,1);
-      lulesh->domain.txz(k) = sigma_prime(3,1);
-      lulesh->domain.tyz(k) = sigma_prime(3,2);
-
-    }
-
-    {
-      if (max_local_newton_iters > max_nonlinear_iters) {
-        max_nonlinear_iters = max_local_newton_iters;
-      }
-    }
+  if (lulesh->domain.numSlices() == 1) {
+    lulesh->UpdateStressForElems2(new_iters);
+    return;
   }
-*/
 
   // Reduction on iters
-  printf("%d local iters = %d\n", thisIndex, max_nonlinear_iters);
-  contribute(sizeof(int), (void *)&max_nonlinear_iters, CkReduction::max_int, *cbIters);
+  printf("%d local iters = %d\n", thisIndex, new_iters);
+    contribute(sizeof(int), (void *)&new_iters, CkReduction::max_int, *cbIters);
 
 }
 
 void CoarseScaleModel::UpdateStressForElems2(int reducedIters)
 {
-  //printf("%d iters = %d\n", thisIndex, reducedIters);
+
+  printf("%d iters = %d\n", thisIndex, reducedIters);
 
   lulesh->UpdateStressForElems2(reducedIters);
-/*
-  int max_nonlinear_iters = reducedIters;
 
-  // The maximum number of Newton iterations required is an indicaton of
-  // fast time scales in the fine-scale model.  If the number of iterations
-  // becomes large, we need to reduce the timestep.  It it becomes small,
-  // we try to increase the time step.
-  if (max_nonlinear_iters > MAX_NONLINEAR_ITER) {
-    lulesh->finescale_dt_modifier *= Real_t(0.95);
-  }
-  else if(max_nonlinear_iters < 0.5 * MAX_NONLINEAR_ITER) {
-    lulesh->finescale_dt_modifier *= Real_t(1.05);
-    if (lulesh->finescale_dt_modifier > 1.) lulesh->finescale_dt_modifier = 1.;
-  }
-   
-  //cout << "   finescale_dt_modifier = " << finescale_dt_modifier << endl;
-  //cout << "   Max nonlinear iterations = " << max_nonlinear_iters << endl;
-  */
 }
 
 void CoarseScaleModel::go(int numRanks, bool useAdaptiveSampling)
@@ -273,10 +230,10 @@ void CoarseScaleModel::sendNodalMass()
   Real_t **fieldData = &fd;
 
   // Send nodal mass to neighbors
-  sendData(xferFields, fieldData);
+  sendDataNodes(xferFields, fieldData);
 }
 
-void CoarseScaleModel::sendData(int xferFields, Real_t **fieldData)
+void CoarseScaleModel::sendDataNodes(int xferFields, Real_t **fieldData)
 {
   if (lulesh->domain.numSlices() == 1) return ;
 
@@ -310,6 +267,7 @@ void CoarseScaleModel::sendData(int xferFields, Real_t **fieldData)
       Real_t *srcAddr = fieldData[fi] ;
       for (Index_t ii=0; ii<size; ++ii) {
         destAddr[ii] = srcAddr[iset[ii]] ;
+        //printf("%d to M1 %d %d = %e\n", lulesh->domain.sliceLoc(), ii, iset[ii], srcAddr[iset[ii]]);
       }
       destAddr += size ;
     }
@@ -333,6 +291,7 @@ void CoarseScaleModel::sendData(int xferFields, Real_t **fieldData)
       Real_t *srcAddr = &fieldData[fi][offset] ;
       for (Index_t ii=0; ii<size; ++ii) {
         destAddr[ii] = srcAddr[iset[ii]] ;
+        //printf("%d to P1 %d %d = %e\n", lulesh->domain.sliceLoc(), ii, iset[ii], srcAddr[iset[ii]]);
       }
       destAddr += size ;
     }
@@ -355,6 +314,77 @@ void CoarseScaleModel::sendData(int xferFields, Real_t **fieldData)
   delete [] sdataP1;
 }
 
+void CoarseScaleModel::sendDataElems(int xferFields, Real_t **fieldData)
+{
+  if (lulesh->domain.numSlices() == 1) return ;
+
+  int size = lulesh->domain.commElems();
+  int offset = lulesh->domain.sliceHeight() - 1;
+  int *iset = lulesh->domain.planeElemIds;
+
+  Real_t *sdataM1 = new Real_t[xferFields*size];
+  Real_t *sdataP1 = new Real_t[xferFields*size];
+
+  int myRank = lulesh->domain.sliceLoc() ;
+
+  Real_t *destAddr ;
+  bool planeMin, planeMax ;
+
+  /* assume communication to 2 neighbors by default */
+  planeMin = planeMax = true ;
+  if (myRank == 0) {
+    planeMin = false ;
+  }
+  if (myRank == (lulesh->domain.numSlices()-1)) {
+    planeMax = false ;
+  }
+
+  /* send to myRank-1 and myRank+1 neighbors */
+
+  /* ASSUMING ONE DOMAIN PER RANK, CONSTANT BLOCK SIZE HERE */
+  if (planeMin) {
+    destAddr = sdataM1;
+    for (Index_t fi=0 ; fi<xferFields; ++fi) {
+      Real_t *srcAddr = fieldData[fi] ;
+      for (Index_t ii=0; ii<size; ++ii) {
+        destAddr[ii] = srcAddr[iset[ii]] ;
+        //printf("%d to M1 %d %d = %e\n", lulesh->domain.sliceLoc(), ii, iset[ii], srcAddr[iset[ii]]);
+      }
+      destAddr += size ;
+    }
+    destAddr -= xferFields*size ;
+
+    // Send to myRank+1 neighbor
+        if (xferFields == 1)
+      thisProxy(thisIndex-1).receiveVelocityGrad(NBR_M1, xferFields*size, sdataM1);
+    else
+      printf("No where to send!\n");
+
+  }
+
+  if (planeMax) {
+    destAddr = sdataP1;
+    for (Index_t fi=0 ; fi<xferFields; ++fi) {
+      Real_t *srcAddr = &fieldData[fi][offset] ;
+      for (Index_t ii=0; ii<size; ++ii) {
+        destAddr[ii] = srcAddr[iset[ii]] ;
+        //printf("%d to P1 %d %d = %e\n", lulesh->domain.sliceLoc(), ii, iset[ii], srcAddr[iset[ii]]);
+      }
+      destAddr += size ;
+    }
+    destAddr -= xferFields*size ;
+
+    // Send to myRank+1 neighbor
+    if (xferFields == 1)
+      thisProxy(thisIndex+1).receiveVelocityGrad(NBR_P1, xferFields*size, sdataP1);
+    else
+      printf("No send P1!\n");
+  }
+
+  delete [] sdataM1;
+  delete [] sdataP1;
+}
+
 void CoarseScaleModel::updateNodalMass(int msgType, int rsize, Real_t rdata[])
 {
   int xferFields = 1;
@@ -364,10 +394,10 @@ void CoarseScaleModel::updateNodalMass(int msgType, int rsize, Real_t rdata[])
   Real_t **fieldData = &fd;
 
   // Receive nodal mass data from L/R neighbor
-  receiveData(msgType, size, xferFields, fieldData, rdata);
+  receiveDataNodes(msgType, size, xferFields, fieldData, rdata);
 }
 
-void CoarseScaleModel::receiveData(int msgType, int size, int xferFields,
+void CoarseScaleModel::receiveDataNodes(int msgType, int size, int xferFields,
    Real_t **fieldData, Real_t rdata[])
 {
   if (lulesh->domain.numSlices() == 1) return ;
@@ -387,10 +417,10 @@ void CoarseScaleModel::receiveData(int msgType, int size, int xferFields,
       Real_t *destAddr = fieldData[fi] ;
       for (Index_t i=0; i<size; ++i) {
         if (xferFields < 6)
-          destAddr[iset[i]] += srcAddr[i] ;
+        destAddr[iset[i]] += srcAddr[i] ;
         else
-          destAddr[iset[i]] = srcAddr[i] ;
-        //printf("d %d %d = %e\n", i, iset[i], destAddr[iset[i]]);
+        destAddr[iset[i]] = srcAddr[i] ;
+        //printf("%d from M1 %d %d = %e\n", lulesh->domain.sliceLoc(), i, iset[i], srcAddr[i]);
       }
       srcAddr += size ;
     }
@@ -402,16 +432,61 @@ void CoarseScaleModel::receiveData(int msgType, int size, int xferFields,
       Real_t *destAddr = &(fieldData[fi][offset]) ;
       for (Index_t i=0; i<size; ++i) {
         if (xferFields < 6)
-          destAddr[iset[i]] += srcAddr[i] ;
+        destAddr[iset[i]] += srcAddr[i] ;
         else
-          destAddr[iset[i]] = srcAddr[i] ;
-        //printf("d %d %d = %e\n", i, iset[i], destAddr[iset[i]]);
+        destAddr[iset[i]] = srcAddr[i] ; 
+        //printf("%d from P1 %d %d = %e\n", lulesh->domain.sliceLoc(), i, iset[i], srcAddr[i]);
       }
       srcAddr += size ;
     }
   }
 
   //delete [] rdata;
+}
+
+void CoarseScaleModel::receiveDataElems(int msgType, int size, int xferFields,
+   Real_t rdata[])
+{
+  if (lulesh->domain.numSlices() == 1) return ;
+
+  int offset = lulesh->domain.sliceHeight() - 1;
+  int *iset = lulesh->domain.planeElemIds;
+
+  Real_t *fieldData[1] ;
+  /* point into ghost data area */
+   fieldData[0] = &(lulesh->domain.delv_xi(lulesh->domain.numElem())) ;
+
+  /* summation order should be from smallest value to largest */
+  /* or we could try out kahan summation! */
+
+  /* ASSUMING ONE DOMAIN PER RANK, CONSTANT BLOCK SIZE HERE */
+  Real_t *srcAddr;
+  if (msgType == NBR_P1) {
+    //printf("%d received from rank-1 size = %d xferfields = %d\n", lulesh->domain.sliceLoc(), size, xferFields);
+    srcAddr = rdata;
+    fieldData[0] += size;
+    for (Index_t fi=0 ; fi<xferFields; ++fi) {
+      Real_t *destAddr = fieldData[fi] ;
+      for (Index_t i=0; i<size; ++i) {
+        destAddr[i] = srcAddr[i] ;
+        //printf("%d from P1 %d %d = %e\n", lulesh->domain.sliceLoc(), i, iset[i], srcAddr[i]);
+      }
+      srcAddr += size ;
+    }
+  }
+  else if (msgType == NBR_M1) {
+    //printf("%d received from rank+1  size = %d xferfields = %d\n", lulesh->domain.sliceLoc(), size, xferFields);
+    srcAddr = rdata;
+    for (Index_t fi=0 ; fi<xferFields; ++fi) {
+      Real_t *destAddr = fieldData[fi] ;
+      for (Index_t i=0; i<size; ++i) {
+        destAddr[i] = srcAddr[i] ;
+        //printf("%d from P1 %d %d = %e\n", lulesh->domain.sliceLoc(), i, iset[i], srcAddr[i]);
+      }
+      srcAddr += size ;
+    }
+  }
+
 }
 
 void CoarseScaleModel::sendForce()
@@ -424,7 +499,7 @@ void CoarseScaleModel::sendForce()
   fieldData[1] = &(lulesh->domain.fy(0)) ;
   fieldData[2] = &(lulesh->domain.fz(0)) ;
 
-  sendData(xferFields, fieldData);
+  sendDataNodes(xferFields, fieldData);
 }
 
 void CoarseScaleModel::updateForce(int msgType, int rsize, Real_t rdata[])
@@ -439,9 +514,33 @@ void CoarseScaleModel::updateForce(int msgType, int rsize, Real_t rdata[])
   fieldData[2] = &(lulesh->domain.fz(0)) ;
 
   // Receive force data from L/R neighbor
-  receiveData(msgType, size, xferFields, fieldData, rdata);
+  receiveDataNodes(msgType, size, xferFields, fieldData, rdata);
 }
 
+void CoarseScaleModel::sendVelocityGrad()
+{
+  int xferFields = 1;
+
+  Real_t *fieldData[1] ;
+
+  fieldData[0] = &(lulesh->domain.delv_xi(0)) ;
+
+  sendDataElems(xferFields, fieldData);
+}
+
+void CoarseScaleModel::updateVelocityGrad(int msgType, int rsize, Real_t rdata[])
+{
+  int xferFields = 1;
+  int size = lulesh->domain.commElems();
+
+  Real_t *fieldData[1] ;
+
+  fieldData[0] = &(lulesh->domain.delv_xi(0)) ;
+
+  // Receive force data from L/R neighbor
+  receiveDataNodes(msgType, size, xferFields, fieldData, rdata);
+}
+  
 void CoarseScaleModel::sendPositionVelocity()
 {
   int xferFields = 6;
@@ -455,7 +554,7 @@ void CoarseScaleModel::sendPositionVelocity()
   fieldData[4] = &(lulesh->domain.yd(0)) ;
   fieldData[5] = &(lulesh->domain.zd(0)) ;
 
-  sendData(xferFields, fieldData);
+  sendDataNodes(xferFields, fieldData);
 }
 
 void CoarseScaleModel::updatePositionVelocity(int msgType, int rsize, Real_t rdata[])
@@ -473,5 +572,5 @@ void CoarseScaleModel::updatePositionVelocity(int msgType, int rsize, Real_t rda
   fieldData[5] = &(lulesh->domain.zd(0)) ;
 
   // Receive force data from L/R neighbor
-  receiveData(msgType, size, xferFields, fieldData, rdata);    
+  receiveDataNodes(msgType, size, xferFields, fieldData, rdata);    
 } 

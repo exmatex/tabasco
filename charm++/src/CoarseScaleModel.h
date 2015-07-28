@@ -50,6 +50,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void LagrangeNodal1();
   void LagrangeNodal2();
   void LagrangeElements();
+  void LagrangeElements2();
   void CalcTimeConstraintsForElems();
   void TimeIncrement();
   void updateTimeIncrement(Real_t reducedt);
@@ -57,20 +58,23 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void UpdateStressForElems();
   void UpdateStressForElems2(int reducedIters);
 
-  void sendData(int xferFields, Real_t **fieldData);
-  void receiveData(int msgType, int size, int xferFields, Real_t **fieldData, Real_t rdata[]);
+  void sendDataNodes(int xferFields, Real_t **fieldData);
+  void sendDataElems(int xferFields, Real_t **fieldData);
+
+  void receiveDataNodes(int msgType, int size, int xferFields, Real_t **fieldData, Real_t rdata[]);
+  void receiveDataElems(int msgType, int size, int xferFields, Real_t rdata[]);
 
   void sendNodalMass();
   void updateNodalMass(int msgType, int rsize, Real_t rdata[]);
-  //void receiveNodalMass(int msgType, int size, Real_t rdata[]);
 
   void sendForce();
   void updateForce(int msgType, int rsize, Real_t rdata[]);
-  //void receiveForce(int msgType, int size, Real_t rdata[]);
   
+  void sendVelocityGrad();
+  void updateVelocityGrad(int msgType, int rsize, Real_t rdata[]);
+
   void sendPositionVelocity();
   void updatePositionVelocity(int msgType, int rsize, Real_t rdata[]);
-  //void receivePositionVelocity(int msgType, int size, Real_t rdata[]);
 
   void startElementFineScaleQuery(int step, int nelems);
   void updateElement(int whichEl, int whichIter, int newPt);
