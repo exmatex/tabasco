@@ -175,8 +175,10 @@ mainmodule TabaSCo {
   };
 
   // Fine scale model
-  array [4D] FineScaleModel {
+  array [2D] FineScaleModel {
     entry FineScaleModel();
+    entry FineScaleModel(bool useAdaptiveSampling);
+/*
     entry void evaluate(int qPt);
     entry void query2(int iter, int qPt);
     entry void requestNeighbors(int qPt);
@@ -185,8 +187,10 @@ mainmodule TabaSCo {
     entry void requestDBStore(int newPt);
     entry void receivePoint(int newPt);
     entry void sendNewPoint2Coarse(int elnum, int iter, int newPt);
+*/
 
     //entry [createhome] void query(int elnum, int iter, int qPt, CkCallback cb)
+/*
     entry [createhome] void query(int elnum, int iter, int qPt)
     {
       // Do nearest neighbor search
@@ -214,6 +218,7 @@ mainmodule TabaSCo {
       }
 
     };
+*/
   };
 
   // Nearest Neighbor Search 

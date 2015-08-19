@@ -47,6 +47,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
   // Entry methods
   void initialize(int numRanks, bool useAdaptiveSampling);
+  void ConstructFineScaleModel(bool useAdaptiveSampling);
   void LagrangeNodal1();
   void LagrangeNodal2();
   void LagrangeElements();

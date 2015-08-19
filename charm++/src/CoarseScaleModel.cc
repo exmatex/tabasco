@@ -118,7 +118,22 @@ void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
 void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling)
 {
   lulesh->Initialize(thisIndex, numRanks);
+  ConstructFineScaleModel(useAdaptiveSampling);
+}
+
+void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
+{
+  // Create Lulesh-local parts of fine scale models
   lulesh->ConstructFineScaleModel(useAdaptiveSampling);
+
+  // Now create 2-D fine scale model chares
+  int domElems = lulesh->domain.numElem();
+
+  fineScaleArray = CProxy_FineScaleModel::ckNew();  
+  for (int i=0; i<domElems; ++i) {
+    fineScaleArray(thisIndex, i).insert(useAdaptiveSampling);
+  }
+  fineScaleArray.doneInserting();
 }
 
 void CoarseScaleModel::LagrangeNodal1()

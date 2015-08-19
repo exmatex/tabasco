@@ -73,13 +73,8 @@ Main::Main(CkArgMsg* msg)
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
   opts.setMap(rrMap);
   
-  // Create coarse scale model
+  // Create coarse scale model, Lulesh
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(opts);
-
-  // Set time reduction and iters reduction
-  //CkCallback *cbTime = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTimeIncrement), coarseScaleArray);
-  //CkCallback *cbIters = new CkCallback(CkReductionTarget(CoarseScaleModel, UpdateStressForElems2), coarseScaleArray);
-  //coarseScaleArray.ckSetReductionClient(cb);
 
 /*
   // Create DB interfaces

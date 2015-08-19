@@ -33,6 +33,7 @@ void Interpolate::run(int elnum, int nbrCount, int nbrData, int qPt)
 
   newPt = thisIndex.z;
 
+/*
   int converged = thisIndex.x;
 
   // Send back new point, if converged
@@ -44,4 +45,5 @@ void Interpolate::run(int elnum, int nbrCount, int nbrData, int qPt)
   }
   else
     fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, elnum).evaluate(qPt);
+*/
 }

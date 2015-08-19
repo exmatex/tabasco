@@ -55,5 +55,5 @@ void NearestNeighborSearch::sendNeighbors(int elnum, int nbrCount, int nbrData)
   printf("NearestNeighborSearch sendNeighbors\n");
 
   nbrCount = NBR_LIMIT;
-  fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, elnum).receiveNeighbors(nbrCount, nbrData);
+  //fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, elnum).receiveNeighbors(nbrCount, nbrData);
 }
