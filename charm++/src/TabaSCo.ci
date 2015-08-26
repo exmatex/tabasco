@@ -2,6 +2,9 @@ mainmodule TabaSCo {
 
   include "types.h";
 
+  include "Constitutive.h";
+  include "tensor.h";
+
   readonly CProxy_Main mainProxy;                    // central controller
   readonly CProxy_CoarseScaleModel coarseScaleArray; // array of domain coarse scale models
   readonly CProxy_FineScaleModel fineScaleArray;     // array of fine scale models
@@ -25,10 +28,10 @@ mainmodule TabaSCo {
 
     entry void initialize(int numRanks, bool useAdaptiveSampling);
 
-    entry void go(int numRanks, bool useAdaptiveSampling);
-    entry void startElementFineScaleQuery(int nstep, int nelems);
+    //entry void go(int numRanks, bool useAdaptiveSampling);
+    //entry void startElementFineScaleQuery(int nstep, int nelems);
     //entry void receiveNewPoint(int whichIter, int whichEl, int newPt);
-    entry void updateElement(int whichEl, int whichIter, int newPt);
+    //entry void updateElement(int whichEl, int whichIter, int newPt);
 
     entry void TimeIncrement();
     entry void updateTimeIncrement(Real_t reducedt);
@@ -39,6 +42,9 @@ mainmodule TabaSCo {
     entry void LagrangeElements2();
     entry void CalcTimeConstraintsForElems();
     entry void UpdateStressForElems();
+
+    entry void receiveAdvanceResults(int elemNum, ConstitutiveData cm_data);
+    entry void updateAdvanceResults(int elemNum, ConstitutiveData cm_data);
 
     entry void sendNodalMass();
     entry void receiveNodalMass(int msgType, int rsize, Real_t rdata[rsize]);
@@ -63,6 +69,7 @@ mainmodule TabaSCo {
         count = (thisIndex > 0 && thisIndex < (numRanks-1) ? 2 : 1);
         initialize(numRanks, useAdaptiveSampling);
         sendNodalMass();
+        nstep = 0;
       }
 
       if (numRanks > 1) {
@@ -134,6 +141,20 @@ mainmodule TabaSCo {
           UpdateStressForElems();
         }
 
+        serial { count = 0; }
+        while(count < numElems) {
+          //when receiveAdvanceResults[nstep](int elemNum, ConstitutiveData cm_data) serial {
+          when receiveAdvanceResults(int elemNum, ConstitutiveData cm_data) serial {
+            //printf("Received from elem %d count = %d\n", elemNum, count);
+            updateAdvanceResults(elemNum, cm_data);
+            count++;
+          }
+        }
+
+        serial {
+          afterAdvance();
+        }
+
         if (numRanks > 1) {
           when reduceIters(int reducedIters) serial {
             UpdateStressForElems2(reducedIters);
@@ -144,6 +165,8 @@ mainmodule TabaSCo {
           printf("step = %d, time = %e, dt=%e\n",
               lulesh->domain.cycle(), double(lulesh->domain.time()), double(lulesh->domain.deltatime()) ) ;
         }
+
+        serial { nstep++; }
       }
 
 /*
@@ -177,7 +200,9 @@ mainmodule TabaSCo {
   // Fine scale model
   array [2D] FineScaleModel {
     entry FineScaleModel();
-    entry FineScaleModel(bool useAdaptiveSampling);
+    entry FineScaleModel(int state_size, bool useAdaptiveSampling);
+
+    entry void advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char state[ssize]);
 /*
     entry void evaluate(int qPt);
     entry void query2(int iter, int qPt);

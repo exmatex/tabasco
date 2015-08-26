@@ -5,6 +5,28 @@
 
 #include "ElastoViscoPlasticity.h"
 
+// PUP operator for Tensor2Sym
+inline void operator|(PUP::er &p, Tensor2Sym &tensor)
+{
+  PUParray(p, tensor.a, 6);
+}
+
+// PUP operator for Tensor2Gen
+inline void operator|(PUP::er &p, Tensor2Gen &tensor)
+{
+  PUParray(p, tensor.a, 9);
+}
+
+// PUP operator for ConstitutiveData
+inline void operator|(PUP::er &p, ConstitutiveData &cdata)
+{
+  p|cdata.sigma_prime;
+  p|cdata.num_models;
+  p|cdata.num_point_value_pairs;
+  p|cdata.num_Newton_iters;
+
+}
+
 class FineScaleModel : public CBase_FineScaleModel {
   private:
     FineScaleModel_SDAG_CODE
@@ -12,13 +34,15 @@ class FineScaleModel : public CBase_FineScaleModel {
     int currentIter;
     int nbrCount;
     int nbrData;
+
+    size_t stateSize;
        
   public:
   
     Constitutive* cm; 
 
   FineScaleModel();
-  FineScaleModel(bool use_adaptive_sampling);
+  FineScaleModel(int state_size, bool use_adaptive_sampling);
   FineScaleModel(CkMigrateMessage *msg);
   ~FineScaleModel();
   void pup(PUP::er &p);
@@ -33,7 +57,7 @@ class FineScaleModel : public CBase_FineScaleModel {
 */
 
   // Entry methods
-  void advance();
+  void advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char* state);
 
 };
 

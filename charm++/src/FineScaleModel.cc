@@ -8,7 +8,6 @@
 #include "Taylor.h"
 #include "MieGruneisen.h"
 
-
 extern CProxy_Main mainProxy;
 extern CProxy_CoarseScaleModel coarseScaleArray;
 extern CProxy_NearestNeighborSearch nnsArray;
@@ -18,11 +17,13 @@ extern CProxy_DBInterface DBArray;
 FineScaleModel::FineScaleModel()
 {}
 
-FineScaleModel::FineScaleModel(bool use_adaptive_sampling)
+FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling)
 {
   // Ordering for a 2D array chare is x, y 
   printf("FineScaleModel created on PE %d Index %d %d\n", 
       CkMyPe(), thisIndex.x, thisIndex.y);
+
+  stateSize = state_size;
 
   ConstitutiveGlobal cm_global;
 
@@ -52,10 +53,8 @@ FineScaleModel::FineScaleModel(bool use_adaptive_sampling)
  
   Tensor2Gen L;
 
-  size_t state_size;
-
   cm = (Constitutive*)(new ElastoViscoPlasticity(cm_global, L, bulk_modulus, shear_modulus, eos_model,
-                                                 plasticity_model, use_adaptive_sampling, state_size));
+                                                 plasticity_model, use_adaptive_sampling, stateSize));
 }
 
 FineScaleModel::FineScaleModel(CkMigrateMessage *msg)
@@ -75,6 +74,7 @@ void FineScaleModel::pup(PUP::er &p)
   p|currentIter;
   p|nbrCount;
   p|nbrData;
+  p|stateSize;
 }
 
 /*
@@ -144,7 +144,9 @@ void FineScaleModel::sendNewPoint2Coarse(int elnum, int iter, int cPt)
 }
 */
 
-void FineScaleModel::advance()
+// Execute advance for element and return results to calling coarse model
+void FineScaleModel::advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char* state)
 {
-
+  ConstitutiveData cm_data = cm->advance(delta_t, L_new, volume_change, state);
+  coarseScaleArray(thisIndex.x).receiveAdvanceResults(thisIndex.y, cm_data);
 }

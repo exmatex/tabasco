@@ -37,6 +37,10 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
     int e;
     int currentPt;
     int count;
+
+    int max_nonlinear_iters;
+    int max_local_newton_iters;
+    size_t* state_size;
      
   public:
   
@@ -57,6 +61,8 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void updateTimeIncrement(Real_t reducedt);
   void TimeIncrement2();
   void UpdateStressForElems();
+  void updateAdvanceResults(int elemNum, ConstitutiveData cm_data);
+  void afterAdvance();
   void UpdateStressForElems2(int reducedIters);
 
   void sendDataNodes(int xferFields, Real_t **fieldData);

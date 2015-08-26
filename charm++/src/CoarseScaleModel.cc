@@ -3,6 +3,9 @@
 #include "DBInterface.h"
 #include "FineScaleModel.h"
 
+#include "Constitutive.h"
+#include "tensor.h"
+
 extern CProxy_Main mainProxy;
 extern CProxy_CoarseScaleModel coarseScaleArray;
 extern CProxy_FineScaleModel fineScaleArray;
@@ -80,6 +83,7 @@ CoarseScaleModel::CoarseScaleModel(CkMigrateMessage *msg)
 
 CoarseScaleModel::~CoarseScaleModel()
 {
+ free(state_size);
  free(lulesh);
 }
 
@@ -93,6 +97,8 @@ void CoarseScaleModel::pup(PUP::er &p)
   p|e;
   p|currentPt;
   p|count;
+  p|max_nonlinear_iters;
+  p|max_local_newton_iters;
 }
 
 void CoarseScaleModel::startElementFineScaleQuery(int step, int nelems)
@@ -118,6 +124,11 @@ void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
 void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling)
 {
   lulesh->Initialize(thisIndex, numRanks);
+
+  numElems = lulesh->domain.numElem();
+  printf("numElems = %d\n", numElems);
+
+  state_size = new size_t[numElems];
   ConstructFineScaleModel(useAdaptiveSampling);
 }
 
@@ -127,11 +138,10 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
   lulesh->ConstructFineScaleModel(useAdaptiveSampling);
 
   // Now create 2-D fine scale model chares
-  int domElems = lulesh->domain.numElem();
-
   fineScaleArray = CProxy_FineScaleModel::ckNew();  
-  for (int i=0; i<domElems; ++i) {
-    fineScaleArray(thisIndex, i).insert(useAdaptiveSampling);
+  for (Index_t i = 0; i < numElems; ++i) {
+    state_size[i] = lulesh->domain.cm(i)->getStateSize();
+    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling);
   }
   fineScaleArray.doneInserting();
 }
@@ -209,6 +219,55 @@ void CoarseScaleModel::TimeIncrement2()
 
 void CoarseScaleModel::UpdateStressForElems()
 {
+  // For this Coarse model's elements
+  max_nonlinear_iters = 0;
+  max_local_newton_iters = 0;
+
+#ifdef _OPENMP
+#pragma omp for
+#endif
+  for (Index_t k=0; k < numElems; ++k) {
+
+    // advance constitutive model
+    fineScaleArray(thisIndex, k).advance(lulesh->domain.deltatime(),
+                                        lulesh->domain.cm_vel_grad(k),
+                                        lulesh->domain.cm_vol_chng(k),
+                                        state_size[k],
+                                        (char*)lulesh->domain.cm_state(k));
+  }
+}
+
+void CoarseScaleModel::updateAdvanceResults(int elemNum, ConstitutiveData cm_data)
+{
+  int num_iters = cm_data.num_Newton_iters;
+  if (num_iters > max_local_newton_iters) max_local_newton_iters = num_iters;
+
+  const Tensor2Sym& sigma_prime = cm_data.sigma_prime;
+
+  lulesh->domain.sx(elemNum) = sigma_prime(1,1);
+  lulesh->domain.sy(elemNum) = sigma_prime(2,2);
+  lulesh->domain.txy(elemNum) = sigma_prime(2,1);
+  lulesh->domain.txz(elemNum) = sigma_prime(3,1);
+  lulesh->domain.tyz(elemNum) = sigma_prime(3,2);
+  
+  if (max_local_newton_iters > max_nonlinear_iters)
+  {
+    max_nonlinear_iters = max_local_newton_iters;
+  }
+}
+
+void CoarseScaleModel::afterAdvance()
+{
+  // Reduction
+  if (lulesh->domain.numSlices() == 1)
+    UpdateStressForElems2(max_nonlinear_iters);
+  else
+    contribute(sizeof(int), (void *)&max_nonlinear_iters, CkReduction::max_int, *cbIters);
+}
+
+/* previous version
+void CoarseScaleModel::UpdateStressForElems()
+{
   
   int new_iters = lulesh->UpdateStressForElems();
 
@@ -222,6 +281,7 @@ void CoarseScaleModel::UpdateStressForElems()
   contribute(sizeof(int), (void *)&new_iters, CkReduction::max_int, *cbIters);
 
 }
+*/
 
 void CoarseScaleModel::UpdateStressForElems2(int reducedIters)
 {
