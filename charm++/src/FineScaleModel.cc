@@ -51,6 +51,7 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling)
   double bulk_modulus = 1.94; // Tantallum (Mbar)
   double shear_modulus = 6.9e-1; // Tantallum (Mbar)
  
+  // Make empty Tensor
   Tensor2Gen L;
 
   cm = (Constitutive*)(new ElastoViscoPlasticity(cm_global, L, bulk_modulus, shear_modulus, eos_model,
@@ -148,5 +149,5 @@ void FineScaleModel::sendNewPoint2Coarse(int elnum, int iter, int cPt)
 void FineScaleModel::advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char* state)
 {
   ConstitutiveData cm_data = cm->advance(delta_t, L_new, volume_change, state);
-  coarseScaleArray(thisIndex.x).receiveAdvanceResults(thisIndex.y, cm_data);
+  coarseScaleArray(thisIndex.x).receiveAdvanceResults(thisIndex.y, cm_data, ssize, state);
 }

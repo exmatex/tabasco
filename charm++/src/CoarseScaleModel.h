@@ -61,7 +61,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void updateTimeIncrement(Real_t reducedt);
   void TimeIncrement2();
   void UpdateStressForElems();
-  void updateAdvanceResults(int elemNum, ConstitutiveData cm_data);
+  void updateAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[]);
   void afterAdvance();
   void UpdateStressForElems2(int reducedIters);
 

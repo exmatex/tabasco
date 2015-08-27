@@ -141,6 +141,7 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
   fineScaleArray = CProxy_FineScaleModel::ckNew();  
   for (Index_t i = 0; i < numElems; ++i) {
     state_size[i] = lulesh->domain.cm(i)->getStateSize();
+
     fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling);
   }
   fineScaleArray.doneInserting();
@@ -217,6 +218,7 @@ void CoarseScaleModel::TimeIncrement2()
 
 }
 
+
 void CoarseScaleModel::UpdateStressForElems()
 {
   // For this Coarse model's elements
@@ -237,8 +239,12 @@ void CoarseScaleModel::UpdateStressForElems()
   }
 }
 
-void CoarseScaleModel::updateAdvanceResults(int elemNum, ConstitutiveData cm_data)
+
+void CoarseScaleModel::updateAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char* state)
 {
+  // set new state
+  lulesh->domain.cm(elemNum)->setState((void *)state);
+
   int num_iters = cm_data.num_Newton_iters;
   if (num_iters > max_local_newton_iters) max_local_newton_iters = num_iters;
 
@@ -254,6 +260,8 @@ void CoarseScaleModel::updateAdvanceResults(int elemNum, ConstitutiveData cm_dat
   {
     max_nonlinear_iters = max_local_newton_iters;
   }
+
+  lulesh->domain.cm(elemNum)->getState(lulesh->domain.cm_state(elemNum));
 }
 
 void CoarseScaleModel::afterAdvance()

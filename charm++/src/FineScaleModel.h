@@ -4,6 +4,7 @@
 #include "TabaSCo.decl.h"
 
 #include "ElastoViscoPlasticity.h"
+#include "tensor.h"
 
 // PUP operator for Tensor2Sym
 inline void operator|(PUP::er &p, Tensor2Sym &tensor)

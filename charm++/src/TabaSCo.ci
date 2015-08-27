@@ -43,8 +43,8 @@ mainmodule TabaSCo {
     entry void CalcTimeConstraintsForElems();
     entry void UpdateStressForElems();
 
-    entry void receiveAdvanceResults(int elemNum, ConstitutiveData cm_data);
-    entry void updateAdvanceResults(int elemNum, ConstitutiveData cm_data);
+    entry void receiveAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[ssize]);
+    entry void updateAdvanceResults(int elemNum, ConstitutiveData cm_datai, int ssize, char state[ssize]);
 
     entry void sendNodalMass();
     entry void receiveNodalMass(int msgType, int rsize, Real_t rdata[rsize]);
@@ -144,9 +144,9 @@ mainmodule TabaSCo {
         serial { count = 0; }
         while(count < numElems) {
           //when receiveAdvanceResults[nstep](int elemNum, ConstitutiveData cm_data) serial {
-          when receiveAdvanceResults(int elemNum, ConstitutiveData cm_data) serial {
+          when receiveAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[ssize]) serial {
             //printf("Received from elem %d count = %d\n", elemNum, count);
-            updateAdvanceResults(elemNum, cm_data);
+            updateAdvanceResults(elemNum, cm_data, ssize, state);
             count++;
           }
         }
