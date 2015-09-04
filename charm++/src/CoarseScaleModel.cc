@@ -70,8 +70,8 @@ CoarseScaleModel::CoarseScaleModel()
   lulesh = new Lulesh();
 
   // Set time reduction and iters reduction
-  cbTime = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTimeIncrement), coarseScaleArray);
-  cbIters = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceIters), coarseScaleArray);
+  cbTime = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTimeIncrement), thisProxy);
+  cbIters = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceIters), thisProxy);
   cbFdone = new CkCallback(CkReductionTarget(Main, fineScaleCreateDone), mainProxy);
 
 }
