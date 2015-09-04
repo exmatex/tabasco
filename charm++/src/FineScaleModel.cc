@@ -18,10 +18,13 @@ FineScaleModel::FineScaleModel()
 {}
 
 FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling)
+//void FineScaleModel::initialize(int state_size, bool use_adaptive_sampling)
 {
   // Ordering for a 2D array chare is x, y 
-  printf("FineScaleModel created on PE %d Index %d %d\n", 
-      CkMyPe(), thisIndex.x, thisIndex.y);
+/*
+  printf("FineScaleModel created on PE %d Index %d %d state size = %d\n", 
+      CkMyPe(), thisIndex.x, thisIndex.y, state_size);
+*/
 
   stateSize = state_size;
 
@@ -60,7 +63,7 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling)
 
 FineScaleModel::FineScaleModel(CkMigrateMessage *msg)
 {
-
+  printf("Migrate Fine Scale chare %d %d\n", thisIndex.x, thisIndex.y);
 }
 
 FineScaleModel::~FineScaleModel()

@@ -29,15 +29,25 @@ void parse_input(string input_file, Input *in)
     {
       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.CoarseScaleModel"))
       {
+        if (v.second.get<std::string>("id") == "type")
+          {
+            in->coarseType = v.second.get<int>("value");
+            CkPrintf("coarse model type                 %d\n", in->coarseType);
+          }
         if (v.second.get<std::string>("id") == "count")
           {
             in->coarseCount = v.second.get<int>("value");
-            CkPrintf("count                             %d\n", in->coarseCount);
+            CkPrintf("coarse model count                %d\n", in->coarseCount);
           }
         if (v.second.get<std::string>("id") == "use adaptive sampling")
           {
             in->useAdaptiveSampling = v.second.get<int>("value");
             CkPrintf("use adaptive sampling             %d\n", in->useAdaptiveSampling);
+          }
+        if (v.second.get<std::string>("id") == "stop time")
+          {
+            in->stopTime = v.second.get<Real_t>("value");
+            CkPrintf("stop time                         %e\n", in->stopTime);
           }
       }
     }

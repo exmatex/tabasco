@@ -7,6 +7,7 @@
 class Main : public CBase_Main {
 
   private:
+    Main_SDAG_CODE
     int doneCount;
     int totalChares;
 
@@ -16,7 +17,5 @@ class Main : public CBase_Main {
   Main(CkArgMsg* msg);
   Main(CkMigrateMessage* msg);
 
-  /// Entry Methods ///
-  void done();
 };
 #endif //__MAIN_H__

@@ -1,7 +1,7 @@
 {"parameter": {
     "header": "TabaSCo Test Input File",
     "CoarseScaleModel": [
-        {"id": "type",                 "value": "Lulesh"},
+        {"id": "type",                 "value": "0"},
         {"id": "count",                "value": "1"},
         {"id": "use adaptive sampling", "value": "0"},
         {"id": "stop time",             "value": "1e-01"}

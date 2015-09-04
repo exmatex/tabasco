@@ -38,7 +38,6 @@ Msg::unpack(void *buf)
 void CoarseScaleModel::updateTimeIncrement(Real_t reducedt)
 {
 
-
   //printf("%d In timeReduce %e\n", thisIndex, reducedt);
 
   Real_t newdt = reducedt;
@@ -73,6 +72,7 @@ CoarseScaleModel::CoarseScaleModel()
   // Set time reduction and iters reduction
   cbTime = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTimeIncrement), coarseScaleArray);
   cbIters = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceIters), coarseScaleArray);
+  cbFdone = new CkCallback(CkReductionTarget(Main, fineScaleCreateDone), mainProxy);
 
 }
 
@@ -121,12 +121,14 @@ void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
 	  printf("Iter %d Coarse %d Element %d update newPt %d\n", whichIter, thisIndex, whichEl, newPt);
 }
 
-void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling)
+void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime)
 {
   lulesh->Initialize(thisIndex, numRanks);
 
+  lulesh->domain.stoptime() = stopTime;
+
   numElems = lulesh->domain.numElem();
-  printf("numElems = %d\n", numElems);
+  //printf("numElems = %d\n", numElems);
 
   state_size = new size_t[numElems];
   ConstructFineScaleModel(useAdaptiveSampling);
@@ -138,13 +140,19 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
   lulesh->ConstructFineScaleModel(useAdaptiveSampling);
 
   // Now create 2-D fine scale model chares
-  fineScaleArray = CProxy_FineScaleModel::ckNew();  
+  numElems = lulesh->domain.numElem();
+  //printf("numElems = %d\n", numElems);
+
   for (Index_t i = 0; i < numElems; ++i) {
     state_size[i] = lulesh->domain.cm(i)->getStateSize();
 
     fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling);
+    //fineScaleArray(thisIndex, i).initialize(state_size[i], useAdaptiveSampling);
   }
-  fineScaleArray.doneInserting();
+  printf("%d FineScaleModels created count = %d\n", thisIndex, numElems);
+
+  if (lulesh->domain.numSlices() > 1)
+   contribute(0,NULL,CkReduction::nop,*cbFdone);
 }
 
 void CoarseScaleModel::LagrangeNodal1()
@@ -224,6 +232,7 @@ void CoarseScaleModel::UpdateStressForElems()
   // For this Coarse model's elements
   max_nonlinear_iters = 0;
   max_local_newton_iters = 0;
+  numElems = lulesh->domain.numElem();
 
 #ifdef _OPENMP
 #pragma omp for
@@ -271,6 +280,7 @@ void CoarseScaleModel::afterAdvance()
     UpdateStressForElems2(max_nonlinear_iters);
   else
     contribute(sizeof(int), (void *)&max_nonlinear_iters, CkReduction::max_int, *cbIters);
+
 }
 
 /* previous version
@@ -294,7 +304,7 @@ void CoarseScaleModel::UpdateStressForElems()
 void CoarseScaleModel::UpdateStressForElems2(int reducedIters)
 {
 
-  //printf("%d iters = %d\n", thisIndex, reducedIters);
+  //printf("%d In UpdateStressForElems2 reducedIters = %d\n", thisIndex, reducedIters);
 
   lulesh->UpdateStressForElems2(reducedIters);
 
@@ -470,6 +480,8 @@ void CoarseScaleModel::sendDataElems(int xferFields, Real_t **fieldData)
 
 void CoarseScaleModel::updateNodalMass(int msgType, int rsize, Real_t rdata[])
 {
+  //printf("%d In updateNodalMass\n", thisIndex);
+
   int xferFields = 1;
   int size = lulesh->domain.commNodes();
 
@@ -592,6 +604,8 @@ void CoarseScaleModel::sendForce()
 
 void CoarseScaleModel::updateForce(int msgType, int rsize, Real_t rdata[])
 {
+  //printf("%d In updateForce\n", thisIndex);
+
   int xferFields = 3;
   int size = lulesh->domain.commNodes();
 
@@ -603,6 +617,7 @@ void CoarseScaleModel::updateForce(int msgType, int rsize, Real_t rdata[])
 
   // Receive force data from L/R neighbor
   receiveDataNodes(msgType, size, xferFields, fieldData, rdata);
+
 }
 
 void CoarseScaleModel::sendVelocityGrad()
@@ -618,6 +633,8 @@ void CoarseScaleModel::sendVelocityGrad()
 
 void CoarseScaleModel::updateVelocityGrad(int msgType, int rsize, Real_t rdata[])
 {
+  //printf("%d In updateVelocityGrad\n", thisIndex);
+
   int xferFields = 1;
   int size = lulesh->domain.commElems();
 
@@ -647,6 +664,8 @@ void CoarseScaleModel::sendPositionVelocity()
 
 void CoarseScaleModel::updatePositionVelocity(int msgType, int rsize, Real_t rdata[])
 { 
+  //printf("%d In updatPositionVelocity\n", thisIndex);
+
   int xferFields = 6;
   int size = lulesh->domain.commNodes();
 

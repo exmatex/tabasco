@@ -44,6 +44,7 @@ class FineScaleModel : public CBase_FineScaleModel {
 
   FineScaleModel();
   FineScaleModel(int state_size, bool use_adaptive_sampling);
+  //void initialize(int state_size, bool use_adaptive_sampling);
   FineScaleModel(CkMigrateMessage *msg);
   ~FineScaleModel();
   void pup(PUP::er &p);

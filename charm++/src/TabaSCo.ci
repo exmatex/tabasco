@@ -17,7 +17,34 @@ mainmodule TabaSCo {
   // Main driver
   mainchare Main {
     entry Main(CkArgMsg *msg);
-    entry void done();
+    entry [reductiontarget] void fineScaleCreateDone();
+    entry [reductiontarget] void done();
+
+    entry void run(int numRanks, bool useAdaptiveSampling, Real_t stopTime) {
+
+      serial {
+        coarseScaleArray.initialize(numRanks, useAdaptiveSampling, stopTime);
+      }
+
+      // Wait for all fine scale model chares to be created
+      if (numRanks > 1) {
+        when fineScaleCreateDone() serial {
+          fineScaleArray.doneInserting();
+          printf("FineScaleModels have been created\n");
+        }
+      }
+      
+      // Run simulation
+      serial {
+        coarseScaleArray.run(numRanks, useAdaptiveSampling, stopTime);
+      }
+
+      //when all chares are done
+      when done() atomic {
+        CkPrintf("Simulation completed\n");
+        CkExit();
+      }
+    };
   };
 
   // Coarse scale model - Lulesh
@@ -26,7 +53,7 @@ mainmodule TabaSCo {
     entry [reductiontarget] void reduceTimeIncrement(Real_t reducedt);
     entry [reductiontarget] void reduceIters(int reducedIters);
 
-    entry void initialize(int numRanks, bool useAdaptiveSampling);
+    entry void initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime);
 
     //entry void go(int numRanks, bool useAdaptiveSampling);
     //entry void startElementFineScaleQuery(int nstep, int nelems);
@@ -62,14 +89,14 @@ mainmodule TabaSCo {
     entry void receivePositionVelocity(int msgType, int rsize, Real_t rdata[rsize]);
     entry void updatePositionVelocity(int msgType, int rsize, Real_t rdata[rsize]);
 
-    entry void run(int numRanks, bool useAdaptiveSampling)
+    entry void run(int numRanks, bool useAdaptiveSampling, Real_t stopTime)
     {
+
+      // Exchange nodal mass between Lulesh chares
       // Nodal mass is sent to rank-1 and rank+1
-      serial { 
+      serial {
         count = (thisIndex > 0 && thisIndex < (numRanks-1) ? 2 : 1);
-        initialize(numRanks, useAdaptiveSampling);
         sendNodalMass();
-        nstep = 0;
       }
 
       if (numRanks > 1) {
@@ -111,8 +138,10 @@ mainmodule TabaSCo {
 
         // Send position and velocity to rank-1
         serial {
+          //printf("%d before LagrangeNodal2\n", thisIndex);
           LagrangeNodal2();
           sendPositionVelocity();
+          //printf("%d after sendPV\n", thisIndex);
         }
 
         if (numRanks > 1 && thisIndex < numRanks-1) {
@@ -123,8 +152,10 @@ mainmodule TabaSCo {
 
         // Send velocity gradient to rank-1 and rank+1 
         serial {
+          //printf("%d before LagrangeElements\n", thisIndex);
           LagrangeElements();
           sendVelocityGrad();
+          //printf("%d after sendVG\n", thisIndex);
         }
 
         if (numRanks > 1) {
@@ -136,27 +167,31 @@ mainmodule TabaSCo {
         }
 
         serial {
+          //printf("%d before LagrangeElements2\n", thisIndex);
           LagrangeElements2();
           CalcTimeConstraintsForElems();
           UpdateStressForElems();
+          //printf("%d after UpdateStressForElems\n", thisIndex);
         }
 
-        serial { count = 0; }
-        while(count < numElems) {
-          //when receiveAdvanceResults[nstep](int elemNum, ConstitutiveData cm_data) serial {
+        serial { nstep = 0; }
+        while(nstep < numElems) {
           when receiveAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[ssize]) serial {
-            //printf("Received from elem %d count = %d\n", elemNum, count);
+            //printf("Received from elem %d count = %d\n", elemNum, nstep);
             updateAdvanceResults(elemNum, cm_data, ssize, state);
-            count++;
+            nstep++;
           }
         }
 
         serial {
+          //printf("before afterAd\n");
           afterAdvance();
         }
 
         if (numRanks > 1) {
+          serial { //printf("before reduceIters\n"); }
           when reduceIters(int reducedIters) serial {
+            //printf("%d before UpdateStressForElems2\n", thisIndex);
             UpdateStressForElems2(reducedIters);
           }
         }
@@ -166,33 +201,11 @@ mainmodule TabaSCo {
               lulesh->domain.cycle(), double(lulesh->domain.time()), double(lulesh->domain.deltatime()) ) ;
         }
 
-        serial { nstep++; }
       }
-
-/*
-      serial { numElems = nelems; printf("nelems = %d\n", nelems); }
-      for (tstep = 0; tstep < ntimesteps; tstep++) {
-        // Start queries for all elements
-        serial {
-          startElementFineScaleQuery(tstep, nelems);
-        }
-
-        // Process new points
-        serial { count = 0; }
-        while(count < nelems) {
-        //for (e = 0; e < nelems; e++) {
-          when receiveNewPoint[tstep](int whichIter, int whichEl, int newPt) serial {
-            //updateElement(m->whichEl, m->whichIter, m->newPt);
-            updateElement(whichEl, whichIter, newPt);
-            count++;
-          }
-        }
-      } 
-*/
 
       // Time steps done
       serial {
-        mainProxy.done();
+        contribute(0,NULL,CkReduction::nop,CkCallback(CkReductionTarget(Main,done),mainProxy));
       }
     };
   };
@@ -201,6 +214,7 @@ mainmodule TabaSCo {
   array [2D] FineScaleModel {
     entry FineScaleModel();
     entry FineScaleModel(int state_size, bool useAdaptiveSampling);
+    //entry void initialize(int state_size, bool useAdaptiveSampling);
 
     entry void advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char state[ssize]);
 /*

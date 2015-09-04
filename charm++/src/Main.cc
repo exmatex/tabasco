@@ -16,9 +16,11 @@
 /* readonly */ CProxy_Interpolate interpolateArray;
 /* readonly */ CProxy_DBInterface DBArray;
 
+/*readonly*/ int coarseType;
 /*readonly*/ int coarseCount;
 /*readonly*/ int NBR_LIMIT;
 /*readonly*/ bool useAdaptiveSampling;
+/*readonly*/ Real_t stopTime;
 
 // Entry point of Charm++ application
 Main::Main(CkArgMsg* msg)
@@ -31,7 +33,7 @@ Main::Main(CkArgMsg* msg)
   CkPrintf("**************************************************\n");
   CkPrintf("**                                              **\n");
   CkPrintf("**                                              **\n");
-  CkPrintf("**   Running \"Charm++ 3D TabaSCo %d processors     **\n", CkNumPes());
+  CkPrintf("**  Running \"Charm++ 3D TabaSCo %d processors   **\n", CkNumPes());
   CkPrintf("**                                              **\n");
   CkPrintf("**                                              **\n");
   CkPrintf("**************************************************\n");
@@ -48,12 +50,19 @@ Main::Main(CkArgMsg* msg)
   strcpy(input_file, msg->argv[1]);
   parse_input((string)input_file, &in);
 
-  // Get element and block dimension sizes
+  // Get coarse model type
+  coarseType = in.coarseType;
+
+  // Get number of coarse model chares
   coarseCount = in.coarseCount;
 
   // Check for adaptive sampling flag
   useAdaptiveSampling = (in.useAdaptiveSampling == 1) ? true : false; 
 
+  // Get simulation stop time
+  stopTime = in.stopTime;
+
+  // Neighbor limit
   NBR_LIMIT = 10;
 
 
@@ -63,9 +72,12 @@ Main::Main(CkArgMsg* msg)
   // Elements breakdown
   // Chares breakdown [number of chares per processor]
   CkPrintf("Lulesh (Charm++)\n"
-           "  Coarse: %d\n"
-           "  UseAdaptiveSampling: %d\n", 
-          coarseCount, ((useAdaptiveSampling == true) ? 1 : 0) );
+           "  Coarse type: %d\n"
+           "  Coarse count: %d\n"
+           "  UseAdaptiveSampling: %d\n"
+           "  Simulation stop time: %e\n", 
+          coarseType, coarseCount, 
+          ((useAdaptiveSampling == true) ? 1 : 0), stopTime );
 
   // Setup chare array size
   CkArrayOptions opts(coarseCount);
@@ -85,14 +97,19 @@ Main::Main(CkArgMsg* msg)
 
   // Create interpolates
   interpolateArray = CProxy_Interpolate::ckNew(opts);
-
-  // Create fine scale models
-  fineScaleArray = CProxy_FineScaleModel::ckNew();  
-  fineScaleArray.doneInserting();
 */
 
+  // Create fine scale models
+  //CkArrayOptions fopts(coarseCount, 2000);
+  //fineScaleArray = CProxy_FineScaleModel::ckNew(fopts);  
+  fineScaleArray = CProxy_FineScaleModel::ckNew();  
+  //fineScaleArray.doneInserting();
+
   // Start coarse scale models
-  coarseScaleArray.run(coarseCount, useAdaptiveSampling);
+  //coarseScaleArray.run(coarseCount, useAdaptiveSampling, stopTime);
+  
+  // Start simulation
+  run(coarseCount, useAdaptiveSampling, stopTime);
 
 }
   
@@ -100,14 +117,6 @@ Main::Main(CkArgMsg* msg)
 // // NOTE: This constructor does not need to appear in the ".ci" file
 Main::Main(CkMigrateMessage* msg)
 {
-}
-
-// End processing
-void Main::done()
-{
-  doneCount++;
-  if (doneCount >= coarseCount)
-    CkExit();
 }
 
 #include "TabaSCo.def.h"

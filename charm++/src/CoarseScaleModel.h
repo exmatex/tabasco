@@ -29,6 +29,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
     CkCallback *cbTime;
     CkCallback *cbIters;
+    CkCallback *cbFdone;
 
     int maxTimesteps;
     int numElems;
@@ -50,7 +51,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void pup(PUP::er &p);
 
   // Entry methods
-  void initialize(int numRanks, bool useAdaptiveSampling);
+  void initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime);
   void ConstructFineScaleModel(bool useAdaptiveSampling);
   void LagrangeNodal1();
   void LagrangeNodal2();
