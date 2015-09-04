@@ -29,10 +29,15 @@ endif
 BOOSTLIB=$(BOOST_INCLUDES)/../lib
 BOOST_LDFLAG=-L$(BOOSTLIB)
 
+LINALG_LDFLAG=$(shell pkg-config --silence-errors --libs lapack blas || true)
+ifeq ($(LINALG_LDFLAG), )
+LINALG_LDFLAG= -llapack -lblas
+endif
+
 OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
 # ../CoEVP/LULESH/lulesh.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
-LDFLAGS= -L../CoEVP/CM/lib -lcm -llapack -lblas -lm -lrt 
+LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 
 LULESH_OBJ=../CoEVP/LULESH/lulesh.o
 
