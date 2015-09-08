@@ -17,7 +17,6 @@ mainmodule TabaSCo {
   // Main driver
   mainchare Main {
     entry Main(CkArgMsg *msg);
-    entry [reductiontarget] void fineScaleCreateDone();
     entry [reductiontarget] void done();
 
     entry void run(int numRanks, bool useAdaptiveSampling, Real_t stopTime) {
@@ -26,14 +25,6 @@ mainmodule TabaSCo {
         coarseScaleArray.initialize(numRanks, useAdaptiveSampling, stopTime);
       }
 
-      // Wait for all fine scale model chares to be created
-      if (numRanks > 1) {
-        when fineScaleCreateDone() serial {
-          fineScaleArray.doneInserting();
-          printf("FineScaleModels have been created\n");
-        }
-      }
-      
       // Run simulation
       serial {
         coarseScaleArray.run(numRanks, useAdaptiveSampling, stopTime);

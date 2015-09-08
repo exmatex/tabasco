@@ -100,14 +100,9 @@ Main::Main(CkArgMsg* msg)
 */
 
   // Create fine scale models
-  //CkArrayOptions fopts(coarseCount, 2000);
-  //fineScaleArray = CProxy_FineScaleModel::ckNew(fopts);  
   fineScaleArray = CProxy_FineScaleModel::ckNew();  
-  //fineScaleArray.doneInserting();
+  fineScaleArray.doneInserting();
 
-  // Start coarse scale models
-  //coarseScaleArray.run(coarseCount, useAdaptiveSampling, stopTime);
-  
   // Start simulation
   run(coarseCount, useAdaptiveSampling, stopTime);
 

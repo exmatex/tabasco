@@ -72,7 +72,6 @@ CoarseScaleModel::CoarseScaleModel()
   // Set time reduction and iters reduction
   cbTime = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTimeIncrement), thisProxy);
   cbIters = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceIters), thisProxy);
-  cbFdone = new CkCallback(CkReductionTarget(Main, fineScaleCreateDone), mainProxy);
 
 }
 
@@ -141,18 +140,13 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
 
   // Now create 2-D fine scale model chares
   numElems = lulesh->domain.numElem();
-  //printf("numElems = %d\n", numElems);
 
   for (Index_t i = 0; i < numElems; ++i) {
     state_size[i] = lulesh->domain.cm(i)->getStateSize();
 
     fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling);
-    //fineScaleArray(thisIndex, i).initialize(state_size[i], useAdaptiveSampling);
   }
   printf("%d FineScaleModels created count = %d\n", thisIndex, numElems);
-
-  if (lulesh->domain.numSlices() > 1)
-   contribute(0,NULL,CkReduction::nop,*cbFdone);
 }
 
 void CoarseScaleModel::LagrangeNodal1()
