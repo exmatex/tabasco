@@ -21,6 +21,10 @@
 /*readonly*/ int NBR_LIMIT;
 /*readonly*/ bool useAdaptiveSampling;
 /*readonly*/ Real_t stopTime;
+/*readonly*/ int fineType;
+/*readonly*/ int nnsType;
+/*readonly*/ int pointDim;
+/*readonly*/ int numTrees;
 
 // Entry point of Charm++ application
 Main::Main(CkArgMsg* msg)
@@ -50,14 +54,18 @@ Main::Main(CkArgMsg* msg)
   strcpy(input_file, msg->argv[1]);
   parse_input((string)input_file, &in);
 
-  // Get coarse model type
+  // Get coarse model parameters - type, count, adptive sampling flag
   coarseType = in.coarseType;
-
-  // Get number of coarse model chares
   coarseCount = in.coarseCount;
-
-  // Check for adaptive sampling flag
   useAdaptiveSampling = (in.useAdaptiveSampling == 1) ? true : false; 
+
+  // Get fine model parameters - type
+  fineType = in.fineType;
+
+  // Get Nearest Neighbor Search parameters
+  nnsType = in.nnsType;
+  pointDim = in.pointDim;
+  numTrees = in.numTrees;
 
   // Get simulation stop time
   stopTime = in.stopTime;
@@ -75,9 +83,14 @@ Main::Main(CkArgMsg* msg)
            "  Coarse type: %d\n"
            "  Coarse count: %d\n"
            "  UseAdaptiveSampling: %d\n"
-           "  Simulation stop time: %e\n", 
+           "  Simulation stop time: %e\n"
+           "  Fine type: %d\n"
+           "  NNS type: %d\n"
+           "  NNS point dimension: %d\n"
+           "  NNS number of trees: %d\n", 
           coarseType, coarseCount, 
-          ((useAdaptiveSampling == true) ? 1 : 0), stopTime );
+          ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
+          fineType, nnsType, pointDim, numTrees);
 
   // Setup chare array size
   CkArrayOptions opts(coarseCount);
@@ -91,10 +104,13 @@ Main::Main(CkArgMsg* msg)
 /*
   // Create DB interfaces
   DBArray = CProxy_DBInterface::ckNew(opts);
+*/
 
   // Create Nearest Neighbor Searches
   nnsArray = CProxy_NearestNeighborSearch::ckNew(opts);
+  nnsArray.initialize(nnsType, pointDim, numTrees);
 
+/*
   // Create interpolates
   interpolateArray = CProxy_Interpolate::ckNew(opts);
 */

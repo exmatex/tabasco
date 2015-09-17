@@ -55,6 +55,10 @@ typedef struct {
   int coarseType;
   int coarseCount;
   int useAdaptiveSampling;
+  int fineType;
+  int nnsType;
+  int pointDim;
+  int numTrees;
   Real_t stopTime;
 } Save_Input;
 /** struct containing the 2D field
@@ -69,6 +73,10 @@ void pup(PUP::er &p)
   p | coarseType;
   p | coarseCount;
   p | useAdaptiveSampling;
+  p | fineType;
+  p | nnsType;
+  p | pointDim;
+  p | numTrees;
   p | stopTime;
 }
 };

@@ -50,6 +50,34 @@ void parse_input(string input_file, Input *in)
             CkPrintf("stop time                         %e\n", in->stopTime);
           }
       }
+
+      BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.FineScaleModel"))
+      {
+        if (v.second.get<std::string>("id") == "type")
+          {
+            in->fineType = v.second.get<int>("value");
+            CkPrintf("fine model type                 %d\n", in->fineType);
+          }
+      }
+
+      BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.NearestNeighborSearch"))
+      {
+        if (v.second.get<std::string>("id") == "type")
+          {
+            in->nnsType = v.second.get<int>("value");
+            CkPrintf("nns type                        %d\n", in->nnsType);
+          }
+        if (v.second.get<std::string>("id") == "point dimension")
+          {
+            in->pointDim = v.second.get<int>("value");
+            CkPrintf("nns point dimension             %d\n", in->pointDim);
+          }
+        if (v.second.get<std::string>("id") == "number of trees")
+          {
+            in->numTrees = v.second.get<int>("value");
+            CkPrintf("nns number of trees             %d\n", in->numTrees);
+          }
+       }
     }
   catch (std::exception const& e)
     {

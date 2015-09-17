@@ -252,8 +252,11 @@ mainmodule TabaSCo {
   };
 
   // Nearest Neighbor Search 
-  array [3D] NearestNeighborSearch {
-    entry NearestNeighborSearch();
+  array [1D] NearestNeighborSearch {
+  entry NearestNeighborSearch();
+  entry void initialize(int ntype, int dim, int numTrees);
+
+/*
     entry void getIndex(int qPt, int nbrCount, int nbrIndex);
     entry void putIndex(int qPt, int nbrIndex);
     entry void requestDBGet(int nbrCount, int nbrIndex, int nbrData);
@@ -274,6 +277,7 @@ mainmodule TabaSCo {
       }    
         
     };
+*/
   };
 
   // Interpolate 
