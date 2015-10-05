@@ -2,7 +2,7 @@
 #include "NearestNeighborSearch.h"
 #include "DBInterface.h"
 
-#include "adaptive_sampling/interpolation_database/key_db/ApproxNearestNeighborsFLANN.h"
+#include "adaptive_sampling/interpolation_database/kriging_database/ApproxNearestNeighborsFLANN.h"
 
 #include <vector>
 

@@ -3,7 +3,7 @@
 
 #include "TabaSCo.decl.h"
 
-#include "adaptive_sampling/interpolation_database/key_db/ApproxNearestNeighbors.h"
+#include "adaptive_sampling/interpolation_database/kriging_database/ApproxNearestNeighbors.h"
 
 class NearestNeighborSearch : public CBase_NearestNeighborSearch {
   private:
