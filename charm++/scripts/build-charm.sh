@@ -25,7 +25,7 @@ cd charm
 
 cd mpi-linux-amd64-smp/tests/charm++/simplearrayhello
 make
-./charmrun hello
+./charmrun ./hello
 
 cd -
 #install {bin,include,lib}/*
