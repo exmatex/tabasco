@@ -12,10 +12,13 @@ PV=6.6.1
 P="charm-${PV}"
 URL=http://charm.cs.uiuc.edu/distrib/${P}.tar.gz
 A="${URL##*/}"
-[[ -f $A ]] || wget -O "$A" "$URL"
+if [[ ! -f $A ]]
+then
+    wget -O "$A" "$URL"
+    tar -xvf "${A}"
+fi
 D=${PWD}/install
 
-tar -xvf "${A}"
 #cd "${A%%.tar.*}"
 cd charm
 ./build charm++ mpi-linux-amd64 smp --with-numa -j${j} --build-shared
