@@ -2,6 +2,11 @@ TabaSCo
 =========
 TabaSCo contains proxy examples of Multi-physics, Multi-scale, Multi-language, Multi-tasking (M4) applications such as CoEVP that are composed of a coarse-scale model (ex. Lulesh) and a fine-scale model (ex. viscoplasticity).
 
+How to build and run
+--------------------
+
+see [here](https://github.com/exmatex/tabasco/wiki/Build)
+
 Copyright and license
 ---------------------
 
