@@ -1,6 +1,3 @@
 [submodule "CoEVP"]
 	path = CoEVP
 	url = ../CoEVP.git
-[submodule "flann"]
-	path = flann
-	url = ../../mariusmuja/flann.git 
