@@ -40,7 +40,7 @@ class FineScaleModel : public CBase_FineScaleModel {
        
   public:
   
-    Constitutive* cm; 
+  Constitutive* cm; 
 
   FineScaleModel();
   FineScaleModel(int state_size, bool use_adaptive_sampling);

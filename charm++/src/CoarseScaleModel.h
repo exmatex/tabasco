@@ -29,6 +29,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
     CkCallback *cbTime;
     CkCallback *cbIters;
+    CkCallback *cbTotal;
     CkCallback *cbFdone;
 
     int maxTimesteps;
@@ -38,6 +39,9 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
     int e;
     int currentPt;
     int count;
+
+    int total_samples;
+    int total_interpolations;
 
     int max_nonlinear_iters;
     int max_local_newton_iters;
@@ -62,7 +66,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void updateTimeIncrement(Real_t reducedt);
   void TimeIncrement2();
   void UpdateStressForElems();
-  void updateAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[]);
+  void updateAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[], int num_samples, int num_interpolations);
   void afterAdvance();
   void UpdateStressForElems2(int reducedIters);
 

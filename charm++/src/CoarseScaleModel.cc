@@ -72,6 +72,10 @@ CoarseScaleModel::CoarseScaleModel()
   // Set time reduction and iters reduction
   cbTime = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTimeIncrement), thisProxy);
   cbIters = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceIters), thisProxy);
+  cbTotal = new CkCallback(CkReductionTarget(CoarseScaleModel, reduceTotal), thisProxy);
+
+  total_samples = 0;
+  total_interpolations = 0;
 
 }
 
@@ -95,6 +99,8 @@ void CoarseScaleModel::pup(PUP::er &p)
   p|tstep;
   p|e;
   p|currentPt;
+  p|total_samples;
+  p|total_interpolations;
   p|count;
   p|max_nonlinear_iters;
   p|max_local_newton_iters;
@@ -224,6 +230,8 @@ void CoarseScaleModel::TimeIncrement2()
 void CoarseScaleModel::UpdateStressForElems()
 {
   // For this Coarse model's elements
+  total_samples = 0;
+  total_interpolations = 0;
   max_nonlinear_iters = 0;
   max_local_newton_iters = 0;
   numElems = lulesh->domain.numElem();
@@ -243,7 +251,7 @@ void CoarseScaleModel::UpdateStressForElems()
 }
 
 
-void CoarseScaleModel::updateAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char* state)
+void CoarseScaleModel::updateAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char* state, int num_samples, int num_interpolations)
 {
   // set new state
   lulesh->domain.cm(elemNum)->setState((void *)state);
@@ -265,6 +273,9 @@ void CoarseScaleModel::updateAdvanceResults(int elemNum, ConstitutiveData cm_dat
   }
 
   lulesh->domain.cm(elemNum)->getState(lulesh->domain.cm_state(elemNum));
+
+  total_samples += num_samples;
+  total_interpolations += num_interpolations;
 }
 
 void CoarseScaleModel::afterAdvance()
@@ -273,7 +284,13 @@ void CoarseScaleModel::afterAdvance()
   if (lulesh->domain.numSlices() == 1)
     UpdateStressForElems2(max_nonlinear_iters);
   else
+  {
     contribute(sizeof(int), (void *)&max_nonlinear_iters, CkReduction::max_int, *cbIters);
+    int total[2];
+    total[0] = total_samples;
+    total[1] = total_interpolations;
+    contribute(2*sizeof(int), (void *)total, CkReduction::sum_int, *cbTotal);
+  }
 
 }
 

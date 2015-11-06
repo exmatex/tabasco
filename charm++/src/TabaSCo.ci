@@ -30,7 +30,7 @@ mainmodule TabaSCo {
         coarseScaleArray.run(numRanks, useAdaptiveSampling, stopTime);
       }
 
-      //when all chares are done
+      // when all chares are done
       when done() atomic {
         CkPrintf("Simulation completed\n");
         CkExit();
@@ -43,13 +43,9 @@ mainmodule TabaSCo {
     entry CoarseScaleModel();
     entry [reductiontarget] void reduceTimeIncrement(Real_t reducedt);
     entry [reductiontarget] void reduceIters(int reducedIters);
+    entry [reductiontarget] void reduceTotal(int reducedTotal[2]);
 
     entry void initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime);
-
-    //entry void go(int numRanks, bool useAdaptiveSampling);
-    //entry void startElementFineScaleQuery(int nstep, int nelems);
-    //entry void receiveNewPoint(int whichIter, int whichEl, int newPt);
-    //entry void updateElement(int whichEl, int whichIter, int newPt);
 
     entry void TimeIncrement();
     entry void updateTimeIncrement(Real_t reducedt);
@@ -61,8 +57,8 @@ mainmodule TabaSCo {
     entry void CalcTimeConstraintsForElems();
     entry void UpdateStressForElems();
 
-    entry void receiveAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[ssize]);
-    entry void updateAdvanceResults(int elemNum, ConstitutiveData cm_datai, int ssize, char state[ssize]);
+    entry void receiveAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[ssize], int num_samples, int num_interpolations);
+    entry void updateAdvanceResults(int elemNum, ConstitutiveData cm_datai, int ssize, char state[ssize], int num_samples, int num_interpolations);
 
     entry void sendNodalMass();
     entry void receiveNodalMass(int msgType, int rsize, Real_t rdata[rsize]);
@@ -129,10 +125,8 @@ mainmodule TabaSCo {
 
         // Send position and velocity to rank-1
         serial {
-          //printf("%d before LagrangeNodal2\n", thisIndex);
           LagrangeNodal2();
           sendPositionVelocity();
-          //printf("%d after sendPV\n", thisIndex);
         }
 
         if (numRanks > 1 && thisIndex < numRanks-1) {
@@ -143,10 +137,8 @@ mainmodule TabaSCo {
 
         // Send velocity gradient to rank-1 and rank+1 
         serial {
-          //printf("%d before LagrangeElements\n", thisIndex);
           LagrangeElements();
           sendVelocityGrad();
-          //printf("%d after sendVG\n", thisIndex);
         }
 
         if (numRanks > 1) {
@@ -158,38 +150,41 @@ mainmodule TabaSCo {
         }
 
         serial {
-          //printf("%d before LagrangeElements2\n", thisIndex);
           LagrangeElements2();
           CalcTimeConstraintsForElems();
           UpdateStressForElems();
-          //printf("%d after UpdateStressForElems\n", thisIndex);
         }
 
         serial { nstep = 0; }
         while(nstep < numElems) {
-          when receiveAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[ssize]) serial {
-            //printf("Received from elem %d count = %d\n", elemNum, nstep);
-            updateAdvanceResults(elemNum, cm_data, ssize, state);
+          when receiveAdvanceResults(int elemNum, ConstitutiveData cm_data, int ssize, char state[ssize], int num_samples, int num_interpolations) serial {
+            updateAdvanceResults(elemNum, cm_data, ssize, state, num_samples, num_interpolations);
             nstep++;
           }
         }
 
         serial {
-          //printf("before afterAd\n");
           afterAdvance();
         }
 
         if (numRanks > 1) {
-          serial { //printf("before reduceIters\n"); }
           when reduceIters(int reducedIters) serial {
-            //printf("%d before UpdateStressForElems2\n", thisIndex);
             UpdateStressForElems2(reducedIters);
+          }
+          when reduceTotal(int total[2]) serial {
+            total_samples = total[0];
+            total_interpolations = total[1];
           }
         }
      
         if (thisIndex == 0) serial {
-          printf("step = %d, time = %e, dt=%e\n",
+          if (useAdaptiveSampling)
+            printf("step = %d, time = %e, dt=%e, Interpolation efficiency = %e\n",
+              lulesh->domain.cycle(), double(lulesh->domain.time()), double(lulesh->domain.deltatime()), (double)total_interpolations / (double)total_samples ) ;
+          else
+            printf("step = %d, time = %e, dt=%e\n",
               lulesh->domain.cycle(), double(lulesh->domain.time()), double(lulesh->domain.deltatime()) ) ;
+
         }
 
       }

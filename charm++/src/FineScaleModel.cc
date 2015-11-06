@@ -152,5 +152,12 @@ void FineScaleModel::sendNewPoint2Coarse(int elnum, int iter, int cPt)
 void FineScaleModel::advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char* state)
 {
   ConstitutiveData cm_data = cm->advance(delta_t, L_new, volume_change, state);
-  coarseScaleArray(thisIndex.x).receiveAdvanceResults(thisIndex.y, cm_data, ssize, state);
+  int num_samples = 0;
+  int num_interpolations = 0;
+  if (cm->adaptiveSamplingEnabled())
+  {
+    num_samples = cm->getNumSamples();
+    num_interpolations = cm->getNumSuccessfulInterpolations();
+  }
+  coarseScaleArray(thisIndex.x).receiveAdvanceResults(thisIndex.y, cm_data, ssize, state, num_samples, num_interpolations);
 }

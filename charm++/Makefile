@@ -3,7 +3,7 @@ SRCDIR=src
 ##############CHARM##########
 ifeq (,$(CHARM_ROOT))
 $(info Please establish Charmm++ environment variables before using this Makefile.)
-$(info E.g. by running setting CHARM_ROOT pr run 'module load charm++')
+$(info E.g. by running setting CHARM_ROOT or run 'module load charm++')
 $(error CHARM_ROOT is not set)
 endif
 CHARMINC=$(CHARM_ROOT)/include/
@@ -37,7 +37,8 @@ endif
 OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
 # ../CoEVP/LULESH/lulesh.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
-LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
+#LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
+LDFLAGS= -tracemode projections -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 
 LULESH_OBJ=../CoEVP/LULESH/lulesh.o
 
