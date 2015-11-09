@@ -43,7 +43,7 @@ mainmodule TabaSCo {
     entry CoarseScaleModel();
     entry [reductiontarget] void reduceTimeIncrement(Real_t reducedt);
     entry [reductiontarget] void reduceIters(int reducedIters);
-    entry [reductiontarget] void reduceTotal(int reducedTotal[2]);
+    entry [reductiontarget] void reduceTotal(int n, int total[n]);
 
     entry void initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime);
 
@@ -171,7 +171,7 @@ mainmodule TabaSCo {
           when reduceIters(int reducedIters) serial {
             UpdateStressForElems2(reducedIters);
           }
-          when reduceTotal(int total[2]) serial {
+          when reduceTotal(int n, int total[n]) serial {
             total_samples = total[0];
             total_interpolations = total[1];
           }
