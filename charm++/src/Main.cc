@@ -23,6 +23,7 @@
 /*readonly*/ Real_t stopTime;
 /*readonly*/ int fineType;
 /*readonly*/ int nnsType;
+/*readonly*/ int nnsCount;
 /*readonly*/ int pointDim;
 /*readonly*/ int numTrees;
 
@@ -64,6 +65,7 @@ Main::Main(CkArgMsg* msg)
 
   // Get Nearest Neighbor Search parameters
   nnsType = in.nnsType;
+  nnsCount= in.nnsCount;
   pointDim = in.pointDim;
   numTrees = in.numTrees;
 
@@ -86,20 +88,21 @@ Main::Main(CkArgMsg* msg)
            "  Simulation stop time: %e\n"
            "  Fine type: %d\n"
            "  NNS type: %d\n"
+           "  NNS count: %d\n"
            "  NNS point dimension: %d\n"
            "  NNS number of trees: %d\n", 
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
-          fineType, nnsType, pointDim, numTrees);
+          fineType, nnsType, nnsCount, pointDim, numTrees);
 
   // Setup chare array size
-  CkArrayOptions opts(coarseCount);
+  CkArrayOptions coarseOpts(coarseCount);
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
-  opts.setMap(rrMap);
+  coarseOpts.setMap(rrMap);
   
   // Create coarse scale model, Lulesh
-  coarseScaleArray = CProxy_CoarseScaleModel::ckNew(opts);
+  coarseScaleArray = CProxy_CoarseScaleModel::ckNew(coarseOpts);
 
 /*
   // Create DB interfaces
@@ -107,7 +110,9 @@ Main::Main(CkArgMsg* msg)
 */
 
   // Create Nearest Neighbor Searches
-  nnsArray = CProxy_NearestNeighborSearch::ckNew(opts);
+  CkArrayOptions nnsOpts(nnsCount);
+  nnsOpts.setMap(rrMap);
+  nnsArray = CProxy_NearestNeighborSearch::ckNew(nnsOpts);
   nnsArray.initialize(nnsType, pointDim, numTrees);
 
 /*

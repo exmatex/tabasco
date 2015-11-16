@@ -13,7 +13,7 @@ OBJDIR=charm_obj
 BINDIR=charm_bin
 
 #OPTFLAGS=-g
-OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include -I../CoEVP/CM/src -I../flann/src/cpp
+OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include -I../CoEVP/CM/src -I../CoEVP/CM/src/adaptive_sampling/database -I../CoEVP/CM/src/adaptive_sampling/utils -I../flann/src/cpp
 #other features
 #DEFS=-DTRACE
 
@@ -38,7 +38,8 @@ OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighbo
 # ../CoEVP/LULESH/lulesh.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
 #LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
-LDFLAGS= -tracemode projections -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
+#LDFLAGS= -tracemode projections -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
+LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 
 LULESH_OBJ=../CoEVP/LULESH/lulesh.o
 

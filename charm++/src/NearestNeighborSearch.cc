@@ -3,6 +3,7 @@
 #include "DBInterface.h"
 
 #include "adaptive_sampling/interpolation_database/kriging_database/ApproxNearestNeighborsFLANN.h"
+//#include "adaptive_sampling/interpolation_database/kriging_database/ApproxNearestNeighborsMTree.h"
 
 #include <vector>
 
@@ -20,15 +21,24 @@ NearestNeighborSearch::NearestNeighborSearch()
 
 void NearestNeighborSearch::initialize(int ntype, int dim, int ntrees)
 {
-  int nchecks = 20;
-
   if (ntype == 0) 
   {
-    //ann = (ApproxNearestNeighbors*)(new ApproxNearestNeighborsFLANN(dim, ntrees, nchecks));
+/*
+    int nchecks = 20;
+    ann = (ApproxNearestNeighbors*)(new ApproxNearestNeighborsFLANN(dim, ntrees, nchecks));
+*/
     printf("FLANN NNS not added yet\n");
   }
   else
   {
+/*
+    std::string mtreeDirectoryName = ".";
+    ann = (ApproxNearestNeighbors*)(new ApproxNearestNeighborsMTree(dim,
+                                                                    "kriging_model_database",
+                                                                    mtreeDirectoryName,
+                                                                    &(std::cout),
+                                                                    false));
+*/
     printf("MTree NNS not added yet\n");
   }
 

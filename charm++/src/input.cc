@@ -67,6 +67,11 @@ void parse_input(string input_file, Input *in)
             in->nnsType = v.second.get<int>("value");
             CkPrintf("nns type                        %d\n", in->nnsType);
           }
+        if (v.second.get<std::string>("id") == "count")
+          {
+            in->nnsCount = v.second.get<int>("value");
+            CkPrintf("nns count                       %d\n", in->nnsCount);
+          }
         if (v.second.get<std::string>("id") == "point dimension")
           {
             in->pointDim = v.second.get<int>("value");

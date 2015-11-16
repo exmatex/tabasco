@@ -57,6 +57,7 @@ typedef struct {
   int useAdaptiveSampling;
   int fineType;
   int nnsType;
+  int nnsCount;
   int pointDim;
   int numTrees;
   Real_t stopTime;
@@ -75,6 +76,7 @@ void pup(PUP::er &p)
   p | useAdaptiveSampling;
   p | fineType;
   p | nnsType;
+  p | nnsCount;
   p | pointDim;
   p | numTrees;
   p | stopTime;
