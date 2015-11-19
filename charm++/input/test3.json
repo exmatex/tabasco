@@ -16,7 +16,7 @@
     // type - 0 = FLANN, 1 = MTree
     //
     "NearestNeighborSearch": [
-        {"id": "type",                 "value": "0"},
+        {"id": "type",                 "value": "1"},
         {"id": "count",                "value": "1"},
         {"id": "point dimension",      "value": "6"},
         {"id": "number of trees",      "value": "1"}

@@ -36,6 +36,28 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling)
   double g = 2.e-3; // (Mbar)
   Plasticity* plasticity_model = (Plasticity*)(new Taylor(D_0, m, g));
 
+  // Construct the approximate nearest neighbors search
+  int point_dimension = plasticity_model->pointDimension();
+
+#ifdef FLANN
+
+         int n_trees = 1;         // input this from somewhere
+         int n_checks = 20;       // input this from somewhere
+
+         ann = (ApproxNearestNeighbors*)(new ApproxNearestNeighborsFLANN(point_dimension,
+                                                                         n_trees,
+                                                                         n_checks));
+#else
+         std::string mtreeDirectoryName = ".";
+
+         ann = (ApproxNearestNeighbors*)(new ApproxNearestNeighborsMTree(point_dimension,
+                                                                         "kriging_model_database",
+                                                                         mtreeDirectoryName,
+                                                                         &(std::cout),
+                                                                         false));
+#endif
+
+
   // Construct the equation of state
   EOS* eos_model;
   /* 
@@ -57,7 +79,7 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling)
   // Make empty Tensor
   Tensor2Gen L;
 
-  cm = (Constitutive*)(new ElastoViscoPlasticity(cm_global, L, bulk_modulus, shear_modulus, eos_model,
+  cm = (Constitutive*)(new ElastoViscoPlasticity(cm_global, ann, L, bulk_modulus, shear_modulus, eos_model,
                                                  plasticity_model, use_adaptive_sampling, stateSize));
 }
 

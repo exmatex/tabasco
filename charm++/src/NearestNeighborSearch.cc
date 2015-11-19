@@ -2,9 +2,6 @@
 #include "NearestNeighborSearch.h"
 #include "DBInterface.h"
 
-#include "adaptive_sampling/interpolation_database/kriging_database/ApproxNearestNeighborsFLANN.h"
-//#include "adaptive_sampling/interpolation_database/kriging_database/ApproxNearestNeighborsMTree.h"
-
 #include <vector>
 
 extern CProxy_Main mainProxy;
@@ -23,23 +20,21 @@ void NearestNeighborSearch::initialize(int ntype, int dim, int ntrees)
 {
   if (ntype == 0) 
   {
-/*
+#ifdef FLANN
     int nchecks = 20;
     ann = (ApproxNearestNeighbors*)(new ApproxNearestNeighborsFLANN(dim, ntrees, nchecks));
-*/
-    printf("FLANN NNS not added yet\n");
+    printf("FLANN NNS creatd.\n");
+#endif
   }
   else
   {
-/*
     std::string mtreeDirectoryName = ".";
     ann = (ApproxNearestNeighbors*)(new ApproxNearestNeighborsMTree(dim,
                                                                     "kriging_model_database",
                                                                     mtreeDirectoryName,
                                                                     &(std::cout),
                                                                     false));
-*/
-    printf("MTree NNS not added yet\n");
+    printf("MTree NNS created.\n");
   }
 
 }
@@ -91,31 +86,3 @@ uint128_t NearestNeighborSearch::getKey(int id)
   uint128_t rkey = ann->getKey(id);
   return rkey; 
 }
-
-/*
-void NearestNeighborSearch::getIndex(int qPt, int nbrCount, int nbrIndex)
-{
-  printf("NearestNeighborSearch getIndex\n");
-}
-
-void NearestNeighborSearch::putIndex(int qPt, int nbrIndex)
-{
-  printf("NearestNeighborSearch putIndex\n");
-}
-
-void NearestNeighborSearch::requestDBGet(int nbrCount, int nbrIndex, int nbrData)
-{
-  printf("NearestNeighborSearch requestDBGet\n");
-
-  //if (nbrCount == NBR_LIMIT)
-    DBArray(thisIndex.x, thisIndex.y, thisIndex.z).get(nbrCount, nbrIndex, nbrData);
-}
-
-void NearestNeighborSearch::sendNeighbors(int elnum, int nbrCount, int nbrData)
-{
-  printf("NearestNeighborSearch sendNeighbors\n");
-
-  nbrCount = NBR_LIMIT;
-  //fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, elnum).receiveNeighbors(nbrCount, nbrData);
-}
-*/

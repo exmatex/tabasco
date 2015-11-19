@@ -6,6 +6,12 @@
 #include "ElastoViscoPlasticity.h"
 #include "tensor.h"
 
+#ifdef FLANN
+#include "ApproxNearestNeighborsFLANN.h"
+#else
+#include "ApproxNearestNeighborsMTree.h"
+#endif
+
 // PUP operator for Tensor2Sym
 inline void operator|(PUP::er &p, Tensor2Sym &tensor)
 {
@@ -41,6 +47,8 @@ class FineScaleModel : public CBase_FineScaleModel {
   public:
   
   Constitutive* cm; 
+
+  ApproxNearestNeighbors* ann;
 
   FineScaleModel();
   FineScaleModel(int state_size, bool use_adaptive_sampling);

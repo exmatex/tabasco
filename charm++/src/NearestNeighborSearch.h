@@ -3,7 +3,11 @@
 
 #include "TabaSCo.decl.h"
 
-#include "adaptive_sampling/interpolation_database/kriging_database/ApproxNearestNeighbors.h"
+#ifdef FLANN
+#include "ApproxNearestNeighborsFLANN.h"
+#else
+#include "ApproxNearestNeighborsMTree.h"
+#endif
 
 class NearestNeighborSearch : public CBase_NearestNeighborSearch {
   private:
@@ -33,12 +37,6 @@ class NearestNeighborSearch : public CBase_NearestNeighborSearch {
                      std::vector<double> &dists);
   uint128_t getKey(int id);
 
-/*
-  void getIndex(int qPt, int nbrCount, int nbrIndex);
-  void putIndex(int qPt, int nbrIndex);
-  void requestDBGet(int nbrCount, int nbrIndex, int nbrData);
-  void sendNeighbors(int elnum, int nbrCount, int nbrData);
-*/
 };
 
 #endif

@@ -203,16 +203,6 @@ mainmodule TabaSCo {
     //entry void initialize(int state_size, bool useAdaptiveSampling);
 
     entry void advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char state[ssize]);
-/*
-    entry void evaluate(int qPt);
-    entry void query2(int iter, int qPt);
-    entry void requestNeighbors(int qPt);
-    entry void receiveNeighbors(int nbrCount, int nbrData);
-    entry void requestInterpolation(int nbrCount, int nbrData, int qPt);
-    entry void requestDBStore(int newPt);
-    entry void receivePoint(int newPt);
-    entry void sendNewPoint2Coarse(int elnum, int iter, int newPt);
-*/
 
     //entry [createhome] void query(int elnum, int iter, int qPt, CkCallback cb)
 /*
@@ -250,29 +240,6 @@ mainmodule TabaSCo {
   array [1D] NearestNeighborSearch {
   entry NearestNeighborSearch();
   entry void initialize(int ntype, int dim, int numTrees);
-
-/*
-    entry void getIndex(int qPt, int nbrCount, int nbrIndex);
-    entry void putIndex(int qPt, int nbrIndex);
-    entry void requestDBGet(int nbrCount, int nbrIndex, int nbrData);
-    entry void receiveData(int nbrCount, int nbrData);
-    entry void sendNeighbors(int elnum, int nbrCount, int nbrData);
-
-    entry void getNeighbors(int elnum, int qPt)
-    {
-      // Get available neighbors and their data
-      serial {
-        getIndex(qPt, nbrCount, nbrIndex);
-        requestDBGet(nbrCount, nbrIndex, nbrData);
-      }
-
-      // Once neighbor data is receive from DB, send to requestor
-      when receiveData(int nbrCount, int nbrData) serial {
-        sendNeighbors(elnum, nbrCount, nbrData);
-      }    
-        
-    };
-*/
   };
 
   // Interpolate 
