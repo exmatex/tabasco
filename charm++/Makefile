@@ -12,8 +12,6 @@ CXX=$(CHARMBIN)/charmc
 OBJDIR=charm_obj
 BINDIR=charm_bin
 
-#OPTFLAGS=-g
-#OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include -I../CoEVP/CM/src -I../CoEVP/CM/src/adaptive_sampling/database -I../CoEVP/CM/src/adaptive_sampling/utils -I../flann/src/cpp
 OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include -std=c++0x
 #other features
 #DEFS=-DTRACE

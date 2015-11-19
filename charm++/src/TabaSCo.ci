@@ -13,6 +13,9 @@ mainmodule TabaSCo {
   readonly CProxy_DBInterface DBArray;               // array of DB interfaces
 
   message Msg;
+  message knn_message;
+  message int_message;
+  message uint128_message;
 
   // Main driver
   mainchare Main {
@@ -240,6 +243,13 @@ mainmodule TabaSCo {
   array [1D] NearestNeighborSearch {
   entry NearestNeighborSearch();
   entry void initialize(int ntype, int dim, int numTrees);
+  entry [sync] int_message* insert(std::vector<double> point, uint128_t key);
+  entry void insertAsync(std::vector<double> point, uint128_t key);
+  entry void insert(std::vector<uint128_t> keys);
+  entry void remove(int id);
+  //entry [sync] knn_message* knn(std::vector<double> x, int k, const CkCallback &cb);
+  entry [sync] knn_message* knn(std::vector<double> x, int k);
+  entry [sync] uint128_message* getKey(int id);
   };
 
   // Interpolate 

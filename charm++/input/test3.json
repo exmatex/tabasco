@@ -21,12 +21,16 @@
         {"id": "point dimension",      "value": "6"},
         {"id": "number of trees",      "value": "1"}
     ],
+    // type - 0 = Kriging, 1 = Linear
+    //
     "Interpolate": [
-        {"id": "type",                 "value": "Kriging"},
+        {"id": "type",                 "value": "0"},
         {"id": "count",                "value": "10"}
     ],
+    // type - 0 = MTree, 1 = Redis
+    //
     "DBInterface": [
-        {"id": "type",                 "value": "mtree"},
+        {"id": "type",                 "value": "0"},
         {"id": "count",                "value": "10"}
     ]
   }

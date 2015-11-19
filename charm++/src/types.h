@@ -10,6 +10,8 @@
 #include <charm++.h>
 #include <stdio.h>
 
+#define uint128_t unsigned __int128
+
 using std::string;
 
 typedef double Real_t;
