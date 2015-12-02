@@ -12,13 +12,15 @@ CXX=$(CHARMBIN)/charmc
 OBJDIR=charm_obj
 BINDIR=charm_bin
 
-OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include -std=c++0x
+#OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include -std=c++0x
+OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include -std=c++11
 #other features
 #DEFS=-DTRACE
 
-ifneq ($(wildcard /usr/include/boost/foreach.hpp), )
-BOOST_INCLUDES=/usr/include
-endif
+#ifneq ($(wildcard /usr/include/boost/foreach.hpp), )
+#BOOST_INCLUDES=/usr/include
+#endif
+
 ifeq ($(BOOST_INCLUDES), )
 $(error Set BOOST_INCLUDES or run 'module load boost' first)
 else
@@ -36,6 +38,16 @@ endif
 OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
 # ../CoEVP/LULESH/lulesh.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
+ifeq ($(NNS_AS_CHARE), yes)
+CXXFLAGS += -DNNS_AS_CHARE
+endif
+ifeq ($(INTERP_AS_CHARE), yes)
+CXXFLAGS += -DINTERP_AS_CHARE
+endif
+ifeq ($(DB_AS_CHARE), yes)
+CXXFLAGS += -DDB_AS_CHARE
+endif
+
 #LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 #LDFLAGS= -tracemode projections -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 

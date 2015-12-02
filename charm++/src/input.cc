@@ -83,6 +83,35 @@ void parse_input(string input_file, Input *in)
             CkPrintf("nns number of trees             %d\n", in->numTrees);
           }
        }
+
+       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.Interpolate"))
+      {
+        if (v.second.get<std::string>("id") == "type")
+          {
+            in->interpType = v.second.get<int>("value");
+            CkPrintf("interpolate type                 %d\n", in->interpType);
+          }
+        if (v.second.get<std::string>("id") == "count")
+          {
+            in->interpCount = v.second.get<int>("value");
+            CkPrintf("interpolate count                %d\n", in->interpCount);
+          }
+       }
+
+       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.DBInterface"))
+      { 
+        if (v.second.get<std::string>("id") == "type")
+          {
+            in->dbType = v.second.get<int>("value");
+            CkPrintf("DB type                 %d\n", in->dbType);
+          }
+        if (v.second.get<std::string>("id") == "count")
+          {
+            in->dbCount = v.second.get<int>("value");
+            CkPrintf("DB count                %d\n", in->dbCount);
+          }
+       }
+
     }
   catch (std::exception const& e)
     {

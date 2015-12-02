@@ -10,6 +10,14 @@ extern CProxy_Main mainProxy;
 extern CProxy_CoarseScaleModel coarseScaleArray;
 extern CProxy_FineScaleModel fineScaleArray;
 
+extern int coarseCount;
+extern int nnsType;
+extern int nnsCount;
+extern int interpType;
+extern int interpCount;
+extern int dbType;
+extern int dbCount;
+
 void *
 Msg::pack(Msg* m)
 {
@@ -104,6 +112,7 @@ void CoarseScaleModel::pup(PUP::er &p)
   p|count;
   p|max_nonlinear_iters;
   p|max_local_newton_iters;
+  p|use_adaptive_sampling;
 }
 
 void CoarseScaleModel::startElementFineScaleQuery(int step, int nelems)
@@ -136,6 +145,7 @@ void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, Real_t
   //printf("numElems = %d\n", numElems);
 
   state_size = new size_t[numElems];
+  use_adaptive_sampling = (useAdaptiveSampling) ? 1 : 0;
   ConstructFineScaleModel(useAdaptiveSampling);
 }
 
@@ -147,12 +157,42 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
   // Now create 2-D fine scale model chares
   numElems = lulesh->domain.numElem();
 
+  int* nnsRange = calcRange(nnsCount);
+  int* interpRange = calcRange(interpCount);
+  int* dbRange = calcRange(dbCount);
+  printf("CoarseScaleModel %d: nns %d %d\n", thisIndex, nnsRange[0], nnsRange[1]);
+  printf("CoarseScaleModel %d: interpolate %d %d\n", thisIndex, interpRange[0], interpRange[1]);
+  printf("CoarseScaleModel %d: dbinterface %d %d\n", thisIndex, dbRange[0], dbRange[1]);
+
+  int nnsIndex = nnsRange[0];
+  int interpIndex = interpRange[0];
+  int dbIndex = dbRange[0];
+
   for (Index_t i = 0; i < numElems; ++i) {
     state_size[i] = lulesh->domain.cm(i)->getStateSize();
 
-    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling);
+    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex);
+    
+    nnsIndex++;
+    if (nnsIndex >= nnsRange[1]) nnsIndex = nnsRange[0];
+    interpIndex++;
+    if (interpIndex >= interpRange[1]) interpIndex = interpRange[0];
+    dbIndex++;
+    if (dbIndex >= dbRange[1]) dbIndex = dbRange[0];
   }
   printf("%d FineScaleModels created count = %d\n", thisIndex, numElems);
+}
+
+int* CoarseScaleModel::calcRange(int chareCount)
+{
+  int* crange = new int[2];
+  int perCoarseChare = chareCount / coarseCount;
+  crange[0] = perCoarseChare * thisIndex;
+  crange[1] = crange[0] + perCoarseChare;
+  if (crange[1] >= chareCount)
+    crange[1] = chareCount; 
+
+  return crange;
 }
 
 void CoarseScaleModel::LagrangeNodal1()

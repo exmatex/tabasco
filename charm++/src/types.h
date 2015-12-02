@@ -62,6 +62,10 @@ typedef struct {
   int nnsCount;
   int pointDim;
   int numTrees;
+  int interpType;
+  int interpCount;
+  int dbType;
+  int dbCount;
   Real_t stopTime;
 } Save_Input;
 /** struct containing the 2D field
@@ -81,6 +85,10 @@ void pup(PUP::er &p)
   p | nnsCount;
   p | pointDim;
   p | numTrees;
+  p | interpType;
+  p | interpCount;
+  p | dbType;
+  p | dbCount;
   p | stopTime;
 }
 };

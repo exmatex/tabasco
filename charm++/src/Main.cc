@@ -26,6 +26,10 @@
 /*readonly*/ int nnsCount;
 /*readonly*/ int pointDim;
 /*readonly*/ int numTrees;
+/*readonly*/ int interpType;
+/*readonly*/ int interpCount;
+/*readonly*/ int dbType;
+/*readonly*/ int dbCount;
 
 // Entry point of Charm++ application
 Main::Main(CkArgMsg* msg)
@@ -69,6 +73,14 @@ Main::Main(CkArgMsg* msg)
   pointDim = in.pointDim;
   numTrees = in.numTrees;
 
+  // Get Interpolate parameters
+  interpType = in.interpType;
+  interpCount = in.interpCount;
+
+  // Get DBInterface parameters
+  dbType = in.dbType;
+  dbCount = in.dbCount;
+
   // Get simulation stop time
   stopTime = in.stopTime;
 
@@ -90,10 +102,15 @@ Main::Main(CkArgMsg* msg)
            "  NNS type: %d\n"
            "  NNS count: %d\n"
            "  NNS point dimension: %d\n"
-           "  NNS number of trees: %d\n", 
+           "  NNS number of trees: %d\n"
+           "  Interpolate type: %d\n"
+           "  Interpolate count: %d\n"
+           "  DBInterface type: %d\n"
+           "  DBInterface count: %d\n",
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
-          fineType, nnsType, nnsCount, pointDim, numTrees);
+          fineType, nnsType, nnsCount, pointDim, numTrees,
+          interpType, interpCount, dbType, dbCount);
 
   // Setup chare array size
   CkArrayOptions coarseOpts(coarseCount);

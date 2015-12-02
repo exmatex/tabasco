@@ -45,6 +45,9 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
     int max_nonlinear_iters;
     int max_local_newton_iters;
+
+    int use_adaptive_sampling;
+
     size_t* state_size;
      
   public:
@@ -53,6 +56,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   CoarseScaleModel(CkMigrateMessage *msg);
   ~CoarseScaleModel();
   void pup(PUP::er &p);
+  int* calcRange(int chareCount);
 
   // Entry methods
   void initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime);

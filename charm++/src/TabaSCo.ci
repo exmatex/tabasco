@@ -202,10 +202,9 @@ mainmodule TabaSCo {
   // Fine scale model
   array [2D] FineScaleModel {
     entry FineScaleModel();
-    entry FineScaleModel(int state_size, bool useAdaptiveSampling);
-    //entry void initialize(int state_size, bool useAdaptiveSampling);
+    entry FineScaleModel(int state_size, bool useAdaptiveSampling, int nnsIndex, int interpIndex, int dbIndex);
 
-    entry void advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char state[ssize]);
+    entry [threaded] void advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char state[ssize]);
 
     //entry [createhome] void query(int elnum, int iter, int qPt, CkCallback cb)
 /*
@@ -243,13 +242,13 @@ mainmodule TabaSCo {
   array [1D] NearestNeighborSearch {
   entry NearestNeighborSearch();
   entry void initialize(int ntype, int dim, int numTrees);
-  entry [sync] int_message* insert(std::vector<double> point, uint128_t key);
   entry void insertAsync(std::vector<double> point, uint128_t key);
   entry void insert(std::vector<uint128_t> keys);
   entry void remove(int id);
-  //entry [sync] knn_message* knn(std::vector<double> x, int k, const CkCallback &cb);
-  entry [sync] knn_message* knn(std::vector<double> x, int k);
-  entry [sync] uint128_message* getKey(int id);
+
+  entry void insert(std::vector<double> point, uint128_t key, const CkCallback &cb);
+  entry void knn(std::vector<double> x, int k, const CkCallback &cb);
+  entry void getKey(int id, const CkCallback &cb);
   };
 
   // Interpolate 

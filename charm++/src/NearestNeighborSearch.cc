@@ -8,49 +8,62 @@ extern CProxy_FineScaleModel fineScaleArray;
 extern CProxy_NearestNeighborSearch nnsArray;
 extern int NBR_LIMIT;
 
-knn_message::knn_message(int k, std::vector<int>& vids, std::vector<uint128_t>& vkeys, std::vector<double>& vdists) : k(k)
+knn_message::knn_message(int k, std::vector<int>& vids, std::vector<uint128_t>& vkeys, std::vector<double>& vdists) : k(k), size(vids.size())
 {
-  ids = new int[k];
-  keys = new uint128_t[k];
-  dists = new double[k];
+  ids = new int[size];
+  keys = new uint128_t[size];
+  dists = new double[size];
 
-  for (int i =0; i < k; i++)
+  for (int i = 0; i < size; i++)
   {
-    ids[i] =  vids[i];
+    ids[i] = vids[i];
+  }
+  for (int i = 0; i < size; i++)
+  {
     keys[i] = vkeys[i];
+  }
+  for (int i  = 0; i < size; i++)
+  {
     dists[i] = vdists[i];
   }
 }
 
 knn_message::knn_message(char* buf, int k) : k(k)
 {
-  ids = new int[k];
-  keys = new uint128_t[k];
-  dists = new double[k];
-
   char* p = buf;
 
-  memcpy(ids, p, k*sizeof(int));
-  p += k*sizeof(int);
-  memcpy(keys, p, k*sizeof(uint128_t));
-  p += k*sizeof(uint128_t);
-  memcpy(dists, p, k*sizeof(double));
+  memcpy(&k, p, sizeof(int));
+  p += sizeof(int);
+  memcpy(&size, p, sizeof(int));
+  p += sizeof(int);
+
+  ids = new int[size];  
+  keys = new uint128_t[size];
+  dists = new double[size];
+
+  memcpy(ids, p, size*sizeof(int));
+  p += size*sizeof(int);
+  memcpy(keys, p, size*sizeof(uint128_t));
+  p += size*sizeof(uint128_t);
+  memcpy(dists, p, size*sizeof(double));
 }
 
 void *
 knn_message::pack(knn_message* m)
 {
-  int msize = sizeof(int)+m->k*sizeof(int)+m->k*sizeof(double)+m->k*sizeof(uint128_t);
+  int msize = 2 * sizeof(int)+m->size*sizeof(int)+m->size*sizeof(double)+m->size*sizeof(uint128_t);
   char *p = (char*)CkAllocBuffer(m, msize);
   char *buf = p;
 
   memcpy(buf, &m->k, sizeof(int));
   buf += sizeof(int);
-  memcpy(buf, m->ids, m->k * sizeof(int));
-  buf += m->k * sizeof(int);
-  memcpy(buf, m->keys, m->k * sizeof(uint128_t));
-  buf += m->k * sizeof(uint128_t);
-  memcpy(buf, m->dists, m->k * sizeof(double));
+  memcpy(buf, &m->size, sizeof(int));
+  buf += sizeof(int);
+  memcpy(buf, m->ids, m->size * sizeof(int));
+  buf += m->size * sizeof(int);
+  memcpy(buf, m->keys, m->size * sizeof(uint128_t));
+  buf += m->size * sizeof(uint128_t);
+  memcpy(buf, m->dists, m->size * sizeof(double));
 
   CkFreeMsg(m);
   return (void*) p;
@@ -70,10 +83,38 @@ knn_message::unpack(void *inbuf)
    return pmsg;
 }
 
+void
+knn_message::copyTo(std::vector<int>& vids, std::vector<uint128_t>& vkeys, std::vector<double>& vdists)
+{
+  for (int i = 0; i < size; i++)
+  {
+    vids.push_back(ids[i]);
+  }
+
+  for (int i = 0; i < size; i++)
+  {
+    vkeys.push_back(keys[i]);
+  }
+
+  for (int i = 0; i < size; i++)
+  {
+    vdists.push_back(dists[i]);
+  }
+}
+
+knn_message::~knn_message()
+{
+  delete [] ids;
+  delete [] keys;
+  delete [] dists;
+}
+
 NearestNeighborSearch::NearestNeighborSearch()
 {
+/*
   printf("NearestNeighborSearch created on PE %d Index %d\n",
       CkMyPe(), thisIndex);
+*/
 
 }
 
@@ -84,7 +125,7 @@ void NearestNeighborSearch::initialize(int ntype, int dim, int ntrees)
 #ifdef FLANN
     int nchecks = 20;
     ann = (ApproxNearestNeighbors*)(new ApproxNearestNeighborsFLANN(dim, ntrees, nchecks));
-    printf("FLANN NNS creatd.\n");
+    //printf("FLANN NNS creatd.\n");
 #endif
   }
   else
@@ -95,7 +136,7 @@ void NearestNeighborSearch::initialize(int ntype, int dim, int ntrees)
                                                                     mtreeDirectoryName,
                                                                     &(std::cout),
                                                                     false));
-    printf("MTree NNS created.\n");
+    //printf("MTree NNS created.\n");
   }
 
 }
@@ -118,12 +159,13 @@ void NearestNeighborSearch::pup(PUP::er &p)
   p|nbrData;
 }
 
-int_message* NearestNeighborSearch::insert(std::vector<double> point, uint128_t key)
+void NearestNeighborSearch::insert(std::vector<double> point, uint128_t key, const CkCallback &cb)
 {
   int id = ann->insert(point, key);
 
   int_message* msg = new int_message(id);
-  return msg;
+
+  cb.send(msg);
 }
 
 void NearestNeighborSearch::insertAsync(std::vector<double> point, uint128_t key)
@@ -141,26 +183,25 @@ void NearestNeighborSearch::remove(int id)
   ann->remove(id);
 }
 
-knn_message* NearestNeighborSearch::knn(std::vector<double> x, int k)
-//NearestNeighborSearch::knn(std::vector<double> x, int k, const CkCallback &cb)
+void NearestNeighborSearch::knn(std::vector<double> x, int k, const CkCallback &cb)
 {
-  std::vector<int> ids(k);
-  std::vector<uint128_t> keys(k);
-  std::vector<double> dists(k);
+
+  std::vector<int> ids;
+  std::vector<uint128_t> keys;
+  std::vector<double> dists;
 
   ann->knn(x, k, ids, keys, dists);
 
   knn_message* msg = new knn_message(k, ids, keys, dists);
-  return msg;
 
-  //cb.send((void*&)msg);
+  cb.send(msg);
 }
 
-uint128_message* NearestNeighborSearch::getKey(int id)
+void NearestNeighborSearch::getKey(int id, const CkCallback &cb)
 {
   uint128_t rkey = ann->getKey(id);
 
   uint128_message *msg = new uint128_message(rkey);
-  return msg;
+  
+  cb.send(msg);
 }
-

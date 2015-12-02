@@ -5,7 +5,7 @@
     "CoarseScaleModel": [
         {"id": "type",                  "value": "0"},
         {"id": "count",                 "value": "1"},
-        {"id": "use adaptive sampling", "value": "0"},
+        {"id": "use adaptive sampling", "value": "1"},
         {"id": "stop time",             "value": "1e-01"}
     ],
     // type - 0 = Taylor
@@ -17,7 +17,7 @@
     //
     "NearestNeighborSearch": [
         {"id": "type",                 "value": "1"},
-        {"id": "count",                "value": "1"},
+        {"id": "count",                "value": "2912"},
         {"id": "point dimension",      "value": "6"},
         {"id": "number of trees",      "value": "1"}
     ],
