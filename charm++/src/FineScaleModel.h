@@ -7,10 +7,12 @@
 #include "ResponsePoint.h"
 #include "tensor.h"
 
+#ifndef NNS_AS_CHARE
 #ifdef FLANN
 #include "ApproxNearestNeighborsFLANN.h"
 #else
 #include "ApproxNearestNeighborsMTree.h"
+#endif
 #endif
 
 // PUP operator for Tensor2Sym
@@ -55,7 +57,10 @@ class FineScaleModel : public CBase_FineScaleModel {
   Constitutive* cm; 
   ElastoViscoPlasticity* em;
 
+// Keep this for now, just to be compatible with CoEVP
+//#ifndef NNS_AS_CHARE
   ApproxNearestNeighbors* ann;
+//#endif
 
   FineScaleModel();
   FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex);
@@ -122,7 +127,9 @@ class FineScaleModel : public CBase_FineScaleModel {
 
   std::pair<int, InterpolationModelPtr> 
       findClosestCoKrigingModel(const ResponsePoint        & point,
+#ifndef NNS_AS_CHARE
                                 ApproxNearestNeighbors     & ann,
+#endif
                                 krigalg::InterpolationModelFactoryPointer modelFactory,
 #ifndef REDIS
                                 InterpolationModelDataBase & modelDB,
@@ -132,7 +139,9 @@ class FineScaleModel : public CBase_FineScaleModel {
   std::pair<int, InterpolationModelPtr>
       findBestCoKrigingModel(bool &                       canInterpolateFlag,
                              const ResponsePoint &        point,
+#ifndef NNS_AS_CHARE
                              ApproxNearestNeighbors     & ann,
+#endif
 #ifndef REDIS
                              InterpolationModelDataBase & modelDB,
 #endif
@@ -146,7 +155,9 @@ class FineScaleModel : public CBase_FineScaleModel {
   std::pair<int, InterpolationModelPtr>
       findBestCoKrigingModel(bool &                       canInterpolateFlag,
                              const ResponsePoint &        point,
+#ifndef NNS_AS_CHARE
                              ApproxNearestNeighbors     & ann,
+#endif
 #ifndef REDIS
                              InterpolationModelDataBase & modelDB,
 #endif
@@ -196,7 +207,9 @@ class FineScaleModel : public CBase_FineScaleModel {
 #ifndef REDIS
                     InterpolationModelDataBase &             modelDB,
 #endif
+#ifndef NNS_AS_CHARE
                     ApproxNearestNeighbors&                  ann,
+#endif
                     const InterpolationModelFactoryPointer & _modelFactory,
                     int &                                    objectId,
                     const double *                           pointData,

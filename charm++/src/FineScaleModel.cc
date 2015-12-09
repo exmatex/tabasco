@@ -44,6 +44,7 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
   // Construct the approximate nearest neighbors search
   int point_dimension = plasticity_model->pointDimension();
 
+#ifndef NNS_AS_CHARE
 #ifdef FLANN
 
          int n_trees = 1;         // input this from somewhere
@@ -60,6 +61,7 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
                                                                          mtreeDirectoryName,
                                                                          &(std::cout),
                                                                          false));
+#endif
 #endif
 
 
@@ -84,7 +86,12 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
   // Make empty Tensor
   Tensor2Gen L;
 
-  cm = (Constitutive*)(new ElastoViscoPlasticity(cm_global, ann, L, bulk_modulus, shear_modulus, eos_model,
+  // ann should be NULL
+  cm = (Constitutive*)(new ElastoViscoPlasticity(cm_global, 
+//#ifndef NNS_AS_CHARE
+                                                 ann, 
+//#endif
+                                                 L, bulk_modulus, shear_modulus, eos_model,
                                                  plasticity_model, use_adaptive_sampling, stateSize));
   em = (ElastoViscoPlasticity*) cm;
 }
@@ -603,7 +610,9 @@ bool FineScaleModel::interpolate(double            * value,
 
         const std::pair<int, InterpolationModelPtr>
           closestKrigingModelData = findClosestCoKrigingModel(queryPoint,
+#ifndef NNS_AS_CHARE
                                                               cm->m_sampler->m_interp->_ann,
+#endif
                                                               cm->m_sampler->m_interp->_modelFactory,
 #ifndef REDIS
                                                               cm->m_sampler->m_interp->_modelDB,
@@ -650,7 +659,9 @@ bool FineScaleModel::interpolate(double            * value,
         const std::pair<int, InterpolationModelPtr>
           bestKrigingModelData = findBestCoKrigingModel(canInterpolateFlag,
                                                         queryPoint,
+#ifndef NNS_AS_CHARE
                                                         cm->m_sampler->m_interp->_ann,
+#endif
 #ifndef REDIS
                                                         cm->m_sampler->m_interp->_modelDB,
 #endif
@@ -810,7 +821,9 @@ bool FineScaleModel::interpolate(double            * value,
 
         const std::pair<int, InterpolationModelPtr>
           closestKrigingModelData = findClosestCoKrigingModel(queryPoint,
+#ifndef NNS_AS_CHARE
                                                               cm->m_sampler->m_interp->_ann,
+#endif
                                                               cm->m_sampler->m_interp->_modelFactory,
 #ifndef REDIS
                                                               cm->m_sampler->m_interp->_modelDB,
@@ -859,7 +872,9 @@ bool FineScaleModel::interpolate(double            * value,
         const std::pair<int, InterpolationModelPtr>
           bestKrigingModelData = findBestCoKrigingModel(canInterpolateFlag,
                                                         queryPoint,
+#ifndef NNS_AS_CHARE
                                                         cm->m_sampler->m_interp->_ann,
+#endif
 #ifndef REDIS
                                                         cm->m_sampler->m_interp->_modelDB,
 #endif
@@ -1001,7 +1016,9 @@ void FineScaleModel::insert(int               & hint,
 #ifndef REDIS
                      cm->m_sampler->m_interp->_modelDB,
 #endif
+#ifndef NNS_AS_CHARE
                      cm->m_sampler->m_interp->_ann,
+#endif
                      cm->m_sampler->m_interp->_modelFactory,
                      hint,
                      point,
@@ -1051,7 +1068,9 @@ void FineScaleModel::insert(int               & hint,
 #ifndef REDIS
                        cm->m_sampler->m_interp->_modelDB,
 #endif
+#ifndef NNS_AS_CHARE
                        cm->m_sampler->m_interp->_ann,
+#endif
                        cm->m_sampler->m_interp->_modelFactory,
                        hint,
                        point,
@@ -1176,7 +1195,9 @@ void FineScaleModel::insert(int               & hint,
 #ifndef REDIS
                          cm->m_sampler->m_interp->_modelDB,
 #endif
+#ifndef NNS_AS_CHARE
                          cm->m_sampler->m_interp->_ann,
+#endif
                          cm->m_sampler->m_interp->_modelFactory,
                          hint,
                          point,
@@ -1233,7 +1254,9 @@ Point FineScaleModel::getModelCenterMass(const InterpolationModel & krigingModel
 std::pair<int, InterpolationModelPtr>
 FineScaleModel::findClosestCoKrigingModel(
                 const ResponsePoint        & point,
+#ifndef NNS_AS_CHARE
                 ApproxNearestNeighbors     & ann,
+#endif
                 krigalg::InterpolationModelFactoryPointer modelFactory,
 #ifndef REDIS
                 InterpolationModelDataBase & modelDB,
@@ -1310,7 +1333,9 @@ std::pair<int, InterpolationModelPtr>
 FineScaleModel::findBestCoKrigingModel(
                 bool &                       canInterpolateFlag,
                 const ResponsePoint &        point,
+#ifndef NNS_AS_CHARE
                 ApproxNearestNeighbors     & ann,
+#endif
 #ifndef REDIS
                 InterpolationModelDataBase & modelDB,
 #endif
@@ -1429,7 +1454,9 @@ std::pair<int, InterpolationModelPtr>
 FineScaleModel::findBestCoKrigingModel(
                 bool &                       canInterpolateFlag,
                 const ResponsePoint &        point,
+#ifndef NNS_AS_CHARE
                 ApproxNearestNeighbors     & ann,
+#endif
 #ifndef REDIS
                 InterpolationModelDataBase & modelDB,
 #endif
@@ -1915,7 +1942,9 @@ void FineScaleModel::addNewModel(
 #ifndef REDIS
                     InterpolationModelDataBase &             modelDB,
 #endif
+#ifndef NNS_AS_CHARE
                     ApproxNearestNeighbors&                  ann,
+#endif
                     const InterpolationModelFactoryPointer & _modelFactory,
                     int &                                    objectId,
                     const double *                           pointData,
