@@ -8,3 +8,4 @@ lulesh
 *~
 CPackConfig.cmake
 CPackSourceConfig.cmake
+charm++/charm_*
