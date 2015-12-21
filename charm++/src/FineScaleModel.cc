@@ -12,6 +12,8 @@
 #include "Database.h"
 #include "MurmurHash3.h"
 
+#include "ModelDB_HashMap.h"
+
 #define MURMUR_SEED 42
 
 extern CProxy_Main mainProxy;
@@ -64,7 +66,7 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
 #endif
 #endif
 
-
+   modelDB = new ModelDB_HashMap(); 
   // Construct the equation of state
   EOS* eos_model;
   /* 
@@ -553,13 +555,7 @@ bool FineScaleModel::interpolate(double            * value,
 
          } else {
 
-#ifdef REDIS
-            std::vector<double> packedContainer = redisToModel(model_key);
-            InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelFactory->build();
-            hintKrigingModel->unpack(packedContainer);
-#else
-            const InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelDB[model_key];
-#endif
+            InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelDB->extract(model_key);
 
             //
             // check if can interpolate; need a valid model for this
@@ -614,9 +610,7 @@ bool FineScaleModel::interpolate(double            * value,
                                                               cm->m_sampler->m_interp->_ann,
 #endif
                                                               cm->m_sampler->m_interp->_modelFactory,
-#ifndef REDIS
                                                               cm->m_sampler->m_interp->_modelDB,
-#endif
                                                               cm->m_sampler->m_interp->_maxQueryPointModelDistance);
 
         InterpolationModelPtr closestKrigingModel =
@@ -662,9 +656,7 @@ bool FineScaleModel::interpolate(double            * value,
 #ifndef NNS_AS_CHARE
                                                         cm->m_sampler->m_interp->_ann,
 #endif
-#ifndef REDIS
                                                         cm->m_sampler->m_interp->_modelDB,
-#endif
                                                         cm->m_sampler->m_interp->_modelFactory,
                                                         cm->m_sampler->m_interp->_tolerance,
                                                         cm->m_sampler->m_interp->_meanErrorFactor,
@@ -769,13 +761,7 @@ bool FineScaleModel::interpolate(double            * value,
 
         } else {
 
-#ifdef REDIS
-           std::vector<double> packedContainer = redisToModel(model_key);
-           InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelFactory->build();
-           hintKrigingModel->unpack(packedContainer);
-#else
-           const InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelDB[model_key];
-#endif
+          const InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelDB->extract(model_key);
 
           //
           // check the distance between hintKrigingModel and point
@@ -825,9 +811,7 @@ bool FineScaleModel::interpolate(double            * value,
                                                               cm->m_sampler->m_interp->_ann,
 #endif
                                                               cm->m_sampler->m_interp->_modelFactory,
-#ifndef REDIS
                                                               cm->m_sampler->m_interp->_modelDB,
-#endif
                                                               cm->m_sampler->m_interp->_maxQueryPointModelDistance);
 
         InterpolationModelPtr closestKrigingModel =
@@ -875,9 +859,7 @@ bool FineScaleModel::interpolate(double            * value,
 #ifndef NNS_AS_CHARE
                                                         cm->m_sampler->m_interp->_ann,
 #endif
-#ifndef REDIS
                                                         cm->m_sampler->m_interp->_modelDB,
-#endif
                                                         cm->m_sampler->m_interp->_modelFactory,
                                                         cm->m_sampler->m_interp->_tolerance,
                                                         cm->m_sampler->m_interp->_meanErrorFactor,
@@ -1013,9 +995,7 @@ void FineScaleModel::insert(int               & hint,
         //
 
         addNewModel(
-#ifndef REDIS
                      cm->m_sampler->m_interp->_modelDB,
-#endif
 #ifndef NNS_AS_CHARE
                      cm->m_sampler->m_interp->_ann,
 #endif
@@ -1048,13 +1028,7 @@ void FineScaleModel::insert(int               & hint,
         uint128_t model_key = cm->m_sampler->m_interp->_ann.getKey(hint);
 #endif
 
-#ifdef REDIS
-        std::vector<double> packedContainer = redisToModel(model_key);
-        InterpolationModelPtr krigingModel = _modelFactory->build();
-        krigingModel->unpack(packedContainer);
-#else
-        InterpolationModelPtr krigingModel = cm->m_sampler->m_interp->_modelDB[model_key];
-#endif
+        InterpolationModelPtr krigingModel = cm->m_sampler->m_interp->_modelDB->extract(model_key);
 
         //
         // check the size of the model; if the next point would put
@@ -1065,9 +1039,7 @@ void FineScaleModel::insert(int               & hint,
         if (krigingModel->getNumberPoints() == cm->m_sampler->m_interp->_maxKrigingModelSize) {
 
            addNewModel(
-#ifndef REDIS
                        cm->m_sampler->m_interp->_modelDB,
-#endif
 #ifndef NNS_AS_CHARE
                        cm->m_sampler->m_interp->_ann,
 #endif
@@ -1142,12 +1114,7 @@ void FineScaleModel::insert(int               & hint,
             cm->m_sampler->m_interp->_ann.remove(hint);
 #endif
 
-#ifdef REDIS
-            SingletonDB& db = SingletonDB::getInstance();
-            db.erase(model_key);
-#else
-            cm->m_sampler->m_interp->_modelDB.erase(model_key);
-#endif
+            cm->m_sampler->m_interp->_modelDB->erase(model_key);
 
             //
             // insert updated kriging model into database
@@ -1177,13 +1144,7 @@ void FineScaleModel::insert(int               & hint,
 
             // Insert the interpolation model into the interpolation model database
 
-#ifdef REDIS
-            std::vector<double> packedContainer;
-            krigingModel->pack(centerMassRP, packedContainer);
-            modelToRedis(new_model_key, packedContainer, centerMassRP.size());
-#else
-            cm->m_sampler->m_interp->_modelDB.insert( std::make_pair(new_model_key, krigingModel) );
-#endif
+            cm->m_sampler->m_interp->_modelDB->insert( new_model_key, krigingModel, (ResponsePoint *) &centerMassRP );
 
           } else {
 
@@ -1192,9 +1153,7 @@ void FineScaleModel::insert(int               & hint,
             //
 
                          addNewModel(
-#ifndef REDIS
                          cm->m_sampler->m_interp->_modelDB,
-#endif
 #ifndef NNS_AS_CHARE
                          cm->m_sampler->m_interp->_ann,
 #endif
@@ -1258,9 +1217,7 @@ FineScaleModel::findClosestCoKrigingModel(
                 ApproxNearestNeighbors     & ann,
 #endif
                 krigalg::InterpolationModelFactoryPointer modelFactory,
-#ifndef REDIS
-                InterpolationModelDataBase & modelDB,
-#endif
+                ModelDatabase * modelDB,
                 double                       maxQueryPointModelDistance)
 {
         //
@@ -1310,13 +1267,7 @@ FineScaleModel::findClosestCoKrigingModel(
            
            uint128_t model_key = keys[0];
 
-#ifdef REDIS
-           std::vector<double> packedContainer = redisToModel(model_key);
-           closestKrigingModel = modelFactory->build();
-           closestKrigingModel->unpack(packedContainer);
-#else
-           closestKrigingModel = modelDB[model_key];
-#endif
+           closestKrigingModel = modelDB->extract(model_key);
 
            closestKrigingModelId = ids[0];
         }
@@ -1336,9 +1287,7 @@ FineScaleModel::findBestCoKrigingModel(
 #ifndef NNS_AS_CHARE
                 ApproxNearestNeighbors     & ann,
 #endif
-#ifndef REDIS
-                InterpolationModelDataBase & modelDB,
-#endif
+                ModelDatabase * modelDB,
                 const InterpolationModelFactoryPointer& _modelFactory,
                 double                       tolerance,
                 double                       meanErrorFactor,
@@ -1398,13 +1347,7 @@ exit(1);
 
               uint128_t model_key = keys[iter];
 
-#ifdef REDIS
-              std::vector<double> packedContainer = redisToModel(model_key);
-              InterpolationModelPtr krigingModel = _modelFactory->build();
-              krigingModel->unpack(packedContainer);
-#else
-              InterpolationModelPtr& krigingModel = modelDB[model_key];
-#endif
+              InterpolationModelPtr krigingModel = modelDB->extract(model_key);
               //
               // skip invalid models
               //
@@ -1457,9 +1400,7 @@ FineScaleModel::findBestCoKrigingModel(
 #ifndef NNS_AS_CHARE
                 ApproxNearestNeighbors     & ann,
 #endif
-#ifndef REDIS
-                InterpolationModelDataBase & modelDB,
-#endif
+                ModelDatabase * modelDB,
                 const InterpolationModelFactoryPointer& _modelFactory,
                 double                       tolerance,
                 double                       meanErrorFactor,
@@ -1510,13 +1451,7 @@ FineScaleModel::findBestCoKrigingModel(
 
               uint128_t model_key = keys[iter];
 
-#ifdef REDIS
-              std::vector<double> packedContainer = redisToModel(model_key);
-              InterpolationModelPtr krigingModel = _modelFactory->build();
-              krigingModel->unpack(packedContainer);
-#else
-              InterpolationModelPtr krigingModel = modelDB[model_key];
-#endif
+              InterpolationModelPtr krigingModel = modelDB->extract(model_key);
 
               //
               // skip if invalid model
@@ -1557,14 +1492,7 @@ FineScaleModel::findBestCoKrigingModel(
            
            uint128_t model_key = keys[0];
 
-#ifdef REDIS
-           std::vector<double> packedContainer = redisToModel(model_key);
-           InterpolationModelPtr krigingModel = _modelFactory->build();
-           krigingModel->unpack(packedContainer);
-#else
-
-           InterpolationModelPtr& krigingModel = modelDB[model_key];
-#endif
+           InterpolationModelPtr krigingModel = modelDB->extract(model_key);
 
            return std::make_pair(ids[0], krigingModel);
 
@@ -1939,9 +1867,7 @@ const double iErrorEstimate =
 }
 
 void FineScaleModel::addNewModel(
-#ifndef REDIS
-                    InterpolationModelDataBase &             modelDB,
-#endif
+                    ModelDatabase *             modelDB,
 #ifndef NNS_AS_CHARE
                     ApproxNearestNeighbors&                  ann,
 #endif
@@ -2014,13 +1940,7 @@ void FineScaleModel::addNewModel(
 
         // Insert the interpolation model into the interpolation model database
         
-        #ifdef REDIS
-        std::vector<double> packedContainer;
-        krigingModel->pack(point, packedContainer);
-        modelToRedis(model_key, packedContainer, point.size());
-#else
-        modelDB.insert( std::make_pair(model_key, krigingModel) );
-#endif
+        modelDB->insert(model_key,krigingModel, (ResponsePoint *)&point);
 
         return;
 

@@ -61,6 +61,7 @@ class FineScaleModel : public CBase_FineScaleModel {
 //#ifndef NNS_AS_CHARE
   ApproxNearestNeighbors* ann;
 //#endif
+  ModelDatabase * modelDB;
 
   FineScaleModel();
   FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex);
@@ -131,9 +132,7 @@ class FineScaleModel : public CBase_FineScaleModel {
                                 ApproxNearestNeighbors     & ann,
 #endif
                                 krigalg::InterpolationModelFactoryPointer modelFactory,
-#ifndef REDIS
-                                InterpolationModelDataBase & modelDB,
-#endif
+                                ModelDatabase * modelDB,
                                 double                       maxQueryPointModelDistance);
 
   std::pair<int, InterpolationModelPtr>
@@ -142,9 +141,7 @@ class FineScaleModel : public CBase_FineScaleModel {
 #ifndef NNS_AS_CHARE
                              ApproxNearestNeighbors     & ann,
 #endif
-#ifndef REDIS
-                             InterpolationModelDataBase & modelDB,
-#endif
+                             ModelDatabase * modelDB,
                              const InterpolationModelFactoryPointer& _modelFactory,
                              double                       tolerance,
                              double                       meanErrorFactor,
@@ -158,9 +155,7 @@ class FineScaleModel : public CBase_FineScaleModel {
 #ifndef NNS_AS_CHARE
                              ApproxNearestNeighbors     & ann,
 #endif
-#ifndef REDIS
-                             InterpolationModelDataBase & modelDB,
-#endif
+                             ModelDatabase * modelDB,
                              const InterpolationModelFactoryPointer& _modelFactory,
                              double                       tolerance,
                              double                       meanErrorFactor,
@@ -204,9 +199,7 @@ class FineScaleModel : public CBase_FineScaleModel {
                                 double               & errorEstimate );
 
   void addNewModel(
-#ifndef REDIS
-                    InterpolationModelDataBase &             modelDB,
-#endif
+                    ModelDatabase *             modelDB,
 #ifndef NNS_AS_CHARE
                     ApproxNearestNeighbors&                  ann,
 #endif

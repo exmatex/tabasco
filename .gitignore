@@ -1,11 +1,2 @@
-CMakeFiles
-CMakeCache.txt
-Makefile
-cmake_install.cmake
-libcm.a
-build
-lulesh
 *~
-CPackConfig.cmake
-CPackSourceConfig.cmake
 charm++/charm_*
