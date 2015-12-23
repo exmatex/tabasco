@@ -127,7 +127,7 @@ void FineScaleModel::advance(const double delta_t, const Tensor2Gen& L_new, cons
 {
   //ConstitutiveData cm_data = cm->advance(delta_t, L_new, volume_change, state);
 
-   em->setState(state);
+   void* plasticity_model_state = em->setState(state);
 
    em->m_D_new = sym(L_new);
    em->m_W_new = skew(L_new);
@@ -159,6 +159,9 @@ void FineScaleModel::advance(const double delta_t, const Tensor2Gen& L_new, cons
    Tensor2Sym Dbar_prime;
    Tensor2Gen Wbar_new;
    updateVbar_prime( em->m_Vbar_prime, Dprime_new, R, em->a(J), delta_t, Vbar_prime, Dbar_prime, Wbar_new );
+
+   // Advance the fine-scale model
+   em->m_plasticity_model->advance(delta_t, plasticity_model_state);
 
    // Update the internal state in preparation for the next call
    em->m_Vbar_prime_dot = Vbar_prime - em->m_Vbar_prime;
