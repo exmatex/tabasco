@@ -93,7 +93,8 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
 //#ifndef NNS_AS_CHARE
                                                  ann, 
 //#endif
-                                                 L, bulk_modulus, shear_modulus, eos_model,
+                                                 modelDB,
+						 L, bulk_modulus, shear_modulus, eos_model,
                                                  plasticity_model, use_adaptive_sampling, stateSize));
   em = (ElastoViscoPlasticity*) cm;
 }

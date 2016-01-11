@@ -151,8 +151,14 @@ void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, Real_t
 
 void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
 {
+  ModelDatabase * global_modelDB = nullptr;
+  ApproxNearestNeighbors* global_ann = nullptr;
+  int flanning = 0;
+  int flann_n_trees=1;
+  int flann_n_checks=20; 
+  int global_ns=0;
   // Create Lulesh-local parts of fine scale models
-  lulesh->ConstructFineScaleModel(useAdaptiveSampling);
+  lulesh->ConstructFineScaleModel(useAdaptiveSampling,global_modelDB,global_ann,flanning,flann_n_trees,flann_n_checks,global_ns);
 
   // Now create 2-D fine scale model chares
   numElems = lulesh->domain.numElem();
@@ -363,7 +369,10 @@ void CoarseScaleModel::UpdateStressForElems2(int reducedIters)
 
 void CoarseScaleModel::go(int numRanks, bool useAdaptiveSampling)
 {
-  lulesh->go(thisIndex, numRanks, useAdaptiveSampling);
+  int visit_data_interval=0;
+  int file_parts=1;
+  int debug_topology=0;
+  lulesh->go(thisIndex, numRanks, useAdaptiveSampling,visit_data_interval,file_parts,debug_topology);
 }
 
 void CoarseScaleModel::sendNodalMass()
@@ -377,6 +386,8 @@ void CoarseScaleModel::sendNodalMass()
   sendDataNodes(xferFields, fieldData);
 }
 
+#define NBR_M1 11
+#define NBR_P1 22
 void CoarseScaleModel::sendDataNodes(int xferFields, Real_t **fieldData)
 {
   if (lulesh->domain.numSlices() == 1) return ;
