@@ -1,9 +1,13 @@
 .PHONY: all clean clean-all libcm tabasco
 
+FLANN=no
+REDIS=no
+SILO=no
+
 all: tabasco
 
 libcm:
-	${MAKE} -C CoEVP $@
+	${MAKE} -C CoEVP FLANN=$(FLANN) REDIS=$(REDIS) SILO=$(SILO)
 
 tabasco: libcm
 	${MAKE} -C charm++
