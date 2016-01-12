@@ -2,7 +2,7 @@
 
 FLANN=no
 REDIS=no
-SILO=no
+SILO=yes
 ifeq ($(SILO),yes)
 SILO_LOC=../CoEVP/silo/silo
 endif
