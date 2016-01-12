@@ -1,12 +1,25 @@
 SRCDIR=src
 
+ifneq ($(shell which charmc), )
+CHARM_ROOT=$(dir $(shell which charmc))..
+endif
+
 ##############CHARM##########
 ifeq (,$(CHARM_ROOT))
 $(info Please establish Charmm++ environment variables before using this Makefile.)
 $(info E.g. by running setting CHARM_ROOT or run 'module load charm++')
 $(error CHARM_ROOT is not set)
+else
+$(info using CHARM_ROOT=$(CHARM_ROOT))
 endif
+
+ifneq ($(wildcard $(CHARM_ROOT)/include/*/charm.h), )
+CHARMINC=$(dir $(wildcard $(CHARM_ROOT)/include/*/charm.h))
+$(info using CHARMINC=$(CHARMINC))
+else
 CHARMINC=$(CHARM_ROOT)/include/
+endif
+
 CHARMBIN=$(CHARM_ROOT)/bin
 CXX=$(CHARMBIN)/charmc
 OBJDIR=charm_obj
@@ -17,9 +30,9 @@ OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include -std=c++0x
 #other features
 #DEFS=-DTRACE
 
-#ifneq ($(wildcard /usr/include/boost/foreach.hpp), )
-#BOOST_INCLUDES=/usr/include
-#endif
+ifneq ($(wildcard /usr/include/boost/foreach.hpp), )
+BOOST_INCLUDES=/usr/include
+endif
 
 ifeq ($(BOOST_INCLUDES), )
 $(error Set BOOST_INCLUDES or run 'module load boost' first)
