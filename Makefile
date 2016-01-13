@@ -1,10 +1,10 @@
 .PHONY: all clean clean-all libcm tabasco
 
-FLANN=no
+FLANN=yes
 ifeq ($(FLANN),yes)
 FLANN_LOC=../CoEVP/flann/flann/src/cpp
 endif
-REDIS=no
+REDIS=yes
 ifeq ($(REDIS),yes)
 REDIS_LOC=../CoEVP/redis/hiredis
 endif
