@@ -2,6 +2,10 @@
 #include "NearestNeighborSearch.h"
 #include "DBInterface.h"
 
+// Approximate nearest neighbor search options
+#include "ApproxNearestNeighborsFLANN.h"
+#include "ApproxNearestNeighborsMTree.h"
+
 extern CProxy_Main mainProxy;
 extern CProxy_DBInterface DBArray;
 extern CProxy_FineScaleModel fineScaleArray;
