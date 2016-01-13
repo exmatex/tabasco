@@ -22,5 +22,8 @@ clean:
 clean-all: clean
 	${MAKE} -C CoEVP clean-all
 
+get_reference:
+	${MAKE} -C CoEVP $@
+
 test:
 	${MAKE} -C CoEVP FLANN=$(FLANN) REDIS=$(REDIS) SILO=$(SILO) CHARM=yes test
