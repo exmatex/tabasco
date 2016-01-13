@@ -67,6 +67,8 @@ typedef struct {
   int dbType;
   int dbCount;
   Real_t stopTime;
+  int file_parts;
+  int visit_data_interval;
 } Save_Input;
 /** struct containing the 2D field
  * **/
@@ -90,6 +92,8 @@ void pup(PUP::er &p)
   p | dbType;
   p | dbCount;
   p | stopTime;
+  p | file_parts;
+  p | visit_data_interval;
 }
 };
 
