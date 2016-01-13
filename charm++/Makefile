@@ -20,6 +20,9 @@ else
 CHARMINC=$(CHARM_ROOT)/include/
 endif
 
+
+
+
 CHARMBIN=$(CHARM_ROOT)/bin
 CXX=$(CHARMBIN)/charmc
 OBJDIR=charm_obj
@@ -60,6 +63,11 @@ endif
 ifeq ($(DB_AS_CHARE), yes)
 CXXFLAGS += -DDB_AS_CHARE
 endif
+ifeq ($(SILO),yes)
+CXXFLAGS += -DSILO
+SILO_LOC=../CoEVP/silo/silo
+endif
+
 
 #LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 #LDFLAGS= -tracemode projections -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
@@ -68,7 +76,7 @@ ifneq ($(strip $(SILO_LOC)),)
 LDFLAGS += -Wl,-rpath,$(realpath $(SILO_LOC))/lib -L$(realpath $(SILO_LOC))/lib -lsiloh5
 endif
 
-LULESH_OBJ=../CoEVP/LULESH/lulesh.o
+LULESH_OBJ=../CoEVP/LULESH/lulesh.o ../CoEVP/LULESH/siloDump.o
 
 #target
 NAME=$(BINDIR)/TabaSCo

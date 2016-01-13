@@ -195,6 +195,7 @@ mainmodule TabaSCo {
       // Time steps done
       serial {
         contribute(0,NULL,CkReduction::nop,CkCallback(CkReductionTarget(Main,done),mainProxy));
+		makeADump(1, 1, 1, 0);
       }
     };
   };

@@ -13,7 +13,7 @@ libcm:
 	${MAKE} -C CoEVP FLANN=$(FLANN) REDIS=$(REDIS) SILO=$(SILO) CHARM=yes
 
 tabasco: libcm
-	${MAKE} -C charm++ SILO_LOC=$(SILO_LOC)
+	${MAKE} -C charm++ SILO=$(SILO) SILO_LOC=$(SILO_LOC)
 
 clean:
 	${MAKE} -C CoEVP clean

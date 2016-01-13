@@ -91,6 +91,8 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
   void sendPositionVelocity();
   void updatePositionVelocity(int msgType, int rsize, Real_t rdata[]);
+
+  void makeADump(int sampling, int visit_data_interval, int file_parts, int debug_topology);
 };
 
 #endif
