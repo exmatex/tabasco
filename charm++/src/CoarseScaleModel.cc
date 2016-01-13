@@ -115,26 +115,6 @@ void CoarseScaleModel::pup(PUP::er &p)
   p|use_adaptive_sampling;
 }
 
-void CoarseScaleModel::startElementFineScaleQuery(int step, int nelems)
-{
-  nstep = step;
-
-  //CkCallback cb(CkIndex_CoarseScaleModel::receiveNewPoint((Msg*)NULL), thisProxy);
-/*
-  for (int j = 0; j < nelems; j++)
-  {
-    //fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(j, nstep, currentPt, cb);
-    fineScaleArray(thisIndex.x, j).query(j, nstep, currentPt);
-  }
-*/
-}
-
-void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
-{
-  int currentPt = newPt;
-	  printf("Iter %d Coarse %d Element %d update newPt %d\n", whichIter, thisIndex, whichEl, newPt);
-}
-
 void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime)
 {
   lulesh->Initialize(thisIndex, numRanks);
@@ -365,14 +345,6 @@ void CoarseScaleModel::UpdateStressForElems2(int reducedIters)
 
   lulesh->UpdateStressForElems2(reducedIters);
 
-}
-
-void CoarseScaleModel::go(int numRanks, bool useAdaptiveSampling)
-{
-  int visit_data_interval=0;
-  int file_parts=1;
-  int debug_topology=0;
-  lulesh->go(thisIndex, numRanks, useAdaptiveSampling,visit_data_interval,file_parts,debug_topology);
 }
 
 void CoarseScaleModel::sendNodalMass()

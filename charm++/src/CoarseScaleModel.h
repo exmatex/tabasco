@@ -91,10 +91,6 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
   void sendPositionVelocity();
   void updatePositionVelocity(int msgType, int rsize, Real_t rdata[]);
-
-  void startElementFineScaleQuery(int step, int nelems);
-  void updateElement(int whichEl, int whichIter, int newPt);
-  void go(int numRanks, bool useAdaptiveSampling);
 };
 
 #endif
