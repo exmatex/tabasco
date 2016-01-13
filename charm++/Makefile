@@ -63,16 +63,21 @@ endif
 ifeq ($(DB_AS_CHARE), yes)
 CXXFLAGS += -DDB_AS_CHARE
 endif
-ifeq ($(SILO),yes)
-CXXFLAGS += -DSILO
-SILO_LOC=../CoEVP/silo/silo
+
+
+ifneq ($(strip $(FLANN_LOC)),)
+CXXFLAGS += -DFLANN -I$(realpath $(FLANN_LOC)) -I$(realpath $(FLANN_LOC))/flann
 endif
 
+ifneq ($(strip $(REDIS_LOC)),)
+CXXFLAGS += -DREDIS -I$(realpath $(REDIS_LOC))
+endif
 
 #LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 #LDFLAGS= -tracemode projections -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 ifneq ($(strip $(SILO_LOC)),)
+CXXFLAGS += -DSILO
 LDFLAGS += -Wl,-rpath,$(realpath $(SILO_LOC))/lib -L$(realpath $(SILO_LOC))/lib -lsiloh5
 endif
 
@@ -82,6 +87,12 @@ LULESH_OBJ=../CoEVP/LULESH/lulesh.o ../CoEVP/LULESH/siloDump.o
 NAME=$(BINDIR)/TabaSCo
 default: all
 all: $(SUBDIRS) $(OBJDIR) $(NAME)
+
+dummy: ;
+
+$(OBJDIR)/.cxxflags: dummy
+	@[ -f $@ ] || touch $@
+	@echo "CXXFLAGS=$(CXXFLAGS)" | cmp -s $@ - || echo "CXXFLAGS=$(CXXFLAGS)" > $@
 
 $(OBJDIR)/%.d: $(SRCDIR)/%.cc
 	@#1. sed:  put one file per line * * -> *\\\n*
@@ -121,7 +132,7 @@ $(NAME): $(OBJS) $(LULESH_OBJ)
 	@mv charmrun $(BINDIR)/
 
 #GNU make implicit rule
-$(OBJDIR)/%.o: $(SRCDIR)/%.cc
+$(OBJDIR)/%.o: $(SRCDIR)/%.cc $(OBJDIR)/.cxxflags
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 .PHONY: $(SUBDIRS)
