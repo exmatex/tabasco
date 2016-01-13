@@ -10,7 +10,7 @@ endif
 all: tabasco
 
 libcm:
-	${MAKE} -C CoEVP FLANN=$(FLANN) REDIS=$(REDIS) SILO=$(SILO)
+	${MAKE} -C CoEVP FLANN=$(FLANN) REDIS=$(REDIS) SILO=$(SILO) CHARM=yes
 
 tabasco: libcm
 	${MAKE} -C charm++ SILO_LOC=$(SILO_LOC)
@@ -21,3 +21,6 @@ clean:
 
 clean-all: clean
 	${MAKE} -C CoEVP clean-all
+
+test:
+	${MAKE} -C CoEVP FLANN=$(FLANN) REDIS=$(REDIS) SILO=$(SILO) CHARM=yes test
