@@ -49,6 +49,7 @@ mainmodule TabaSCo {
     entry [reductiontarget] void reduceTotal(int n, int total[n]);
 
     entry void initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime);
+    entry void setSiloFileParts(int numParts);
 
     entry void TimeIncrement();
     entry void updateTimeIncrement(Real_t reducedt);
@@ -195,7 +196,7 @@ mainmodule TabaSCo {
       // Time steps done
       serial {
         contribute(0,NULL,CkReduction::nop,CkCallback(CkReductionTarget(Main,done),mainProxy));
-		makeADump(1, 1, 1, 0);
+		makeADump(1, 1, 0);
       }
     };
   };

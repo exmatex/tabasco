@@ -129,6 +129,7 @@ void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, Real_t
   state_size = new size_t[numElems];
   use_adaptive_sampling = (useAdaptiveSampling) ? 1 : 0;
   ConstructFineScaleModel(useAdaptiveSampling);
+
 }
 
 void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
@@ -718,13 +719,20 @@ void CoarseScaleModel::updatePositionVelocity(int msgType, int rsize, Real_t rda
   receiveDataNodes(msgType, size, xferFields, fieldData, rdata);    
 }
 
-void CoarseScaleModel::makeADump(int sampling, int visit_data_interval, int file_parts, int debug_topology)
+void CoarseScaleModel::makeADump(int sampling, int visit_data_interval, int debug_topology)
 {
 #ifdef SILO
    //if ((visit_data_interval != 0) && (lulesh->domain.cycle() % visit_data_interval != 0)) {
       DumpDomain(&(lulesh->domain), lulesh->domain.sliceLoc(), lulesh->domain.numSlices(), 
-                 ((lulesh->domain.numSlices() == 1) ? file_parts : 0), sampling, debug_topology ) ;
+                 ((lulesh->domain.numSlices() == 1) ? this->file_parts : 0), sampling, debug_topology ) ;
    //}
 #endif
 }
+
+
+void CoarseScaleModel::setSiloFileParts(int numParts)
+{
+  this->file_parts = numParts;
+}
+ 
 

@@ -49,6 +49,8 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
     int use_adaptive_sampling;
 
     size_t* state_size;
+
+    int file_parts;
      
   public:
   
@@ -92,7 +94,8 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   void sendPositionVelocity();
   void updatePositionVelocity(int msgType, int rsize, Real_t rdata[]);
 
-  void makeADump(int sampling, int visit_data_interval, int file_parts, int debug_topology);
+  void makeADump(int sampling, int visit_data_interval, int debug_topology);
+  void setSiloFileParts(int numParts);
 };
 
 #endif
