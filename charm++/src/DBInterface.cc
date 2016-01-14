@@ -5,13 +5,16 @@ extern CProxy_Main mainProxy;
 extern CProxy_NearestNeighborSearch nnsArray;
 
 DBInterface::DBInterface()
+: dbRef(SingletonDB::getInstance())
 {
-  
-  printf("DBInterface created on PE %d Index %d %d %d\n", 
-      CkMyPe(), thisIndex.x, thisIndex.y, thisIndex.z);
+  CkPrintf("DBInterface created on PE %d Index %d\n",
+      CkMyPe(), thisIndex);
+  //Tell charm++ to not migrate this chare
+  setMigratable(false);
 }
 
 DBInterface::DBInterface(CkMigrateMessage *msg)
+: dbRef(SingletonDB::getInstance())
 {
 
 }
@@ -23,19 +26,33 @@ DBInterface::~DBInterface()
 
 void DBInterface::pup(PUP::er &p)
 {
-
+    //This should never be called... Probably
+    ///TODO: Verify this is only called if migrating, not context switching, and then uncomment error
+    //CkPrintf("ERROR: DBInterface %d:%d Migrating\n", CkMyPe(), thisIndex.x);
 }
 
-void DBInterface::get(int pCount, int pIndex, int pData)
+void DBInterface::push(uint128_t key, std::vector<double> buf, unsigned long key_length)
 {
-  printf("DBInterface get\n");
-
-  // Call to DB
-
-  //nnsArray(thisIndex.x, thisIndex.y, thisIndex.z).receiveData(pCount, pData);
+    //Simple, just directly pass the arguments
+    this->dbRef.push(key, buf, key_length);
 }
 
-void DBInterface::put(int pCount, int pData)
+DBVecMessage * DBInterface::pull(uint128_t key)
 {
-  printf("DBInterface put\n");
+    std::vector<double> retVec = this->dbRef.pull(key);
+    DBVecMessage * msg = new DBVecMessage(retVec);
+    return msg;
+}
+
+DBVecMessage * DBInterface::pull_key(uint128_t key)
+{
+    std::vector<double> retVec = this->dbRef.pull_key(key);
+    DBVecMessage * msg = new DBVecMessage(retVec);
+    return msg;
+}
+
+void DBInterface::erase(uint128_t key)
+{
+    //Simple, just directly pass the arguments
+    this->dbRef.erase(key);
 }

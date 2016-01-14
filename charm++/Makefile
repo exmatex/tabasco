@@ -48,7 +48,7 @@ ifeq ($(LINALG_LDFLAG), )
 LINALG_LDFLAG= -llapack -lblas
 endif
 
-OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
+OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o DBVecMessage.o DBMap.o ModelDBInterface.o input.o Main.o)
 # ../CoEVP/LULESH/lulesh.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
 ifeq ($(NNS_AS_CHARE), yes)

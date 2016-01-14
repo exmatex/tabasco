@@ -5,9 +5,12 @@
 #include "NearestNeighborSearch.h"
 #include "Interpolate.h"
 #include "DBInterface.h"
+#include "DBMap.h"
+#include "DBVecMessage.h"
 #include "input.h"
 
 #include <cstring>
+#include <vector>
 
 /* readonly */ CProxy_Main mainProxy;
 /* readonly */ CProxy_CoarseScaleModel coarseScaleArray;
@@ -121,10 +124,17 @@ Main::Main(CkArgMsg* msg)
   // Create coarse scale model, Lulesh
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(coarseOpts);
 
-/*
+  //Create DB Map
+  ///TODO: Figure out a good mapping scheme. For now, we force a single DB node with intentions of explicitely defining/passing a node list
+  ///TODO: Actually take advantage of the dbCount variable
+  std::vector<int> nodeList;
+  nodeList.push_back(0);
+  CProxy_DBMap DBMapProxy = CProxy_DBMap::ckNew(nodeList);
+  //Create array options for DB Interface
+  CkArrayOptions dbMapOptions(1);
+  dbMapOptions.setMap(DBMapProxy);
   // Create DB interfaces
-  DBArray = CProxy_DBInterface::ckNew(opts);
-*/
+  DBArray = CProxy_DBInterface::ckNew(dbMapOptions);
 
   // Create Nearest Neighbor Searches
   CkArrayOptions nnsOpts(nnsCount);
