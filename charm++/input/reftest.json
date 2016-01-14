@@ -1,0 +1,29 @@
+{"parameter": {
+    "header": "TabaSCo Test Input File",
+    "CoarseScaleModel": [
+        {"id": "type",                  "value": "0"},
+        {"id": "count",                 "value": "1"},
+        {"id": "use adaptive sampling", "value": "0"},
+        {"id": "stop time",             "value": "1e-01"},
+        {"id": "visit data interval",   "value": "20"},
+        {"id": "file parts",            "value": "4"}
+    ],
+    "FineScaleModel": [
+        {"id": "type",                 "value": "0"} 
+    ],
+    "NearestNeighborSearch": [
+        {"id": "type",                 "value": "1"},
+        {"id": "count",                "value": "2912"},
+        {"id": "point dimension",      "value": "6"},
+        {"id": "number of trees",      "value": "1"}
+    ],
+    "Interpolate": [
+        {"id": "type",                 "value": "0"},
+        {"id": "count",                "value": "10"}
+    ],
+    "DBInterface": [
+        {"id": "type",                 "value": "0"},
+        {"id": "count",                "value": "10"}
+    ]
+  }
+}
