@@ -3,7 +3,7 @@
     "CoarseScaleModel": [
         {"id": "type",                  "value": "0"},
         {"id": "count",                 "value": "1"},
-        {"id": "use adaptive sampling", "value": "1"},
+        {"id": "use adaptive sampling", "value": "0"},
         {"id": "stop time",             "value": "1e-01"}
     ],
     "FineScaleModel": [
@@ -18,6 +18,10 @@
     "Interpolate": [
         {"id": "type",                 "value": "0"},
         {"id": "count",                "value": "10"}
+    ],
+    "Evaluate": [
+        {"id": "type",                 "value": "0"},
+        {"id": "count",                "value": "2912"}
     ],
     "DBInterface": [
         {"id": "type",                 "value": "0"},

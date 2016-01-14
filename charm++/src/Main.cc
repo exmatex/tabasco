@@ -4,6 +4,7 @@
 #include "FineScaleModel.h"
 #include "NearestNeighborSearch.h"
 #include "Interpolate.h"
+#include "Evaluate.h"
 #include "DBInterface.h"
 #include "input.h"
 
@@ -14,6 +15,7 @@
 /* readonly */ CProxy_FineScaleModel fineScaleArray;
 /* readonly */ CProxy_NearestNeighborSearch nnsArray;
 /* readonly */ CProxy_Interpolate interpolateArray;
+/* readonly */ CProxy_Evaluate evaluateArray;
 /* readonly */ CProxy_DBInterface DBArray;
 
 /*readonly*/ int coarseType;
@@ -28,6 +30,8 @@
 /*readonly*/ int numTrees;
 /*readonly*/ int interpType;
 /*readonly*/ int interpCount;
+/*readonly*/ int evalType;
+/*readonly*/ int evalCount;
 /*readonly*/ int dbType;
 /*readonly*/ int dbCount;
 
@@ -77,6 +81,10 @@ Main::Main(CkArgMsg* msg)
   interpType = in.interpType;
   interpCount = in.interpCount;
 
+  // Get Evaluate parameters
+  evalType = in.evalType;
+  evalCount = in.evalCount;
+
   // Get DBInterface parameters
   dbType = in.dbType;
   dbCount = in.dbCount;
@@ -105,22 +113,23 @@ Main::Main(CkArgMsg* msg)
            "  NNS number of trees: %d\n"
            "  Interpolate type: %d\n"
            "  Interpolate count: %d\n"
+           "  Evaluate type: %d\n"
+           "  Evaluate count: %d\n"
            "  DBInterface type: %d\n"
            "  DBInterface count: %d\n",
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
           fineType, nnsType, nnsCount, pointDim, numTrees,
-          interpType, interpCount, dbType, dbCount);
+          interpType, interpCount, evalType, evalCount, dbType, dbCount);
 
-  // Setup chare array size
-  CkArrayOptions coarseOpts(coarseCount);
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
-  coarseOpts.setMap(rrMap);
   
-  // Create coarse scale model, Lulesh
+  // Setup chare array size
+  CkArrayOptions coarseOpts(coarseCount);
+  coarseOpts.setMap(rrMap);
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(coarseOpts);
-
+    
 /*
   // Create DB interfaces
   DBArray = CProxy_DBInterface::ckNew(opts);
@@ -136,6 +145,12 @@ Main::Main(CkArgMsg* msg)
   // Create interpolates
   interpolateArray = CProxy_Interpolate::ckNew(opts);
 */
+
+  // Create Evaluates
+  CkArrayOptions evalOpts(evalCount);
+  evalOpts.setMap(rrMap);
+  evaluateArray = CProxy_Evaluate::ckNew(evalOpts);
+  evaluateArray.initialize(evalType);
 
   // Create fine scale models
   fineScaleArray = CProxy_FineScaleModel::ckNew();  

@@ -35,7 +35,7 @@ ifeq ($(LINALG_LDFLAG), )
 LINALG_LDFLAG= -llapack -lblas
 endif
 
-OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o DBInterface.o input.o Main.o)
+OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o Evaluate.o DBInterface.o input.o Main.o)
 # ../CoEVP/LULESH/lulesh.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
 ifeq ($(NNS_AS_CHARE), yes)
@@ -46,6 +46,9 @@ CXXFLAGS += -DINTERP_AS_CHARE
 endif
 ifeq ($(DB_AS_CHARE), yes)
 CXXFLAGS += -DDB_AS_CHARE
+endif
+ifeq ($(EVAL_AS_CHARE), yes)
+CXXFLAGS += -DEVAL_AS_CHARE
 endif
 
 #LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 

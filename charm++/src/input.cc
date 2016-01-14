@@ -98,6 +98,20 @@ void parse_input(string input_file, Input *in)
           }
        }
 
+       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.Evaluate"))
+      {     
+        if (v.second.get<std::string>("id") == "type")
+          {
+            in->evalType = v.second.get<int>("value");
+            CkPrintf("evaluate type                 %d\n", in->evalType);
+          } 
+        if (v.second.get<std::string>("id") == "count")
+          {
+            in->evalCount = v.second.get<int>("value");
+            CkPrintf("evaluate count                %d\n", in->evalCount);
+          } 
+       }  
+
        BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.DBInterface"))
       { 
         if (v.second.get<std::string>("id") == "type")

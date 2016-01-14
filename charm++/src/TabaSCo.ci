@@ -10,12 +10,15 @@ mainmodule TabaSCo {
   readonly CProxy_FineScaleModel fineScaleArray;     // array of fine scale models
   readonly CProxy_NearestNeighborSearch nnsArray;    // array of nearest neighbor searches
   readonly CProxy_Interpolate interpolateArray;      // array of interpolations
+  readonly CProxy_Evaluate evaluateArray;            // array of evaluates
   readonly CProxy_DBInterface DBArray;               // array of DB interfaces
 
   message Msg;
   message knn_message;
   message int_message;
   message uint128_message;
+  message eval_message;
+  message evaln_message;
 
   // Main driver
   mainchare Main {
@@ -202,40 +205,10 @@ mainmodule TabaSCo {
   // Fine scale model
   array [2D] FineScaleModel {
     entry FineScaleModel();
-    entry FineScaleModel(int state_size, bool useAdaptiveSampling, int nnsIndex, int interpIndex, int dbIndex);
+    entry FineScaleModel(int state_size, bool useAdaptiveSampling, int nnsIndex, int interpIndex, int dbIndex, int evalIndex);
 
     entry [threaded] void advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char state[ssize]);
 
-    //entry [createhome] void query(int elnum, int iter, int qPt, CkCallback cb)
-/*
-    entry [createhome] void query(int elnum, int iter, int qPt)
-    {
-      // Do nearest neighbor search
-      serial {
-        requestNeighbors(qPt);
-      }
-
-      // Receive nearest neighbors, do interpolation if enough, else evaluation
-      when receiveNeighbors(int nbrCount, int nbrData) serial {
-        if (nbrCount == NBR_LIMIT)
-          requestInterpolation(nbrCount, nbrData, qPt);
-        else
-          evaluate(qPt);
-      }
-
-      // Receive results of interpolation or evaluate
-      // Save to DB and send back to Coarse Scale model
-      when receivePoint(int cPt) serial { 
-        requestDBStore(cPt);
-        //Msg *m = new Msg();
-        //m->whichEl = elnum; m->whichIter = iter; m->newPt = cPt;
-        //cb.send(m);
-
-//        coarseScaleArray(thisIndex.w, thisIndex.x, thisIndex.y).receiveNewPoint(iter, elnum, cPt);
-      }
-
-    };
-*/
   };
 
   // Nearest Neighbor Search 
@@ -255,6 +228,15 @@ mainmodule TabaSCo {
   array [3D] Interpolate {
     entry Interpolate();
     entry void run(int elnum, int nbrCount, int nbrData, int qPt);
+  };
+
+  // Evaluate
+  array [1D] Evaluate {
+    entry Evaluate();
+    entry void initialize(int etype);
+   
+    entry void eval(std::vector<double> point, const CkCallback &cb);
+    entry void evalNative(Tensor2Sym in, const CkCallback &cb);
   };
 
   // DB interface

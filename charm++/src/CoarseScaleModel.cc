@@ -15,6 +15,8 @@ extern int nnsType;
 extern int nnsCount;
 extern int interpType;
 extern int interpCount;
+extern int evalType;
+extern int evalCount;
 extern int dbType;
 extern int dbCount;
 
@@ -160,18 +162,22 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
   int* nnsRange = calcRange(nnsCount);
   int* interpRange = calcRange(interpCount);
   int* dbRange = calcRange(dbCount);
+  int* evalRange = calcRange(evalCount);
+
   printf("CoarseScaleModel %d: nns %d %d\n", thisIndex, nnsRange[0], nnsRange[1]);
   printf("CoarseScaleModel %d: interpolate %d %d\n", thisIndex, interpRange[0], interpRange[1]);
   printf("CoarseScaleModel %d: dbinterface %d %d\n", thisIndex, dbRange[0], dbRange[1]);
+  printf("CoarseScaleModel %d: evaluate %d %d\n", thisIndex, evalRange[0], evalRange[1]);
 
   int nnsIndex = nnsRange[0];
   int interpIndex = interpRange[0];
   int dbIndex = dbRange[0];
+  int evalIndex = evalRange[0];
 
   for (Index_t i = 0; i < numElems; ++i) {
     state_size[i] = lulesh->domain.cm(i)->getStateSize();
 
-    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex);
+    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex, evalIndex);
     
     nnsIndex++;
     if (nnsIndex >= nnsRange[1]) nnsIndex = nnsRange[0];
@@ -179,6 +185,8 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
     if (interpIndex >= interpRange[1]) interpIndex = interpRange[0];
     dbIndex++;
     if (dbIndex >= dbRange[1]) dbIndex = dbRange[0];
+    evalIndex++;
+    if (evalIndex >= evalRange[1]) evalIndex = evalRange[0];
   }
   printf("%d FineScaleModels created count = %d\n", thisIndex, numElems);
 }
