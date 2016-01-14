@@ -52,6 +52,8 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
     int file_parts;
     int visit_data_interval;
+
+    bool remoteDB;
      
   public:
   
@@ -97,6 +99,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
   void makeADump(bool forceDump);
   void setSiloParams(int numParts, int dataInterval);
+  void setRemoteDB(bool remoteDB);
 };
 
 #endif

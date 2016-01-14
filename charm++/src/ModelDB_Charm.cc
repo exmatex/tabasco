@@ -1,4 +1,4 @@
-#include "ModelDBInterface.h"
+#include "ModelDB_Charm.h"
 #include "DBVecMessage.h"
 
 #include "ResponsePoint.h"
@@ -7,20 +7,20 @@
 
 extern CProxy_DBInterface DBArray;
 
-ModelDBInterface::ModelDBInterface(unsigned int index)
+ModelDB_Charm::ModelDB_Charm(unsigned int index)
 : dbVecIndex(index)
 {
 
 }
 
-void ModelDBInterface::insert(uint128_t & model_key, krigalg::InterpolationModelPtr krigingModel, krigcpl::ResponsePoint * point)
+void ModelDB_Charm::insert(uint128_t & model_key, krigalg::InterpolationModelPtr krigingModel, krigcpl::ResponsePoint * point)
 {
     std::vector<double> packedContainer;
     krigingModel->pack(*point, packedContainer);
     DBArray[dbVecIndex].push(model_key, packedContainer, point->size());
 }
 
-krigalg::InterpolationModelPtr ModelDBInterface::extract(uint128_t & model_key, krigalg::InterpolationModelFactoryPointer  * newFact)
+krigalg::InterpolationModelPtr ModelDB_Charm::extract(uint128_t & model_key, krigalg::InterpolationModelFactoryPointer  * newFact)
 {
     ///TODO: Error checking would probably be smart
     DBVecMessage * msg = DBArray[dbVecIndex].pull(model_key);
@@ -37,7 +37,7 @@ krigalg::InterpolationModelPtr ModelDBInterface::extract(uint128_t & model_key, 
 
 }
 
-void ModelDBInterface::erase(uint128_t & model_key)
+void ModelDB_Charm::erase(uint128_t & model_key)
 {
     //We had to comment this out with CoEVP/LULESH
     //DBArray[dbVecIndex].erase(model_key);

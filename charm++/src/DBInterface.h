@@ -12,7 +12,7 @@ class DBInterface : public CBase_DBInterface {
       SingletonDB & dbRef;
   public:
 
-  DBInterface();
+  DBInterface(int backType=0);
   DBInterface(CkMigrateMessage *msg);
   ~DBInterface();
   void pup(PUP::er &p);

@@ -66,6 +66,7 @@ typedef struct {
   int interpCount;
   int dbType;
   int dbCount;
+  int dbRemote;
   Real_t stopTime;
   int file_parts;
   int visit_data_interval;
@@ -164,4 +165,5 @@ inline void xy_to_index(int x, int y, int* index, Input in)
   *index = x + y * in.dim_x;
 */
 }
+
 #endif

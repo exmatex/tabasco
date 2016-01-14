@@ -51,6 +51,7 @@ mainmodule TabaSCo {
 
     entry void initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime);
     entry void setSiloParams(int numParts, int dataInterval);
+    entry void setRemoteDB(bool remoteDB);
 
     entry void TimeIncrement();
     entry void updateTimeIncrement(Real_t reducedt);
@@ -206,7 +207,7 @@ mainmodule TabaSCo {
   // Fine scale model
   array [2D] FineScaleModel {
     entry FineScaleModel();
-    entry FineScaleModel(int state_size, bool useAdaptiveSampling, int nnsIndex, int interpIndex, int dbIndex);
+    entry FineScaleModel(int state_size, bool useAdaptiveSampling, int nnsIndex, int interpIndex, int dbIndex, bool remoteDB);
 
     entry [threaded] void advance(const double delta_t, const Tensor2Gen& L_new, const double volume_change, int ssize, char state[ssize]);
 
@@ -263,7 +264,7 @@ mainmodule TabaSCo {
 
   // DB interface
   array [1D] DBInterface {
-    entry DBInterface();
+    entry DBInterface(int backType);
     entry void push(uint128_t key, std::vector<double> buf, unsigned long key_length);
     entry [sync] DBVecMessage * pull(uint128_t key);
     entry [sync] DBVecMessage * pull_key(uint128_t key);

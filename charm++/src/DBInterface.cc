@@ -4,8 +4,8 @@
 extern CProxy_Main mainProxy;
 extern CProxy_NearestNeighborSearch nnsArray;
 
-DBInterface::DBInterface()
-: dbRef(SingletonDB::getInstance())
+DBInterface::DBInterface(int backType)
+: dbRef(SingletonDB::getInstance(static_cast<SingletonDBBackendEnum>(backType))) ///TODO: Find a MUCH better way to do this
 {
   CkPrintf("DBInterface created on PE %d Index %d\n",
       CkMyPe(), thisIndex);

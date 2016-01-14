@@ -33,6 +33,7 @@
 /*readonly*/ int interpCount;
 /*readonly*/ int dbType;
 /*readonly*/ int dbCount;
+/*readonly*/ bool dbRemote; //Do we need to declare this anywhere else for charm purposes?
 
 /*readonly*/ int file_parts; //Do we need to declare this anywhere else for charm purposes?
 /*readonly*/ int visit_data_interval; //Do we need to declare this anywhere else for charm purposes?
@@ -86,6 +87,7 @@ Main::Main(CkArgMsg* msg)
   // Get DBInterface parameters
   dbType = in.dbType;
   dbCount = in.dbCount;
+  dbRemote = (in.dbRemote != 0) ? true : false;
 
   // Get simulation stop time
   stopTime = in.stopTime;
@@ -117,12 +119,13 @@ Main::Main(CkArgMsg* msg)
            "  Interpolate count: %d\n"
            "  DBInterface type: %d\n"
            "  DBInterface count: %d\n"
+           "  Use Remote DB %d\n"
            "  Number of SILO Files for Single Domain: %d\n"
            "  Visit Data Interval: %d\n",
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
           fineType, nnsType, nnsCount, pointDim, numTrees,
-          interpType, interpCount, dbType, dbCount, file_parts, visit_data_interval);
+          interpType, interpCount, dbType, dbCount, dbRemote, file_parts, visit_data_interval);
 
   // Setup chare array size
   CkArrayOptions coarseOpts(coarseCount);
@@ -146,8 +149,11 @@ Main::Main(CkArgMsg* msg)
   CkArrayOptions dbMapOptions(1);
   dbMapOptions.setMap(DBMapProxy);
 
-  // Create DB interfaces
-  DBArray = CProxy_DBInterface::ckNew(dbMapOptions);
+  // Create DB interfaces with desired backend, if we need them
+  if(dbRemote == true)
+  {
+    DBArray = CProxy_DBInterface::ckNew(dbType, dbMapOptions);
+  }
 
   // Create Nearest Neighbor Searches
   CkArrayOptions nnsOpts(nnsCount);

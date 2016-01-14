@@ -160,7 +160,7 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
   for (Index_t i = 0; i < numElems; ++i) {
     state_size[i] = lulesh->domain.cm(i)->getStateSize();
 
-    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex);
+    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex, remoteDB);
     
     nnsIndex++;
     if (nnsIndex >= nnsRange[1]) nnsIndex = nnsRange[0];
@@ -738,5 +738,8 @@ void CoarseScaleModel::setSiloParams(int numParts, int dataInterval)
   this->file_parts = numParts;
   this->visit_data_interval = dataInterval;
 }
- 
 
+void CoarseScaleModel::setRemoteDB(bool remoteDB)
+{
+  this->remoteDB = remoteDB;
+}

@@ -120,6 +120,11 @@ void parse_input(string input_file, Input *in)
             in->dbCount = v.second.get<int>("value");
             CkPrintf("DB count                %d\n", in->dbCount);
           }
+        if (v.second.get<std::string>("id") == "remote")
+          {
+            in->dbRemote = v.second.get<int>("value");
+            CkPrintf("Remote DB                %d\n", in->dbRemote);
+          }
        }
 
     }

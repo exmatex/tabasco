@@ -13,6 +13,7 @@
 #include "MurmurHash3.h"
 
 #include "ModelDB_HashMap.h"
+#include "ModelDB_Charm.h"
 
 #define MURMUR_SEED 42
 
@@ -25,7 +26,7 @@ extern CProxy_DBInterface DBArray;
 FineScaleModel::FineScaleModel()
 {}
 
-FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex) : stateSize(state_size), nnsIndex(nnsIndex), interpIndex(interpIndex), dbIndex(dbIndex) 
+FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex, bool remoteDB) : stateSize(state_size), nnsIndex(nnsIndex), interpIndex(interpIndex), dbIndex(dbIndex), remoteDB(remoteDB)
 {
   // Ordering for a 2D array chare is x, y 
 /*
@@ -66,7 +67,14 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
 #endif
 #endif
 
-   modelDB = new ModelDB_HashMap(); 
+   if(remoteDB == false)
+   {
+     modelDB = new ModelDB_HashMap(); 
+   }
+   else
+   {
+     modelDB = new ModelDB_Charm(dbIndex); 
+   }
   // Construct the equation of state
   EOS* eos_model;
   /* 
@@ -120,6 +128,7 @@ void FineScaleModel::pup(PUP::er &p)
   p|nnsIndex;
   p|interpIndex;
   p|dbIndex;
+  p|remoteDB;
   p|stateSize;
 }
 
