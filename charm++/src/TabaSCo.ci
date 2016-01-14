@@ -50,6 +50,7 @@ mainmodule TabaSCo {
     entry [reductiontarget] void reduceTotal(int n, int total[n]);
 
     entry void initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime);
+    entry void setSiloParams(int numParts, int dataInterval);
 
     entry void TimeIncrement();
     entry void updateTimeIncrement(Real_t reducedt);
@@ -102,6 +103,7 @@ mainmodule TabaSCo {
 
       while (lulesh->domain.time() < lulesh->domain.stoptime()) {
         serial {
+          makeADump(false);
           TimeIncrement();
         }
 
@@ -196,6 +198,7 @@ mainmodule TabaSCo {
       // Time steps done
       serial {
         contribute(0,NULL,CkReduction::nop,CkCallback(CkReductionTarget(Main,done),mainProxy));
+		makeADump(true);
       }
     };
   };

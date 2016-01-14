@@ -34,6 +34,9 @@
 /*readonly*/ int dbType;
 /*readonly*/ int dbCount;
 
+/*readonly*/ int file_parts; //Do we need to declare this anywhere else for charm purposes?
+/*readonly*/ int visit_data_interval; //Do we need to declare this anywhere else for charm purposes?
+
 // Entry point of Charm++ application
 Main::Main(CkArgMsg* msg)
  {
@@ -90,6 +93,10 @@ Main::Main(CkArgMsg* msg)
   // Neighbor limit
   NBR_LIMIT = 10;
 
+  // Get SILO parameters
+  file_parts = (in.file_parts != 0) ? in.file_parts : 1;
+  visit_data_interval = in.visit_data_interval;
+
 
   // Set other parameters
 
@@ -109,11 +116,13 @@ Main::Main(CkArgMsg* msg)
            "  Interpolate type: %d\n"
            "  Interpolate count: %d\n"
            "  DBInterface type: %d\n"
-           "  DBInterface count: %d\n",
+           "  DBInterface count: %d\n"
+           "  Number of SILO Files for Single Domain: %d\n"
+           "  Visit Data Interval: %d\n",
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
           fineType, nnsType, nnsCount, pointDim, numTrees,
-          interpType, interpCount, dbType, dbCount);
+          interpType, interpCount, dbType, dbCount, file_parts, visit_data_interval);
 
   // Setup chare array size
   CkArrayOptions coarseOpts(coarseCount);
@@ -123,6 +132,9 @@ Main::Main(CkArgMsg* msg)
   
   // Create coarse scale model, Lulesh
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(coarseOpts);
+#ifdef SILO
+  coarseScaleArray.setSiloParams(file_parts, visit_data_interval);
+#endif
 
   //Create DB Map
   ///TODO: Figure out a good mapping scheme. For now, we force a single DB node with intentions of explicitely defining/passing a node list
@@ -133,6 +145,7 @@ Main::Main(CkArgMsg* msg)
   //Create array options for DB Interface
   CkArrayOptions dbMapOptions(1);
   dbMapOptions.setMap(DBMapProxy);
+
   // Create DB interfaces
   DBArray = CProxy_DBInterface::ckNew(dbMapOptions);
 

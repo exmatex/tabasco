@@ -6,6 +6,8 @@
 #include "Constitutive.h"
 #include "tensor.h"
 
+#include "LULESH/siloDump.h"
+
 extern CProxy_Main mainProxy;
 extern CProxy_CoarseScaleModel coarseScaleArray;
 extern CProxy_FineScaleModel fineScaleArray;
@@ -127,6 +129,7 @@ void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, Real_t
   state_size = new size_t[numElems];
   use_adaptive_sampling = (useAdaptiveSampling) ? 1 : 0;
   ConstructFineScaleModel(useAdaptiveSampling);
+
 }
 
 void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
@@ -714,4 +717,26 @@ void CoarseScaleModel::updatePositionVelocity(int msgType, int rsize, Real_t rda
 
   // Receive force data from L/R neighbor
   receiveDataNodes(msgType, size, xferFields, fieldData, rdata);    
-} 
+}
+
+void CoarseScaleModel::makeADump(bool forceDump)
+{
+#ifdef SILO
+   int debug_topology = 0; //Eventually pull this out
+   int sampling = this->use_adaptive_sampling; //Verify these are the same
+   //int sampling = 1;
+   if ((this->visit_data_interval != 0) and ( (lulesh->domain.cycle() % this->visit_data_interval == 0) or forceDump)) {
+      DumpDomain(&(lulesh->domain), lulesh->domain.sliceLoc(), lulesh->domain.numSlices(), 
+                 ((lulesh->domain.numSlices() == 1) ? this->file_parts : 0), sampling, debug_topology ) ;
+   }
+#endif
+}
+
+
+void CoarseScaleModel::setSiloParams(int numParts, int dataInterval)
+{
+  this->file_parts = numParts;
+  this->visit_data_interval = dataInterval;
+}
+ 
+
