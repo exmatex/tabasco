@@ -138,6 +138,7 @@ Main::Main(CkArgMsg* msg)
 #ifdef SILO
   coarseScaleArray.setSiloParams(file_parts, visit_data_interval);
 #endif
+  coarseScaleArray.setRemoteDB(dbRemote);
 
   //Create DB Map
   ///TODO: Figure out a good mapping scheme. For now, we force a single DB node with intentions of explicitely defining/passing a node list
