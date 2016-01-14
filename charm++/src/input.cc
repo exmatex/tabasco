@@ -24,7 +24,10 @@ void parse_input(string input_file, Input *in)
 
       file.close();
       boost::property_tree::read_json(buffer, pt);
-    }
+  } else {
+      std::cerr << "Could not open json file " << input_file << std::endl;
+      CkExit();
+ }
   try
     {
       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.CoarseScaleModel"))

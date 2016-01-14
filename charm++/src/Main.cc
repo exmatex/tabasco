@@ -56,6 +56,10 @@ Main::Main(CkArgMsg* msg)
   // chare object).
   mainProxy = thisProxy;
 
+  if(msg->argc < 2){
+    std::cerr << "Missing argument (json file)" << std::endl;
+    CkExit();
+  }
   // Get input values from json file
   Input in;
   char input_file[1024];
