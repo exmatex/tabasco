@@ -19,6 +19,10 @@
         {"id": "type",                 "value": "0"},
         {"id": "count",                "value": "10"}
     ],
+    "Evaluate": [
+        {"id": "type",                 "value": "0"},
+        {"id": "count",                "value": "2912"}
+    ],
     "DBInterface": [
         {"id": "type",                 "value": "0"},
         {"id": "count",                "value": "10"}

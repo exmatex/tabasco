@@ -64,6 +64,8 @@ typedef struct {
   int numTrees;
   int interpType;
   int interpCount;
+  int evalType;
+  int evalCount;
   int dbType;
   int dbCount;
   Real_t stopTime;
@@ -89,6 +91,8 @@ void pup(PUP::er &p)
   p | numTrees;
   p | interpType;
   p | interpCount;
+  p | evalType;
+  p | evalCount;
   p | dbType;
   p | dbCount;
   p | stopTime;
