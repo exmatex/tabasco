@@ -11,7 +11,7 @@ endif
 SILO=yes
 ifeq ($(SILO),yes)
 SILO_LOC=../CoEVP/silo/silo
-SILODIFF=../CoEVP/silo/silo/bin/silodiff
+SILODIFF=CoEVP/silo/silo/bin/silodiff
 endif
 
 all: tabasco
@@ -44,6 +44,7 @@ dummy: ;
 
 TESTFILE=reftest.json
 
+CHARMRUN=../charm++/charm_bin/charmrun ++local ++p 1
 test/.charmflags: dummy
 	mkdir -p test
 	@[ -f $@ ] || touch $@
