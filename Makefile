@@ -45,11 +45,13 @@ dummy: ;
 TESTFILE=reftest.json
 
 test/.charmflags: dummy
+	mkdir -p test
 	@[ -f $@ ] || touch $@
 	@echo "CHARMRUN=$(CHARMRUN)" | cmp -s $@ - || echo "CHARMRUN=$(CHARMRUN)" > $@
 
 TABASCO_OPTS=../charm++/input/$(TESTFILE)
 test/.tabascoopts: dummy
+	mkdir -p test
 	@[ -f $@ ] || touch $@
 	@echo "TABASCO_OPTS=$(TABASCO_OPTS)" | cmp -s $@ - || echo "TABASCO_OPTS=$(TABASCO_OPTS)" > $@
 
