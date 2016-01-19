@@ -2,6 +2,7 @@
 #include "FineScaleModel.h"
 #include "NearestNeighborSearch.h"
 #include "Interpolate.h"
+#include "Evaluate.h"
 #include "DBInterface.h"
 
 #include "Taylor.h"
@@ -21,12 +22,13 @@ extern CProxy_Main mainProxy;
 extern CProxy_CoarseScaleModel coarseScaleArray;
 extern CProxy_NearestNeighborSearch nnsArray;
 extern CProxy_Interpolate interpolateArray;
+extern CProxy_Evaluate evaluateArray;
 extern CProxy_DBInterface DBArray;
 
 FineScaleModel::FineScaleModel()
 {}
 
-FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex, bool remoteDB) : stateSize(state_size), nnsIndex(nnsIndex), interpIndex(interpIndex), dbIndex(dbIndex), remoteDB(remoteDB)
+FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex, bool remoteDB, int evalIndex) : stateSize(state_size), nnsIndex(nnsIndex), interpIndex(interpIndex), dbIndex(dbIndex), remoteDB(remoteDB), evalIndex(evalIndex)
 {
   // Ordering for a 2D array chare is x, y 
 /*
@@ -392,7 +394,14 @@ void FineScaleModel::evaluateFineScaleModel( const Tensor2Sym& tau_bar_prime,
    }
    else {
 
+#ifdef EVAL_AS_CHARE
+      evaln_message* evaln_msg;
+      evaluateArray(evalIndex).evalNative(tau_bar_prime, CkCallbackResumeThread((void*&)evaln_msg));
+      evaln_msg->copyTo(Dbar_prime, Dbar_prime_deriv); 
+      delete evaln_msg;
+#else
       em->m_plasticity_model->evaluateNative( tau_bar_prime, Dbar_prime, Dbar_prime_deriv );
+#endif
 
    }
 }
@@ -452,7 +461,15 @@ FineScaleModel::sample( std::vector<double>&       value,
 
    if (interpolationSuccess == false) {
 
+#ifdef EVAL_AS_CHARE
+      eval_message* eval_msg;
+      evaluateArray(evalIndex).eval(point, CkCallbackResumeThread((void*&)eval_msg));
+      eval_msg->copyTo(value);
+      delete eval_msg;
+
+#else
       fine_scale_model.evaluate(point, value);
+#endif
 
       if (cm->m_sampler->m_verbose) {
          //         cout << "Interpolation failed: Adding key" << endl;

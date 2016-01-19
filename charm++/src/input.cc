@@ -24,7 +24,10 @@ void parse_input(string input_file, Input *in)
 
       file.close();
       boost::property_tree::read_json(buffer, pt);
-    }
+  } else {
+      std::cerr << "Could not open json file " << input_file << std::endl;
+      CkExit();
+ }
   try
     {
       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.CoarseScaleModel"))
@@ -107,6 +110,20 @@ void parse_input(string input_file, Input *in)
             CkPrintf("interpolate count                %d\n", in->interpCount);
           }
        }
+
+       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.Evaluate"))
+      {     
+        if (v.second.get<std::string>("id") == "type")
+          {
+            in->evalType = v.second.get<int>("value");
+            CkPrintf("evaluate type                 %d\n", in->evalType);
+          } 
+        if (v.second.get<std::string>("id") == "count")
+          {
+            in->evalCount = v.second.get<int>("value");
+            CkPrintf("evaluate count                %d\n", in->evalCount);
+          } 
+       }  
 
        BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.DBInterface"))
       { 

@@ -11,7 +11,7 @@ endif
 SILO=yes
 ifeq ($(SILO),yes)
 SILO_LOC=../CoEVP/silo/silo
-SILODIFF=../CoEVP/silo/silo/bin/silodiff
+SILODIFF=CoEVP/silo/silo/bin/silodiff
 endif
 
 all: tabasco
@@ -40,12 +40,28 @@ reference:
 test_CoEVP:
 	${MAKE} -C CoEVP FLANN=$(FLANN) REDIS=$(REDIS) SILO=$(SILO) CHARM=yes test
 
+dummy: ;
+
+TESTFILE=reftest.json
+
+CHARMRUN=../charm++/charm_bin/charmrun ++local ++p 1
+test/.charmflags: dummy
+	mkdir -p test
+	@[ -f $@ ] || touch $@
+	@echo "CHARMRUN=$(CHARMRUN)" | cmp -s $@ - || echo "CHARMRUN=$(CHARMRUN)" > $@
+
+TABASCO_OPTS=../charm++/input/$(TESTFILE)
+test/.tabascoopts: dummy
+	mkdir -p test
+	@[ -f $@ ] || touch $@
+	@echo "TABASCO_OPTS=$(TABASCO_OPTS)" | cmp -s $@ - || echo "TABASCO_OPTS=$(TABASCO_OPTS)" > $@
+
 STEPS=0500
 #bit hackish, but let's assume we have $(STEPS) steps
-test/taylor_$(STEPS).silo: charm++/charm_bin/TabaSCo
+test/taylor_$(STEPS).silo: charm++/charm_bin/TabaSCo test/.charmflags test/.tabascoopts
 	@[ "$(SILO)" = "yes" ] || { echo "make test needs SILO=yes" && exit 1; }
 	mkdir -p test
-	cd test && ../charm++/charm_bin/TabaSCo ../charm++/input/reftest.json
+	cd test && $(CHARMRUN) ../charm++/charm_bin/TabaSCo $(TABASCO_OPTS)
 
 SILODIFF_OPTS=-A 1e-8 -E _hdf5libinfo
 test: test/taylor_$(STEPS).silo 

@@ -19,10 +19,8 @@ env:
 
 before_script:
   - export PATH="/usr/lib/ccache:$PATH"
-  - git clone --depth=1 http://charm.cs.uiuc.edu/gerrit/charm &&
-    cd charm && 
-    ./build charm++ net-linux-x86_64 -j4 && export CHARM_ROOT=$PWD &&
-    cd ..;
+  - wget -O - http://charm.cs.illinois.edu/distrib/charm-6.6.1.tar.gz | tar -xz 
+  - cd charm && ./build charm++ net-linux-x86_64 -j4 && export CHARM_ROOT=$PWD && cd ..
 
 script:
   - make -j2 REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} CHARM_ROOT=${CHARM_ROOT} && 

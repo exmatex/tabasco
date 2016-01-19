@@ -27,6 +27,12 @@ inline void operator|(PUP::er &p, Tensor2Gen &tensor)
   PUParray(p, tensor.a, 9);
 }
 
+// PUP operator for Tensor4LSym
+inline void operator|(PUP::er &p, Tensor4LSym &tensor)
+{
+  PUParray(p, tensor.a, 36);
+}
+
 // PUP operator for ConstitutiveData
 inline void operator|(PUP::er &p, ConstitutiveData &cdata)
 {
@@ -50,6 +56,7 @@ class FineScaleModel : public CBase_FineScaleModel {
     int interpIndex;
     int dbIndex;
     bool remoteDB;
+    int evalIndex;
 
     size_t stateSize;
        
@@ -65,7 +72,7 @@ class FineScaleModel : public CBase_FineScaleModel {
   ModelDatabase * modelDB;
 
   FineScaleModel();
-  FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex, bool remoteDB);
+  FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex, bool remoteDB, int evalIndex);
   FineScaleModel(CkMigrateMessage *msg);
   ~FineScaleModel();
   void pup(PUP::er &p);

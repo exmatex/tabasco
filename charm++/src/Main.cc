@@ -4,6 +4,7 @@
 #include "FineScaleModel.h"
 #include "NearestNeighborSearch.h"
 #include "Interpolate.h"
+#include "Evaluate.h"
 #include "DBInterface.h"
 #include "DBMap.h"
 #include "DBVecMessage.h"
@@ -17,6 +18,7 @@
 /* readonly */ CProxy_FineScaleModel fineScaleArray;
 /* readonly */ CProxy_NearestNeighborSearch nnsArray;
 /* readonly */ CProxy_Interpolate interpolateArray;
+/* readonly */ CProxy_Evaluate evaluateArray;
 /* readonly */ CProxy_DBInterface DBArray;
 
 /*readonly*/ int coarseType;
@@ -31,6 +33,8 @@
 /*readonly*/ int numTrees;
 /*readonly*/ int interpType;
 /*readonly*/ int interpCount;
+/*readonly*/ int evalType;
+/*readonly*/ int evalCount;
 /*readonly*/ int dbType;
 /*readonly*/ int dbCount;
 /*readonly*/ bool dbRemote; //Do we need to declare this anywhere else for charm purposes?
@@ -60,6 +64,10 @@ Main::Main(CkArgMsg* msg)
   // chare object).
   mainProxy = thisProxy;
 
+  if(msg->argc < 2){
+    std::cerr << "Missing argument (json file)" << std::endl;
+    CkExit();
+  }
   // Get input values from json file
   Input in;
   char input_file[1024];
@@ -83,6 +91,10 @@ Main::Main(CkArgMsg* msg)
   // Get Interpolate parameters
   interpType = in.interpType;
   interpCount = in.interpCount;
+
+  // Get Evaluate parameters
+  evalType = in.evalType;
+  evalCount = in.evalCount;
 
   // Get DBInterface parameters
   dbType = in.dbType;
@@ -117,6 +129,8 @@ Main::Main(CkArgMsg* msg)
            "  NNS number of trees: %d\n"
            "  Interpolate type: %d\n"
            "  Interpolate count: %d\n"
+           "  Evaluate type: %d\n"
+           "  Evaluate count: %d\n"
            "  DBInterface type: %d\n"
            "  DBInterface count: %d\n"
            "  Use Remote DB %d\n"
@@ -125,15 +139,14 @@ Main::Main(CkArgMsg* msg)
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
           fineType, nnsType, nnsCount, pointDim, numTrees,
-          interpType, interpCount, dbType, dbCount, dbRemote, file_parts, visit_data_interval);
+          interpType, interpCount, evalType, evalCount, dbType, dbCount, dbRemote, file_parts, visit_data_interval);
 
-  // Setup chare array size
-  CkArrayOptions coarseOpts(coarseCount);
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
-  coarseOpts.setMap(rrMap);
   
-  // Create coarse scale model, Lulesh
+  // Setup chare array size
+  CkArrayOptions coarseOpts(coarseCount);
+  coarseOpts.setMap(rrMap);
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(coarseOpts);
 #ifdef SILO
   coarseScaleArray.setSiloParams(file_parts, visit_data_interval);
@@ -166,6 +179,12 @@ Main::Main(CkArgMsg* msg)
   // Create interpolates
   interpolateArray = CProxy_Interpolate::ckNew(opts);
 */
+
+  // Create Evaluates
+  CkArrayOptions evalOpts(evalCount);
+  evalOpts.setMap(rrMap);
+  evaluateArray = CProxy_Evaluate::ckNew(evalOpts);
+  evaluateArray.initialize(evalType);
 
   // Create fine scale models
   fineScaleArray = CProxy_FineScaleModel::ckNew();  
