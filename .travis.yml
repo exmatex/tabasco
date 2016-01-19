@@ -14,8 +14,11 @@ addons:
 
 env:
   matrix: 
-    - SILO=yes FLANN=no  REDIS=no
-    - SILO=no  FLANN=no  REDIS=no
+    - SILO=yes FLANN=no   REDIS=no
+    - SILO=yes FLANN=yes  REDIS=no
+    - SILO=yes FLANN=no   REDIS=yes
+    - SILO=yes FLANN=yes  REDIS=yes
+    - SILO=no  FLANN=no   REDIS=no
 
 before_script:
   - export PATH="/usr/lib/ccache:$PATH"
