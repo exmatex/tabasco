@@ -98,7 +98,8 @@ Main::Main(CkArgMsg* msg)
 
   // Get DBInterface parameters
   dbType = in.dbType;
-  dbCount = in.dbCount;
+  int tempDBCount;
+  tempDBCount = in.dbCount;
   dbRemote = (in.dbRemote != 0) ? true : false;
 
   // Get simulation stop time
@@ -111,6 +112,28 @@ Main::Main(CkArgMsg* msg)
   file_parts = (in.file_parts != 0) ? in.file_parts : 1;
   visit_data_interval = in.visit_data_interval;
 
+  //Set DBCount before moving forward for output purposes
+  // Create DB interfaces with desired backend, if we need them
+  if(dbRemote == true)
+  {
+    int numDBs = tempDBCount;
+    if(CmiCpuTopologyEnabled())
+    {
+        numDBs = std::min(CmiNumPhysicalNodes(), tempDBCount);
+    }
+    //CkPrintf("numDBs = %d\n", numDBs);
+    CProxy_DBMap DBMapProxy = CProxy_DBMap::ckNew(numDBs);
+    //Create array options for DB Interface
+    CkArrayOptions dbMapOptions(numDBs);
+    dbMapOptions.setMap(DBMapProxy);
+
+    DBArray = CProxy_DBInterface::ckNew(dbType, dbMapOptions);
+    dbCount = numDBs;
+  }
+  else
+  {
+    dbCount = 0;
+  }
 
   // Set other parameters
 
@@ -153,21 +176,7 @@ Main::Main(CkArgMsg* msg)
 #endif
   coarseScaleArray.setRemoteDB(dbRemote);
 
-  //Create DB Map
-  ///TODO: Figure out a good mapping scheme. For now, we force a single DB node with intentions of explicitely defining/passing a node list
-  ///TODO: Actually take advantage of the dbCount variable
-  std::vector<int> nodeList;
-  nodeList.push_back(0);
-  CProxy_DBMap DBMapProxy = CProxy_DBMap::ckNew(nodeList);
-  //Create array options for DB Interface
-  CkArrayOptions dbMapOptions(1);
-  dbMapOptions.setMap(DBMapProxy);
 
-  // Create DB interfaces with desired backend, if we need them
-  if(dbRemote == true)
-  {
-    DBArray = CProxy_DBInterface::ckNew(dbType, dbMapOptions);
-  }
 
   // Create Nearest Neighbor Searches
   CkArrayOptions nnsOpts(nnsCount);

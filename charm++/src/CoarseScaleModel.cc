@@ -160,8 +160,7 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
 
   int nnsIndex = nnsRange[0];
   int interpIndex = interpRange[0];
-  //int dbIndex = dbRange[0];
-  int dbIndex = 0; ///TODO: Actually support multile DBInterfaceChares by doing a proper mapping
+  int dbIndex = dbRange[0];
   int evalIndex = evalRange[0];
 
   for (Index_t i = 0; i < numElems; ++i) {
@@ -177,7 +176,6 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
     if (dbIndex >= dbRange[1]) dbIndex = dbRange[0];
     evalIndex++;
     if (evalIndex >= evalRange[1]) evalIndex = evalRange[0];
-    dbIndex = 0; ///TODO: Actually support multiple DBInterfaceChares by doing a proper mapping
   }
   printf("%d FineScaleModels created count = %d\n", thisIndex, numElems);
 }
