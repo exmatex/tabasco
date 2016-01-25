@@ -160,11 +160,6 @@ Evaluate::Evaluate()
 {
   pm = NULL;
 
-  double D_0 = 1.e-2;
-  double m = 1./20.;
-  double g = 2.e-3; // (Mbar)
-
-  pm = (Plasticity*)(new Taylor(D_0, m, g));
 }
 
 Evaluate::Evaluate(CkMigrateMessage *msg)
@@ -187,7 +182,7 @@ void Evaluate::initialize(int etype)
   evalType = etype;
 
   // Taylor plasticity model
-  if (evalType = 0) {
+  if (evalType == 0) {
       double D_0 = 1.e-2;
       double m = 1./20.;
       double g = 2.e-3; // (Mbar)
