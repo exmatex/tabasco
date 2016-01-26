@@ -46,10 +46,22 @@ endif
 BOOSTLIB=$(BOOST_INCLUDES)/../lib
 BOOST_LDFLAG=-L$(BOOSTLIB)
 
-LINALG_LDFLAG=$(shell pkg-config --silence-errors --libs lapack blas || true)
-ifeq ($(LINALG_LDFLAG), )
-LINALG_LDFLAG= -llapack -lblas
+LINALG_LDFLAG =
+
+LAPACK = $(shell pkg-config --silence-errors --libs lapack blas || true)
+ifeq ($(strip $(LAPACK)),)
+ifneq ($(strip $(LAPACK_LOC)),)
+LAPACK += -L$(LAPACK_LOC)
 endif
+LAPACK += -llapack
+
+ifneq ($(strip $(BLAS_LOC)),)
+LAPACK += -L$(BLAS_LOC)
+endif
+LAPACK += -lblas
+endif
+
+LINALG_LDFLAG += $(LAPACK)
 
 OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o Evaluate.o DBInterface.o input.o Main.o DBVecMessage.o DBMap.o ModelDB_Charm.o)
 # ../CoEVP/LULESH/lulesh.o)
