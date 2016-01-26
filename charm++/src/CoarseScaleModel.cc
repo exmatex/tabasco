@@ -6,6 +6,8 @@
 #include "Constitutive.h"
 #include "tensor.h"
 
+#include "LULESH/siloDump.h"
+
 extern CProxy_Main mainProxy;
 extern CProxy_CoarseScaleModel coarseScaleArray;
 extern CProxy_FineScaleModel fineScaleArray;
@@ -117,26 +119,6 @@ void CoarseScaleModel::pup(PUP::er &p)
   p|use_adaptive_sampling;
 }
 
-void CoarseScaleModel::startElementFineScaleQuery(int step, int nelems)
-{
-  nstep = step;
-
-  //CkCallback cb(CkIndex_CoarseScaleModel::receiveNewPoint((Msg*)NULL), thisProxy);
-/*
-  for (int j = 0; j < nelems; j++)
-  {
-    //fineScaleArray(thisIndex.x, thisIndex.y, thisIndex.z, j).query(j, nstep, currentPt, cb);
-    fineScaleArray(thisIndex.x, j).query(j, nstep, currentPt);
-  }
-*/
-}
-
-void CoarseScaleModel::updateElement(int whichEl, int whichIter, int newPt)
-{
-  int currentPt = newPt;
-	  printf("Iter %d Coarse %d Element %d update newPt %d\n", whichIter, thisIndex, whichEl, newPt);
-}
-
 void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime)
 {
   lulesh->Initialize(thisIndex, numRanks);
@@ -149,12 +131,19 @@ void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, Real_t
   state_size = new size_t[numElems];
   use_adaptive_sampling = (useAdaptiveSampling) ? 1 : 0;
   ConstructFineScaleModel(useAdaptiveSampling);
+
 }
 
 void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
 {
+  ModelDatabase * global_modelDB = nullptr;
+  ApproxNearestNeighbors* global_ann = nullptr;
+  int flanning = 0;
+  int flann_n_trees=1;
+  int flann_n_checks=20; 
+  int global_ns=0;
   // Create Lulesh-local parts of fine scale models
-  lulesh->ConstructFineScaleModel(useAdaptiveSampling);
+  lulesh->ConstructFineScaleModel(useAdaptiveSampling,global_modelDB,global_ann,flanning,flann_n_trees,flann_n_checks,global_ns);
 
   // Now create 2-D fine scale model chares
   numElems = lulesh->domain.numElem();
@@ -177,7 +166,7 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
   for (Index_t i = 0; i < numElems; ++i) {
     state_size[i] = lulesh->domain.cm(i)->getStateSize();
 
-    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex, evalIndex);
+    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex, remoteDB, evalIndex);
     
     nnsIndex++;
     if (nnsIndex >= nnsRange[1]) nnsIndex = nnsRange[0];
@@ -369,11 +358,6 @@ void CoarseScaleModel::UpdateStressForElems2(int reducedIters)
 
 }
 
-void CoarseScaleModel::go(int numRanks, bool useAdaptiveSampling)
-{
-  lulesh->go(thisIndex, numRanks, useAdaptiveSampling);
-}
-
 void CoarseScaleModel::sendNodalMass()
 {
   int xferFields = 1;
@@ -385,6 +369,8 @@ void CoarseScaleModel::sendNodalMass()
   sendDataNodes(xferFields, fieldData);
 }
 
+#define NBR_M1 11
+#define NBR_P1 22
 void CoarseScaleModel::sendDataNodes(int xferFields, Real_t **fieldData)
 {
   if (lulesh->domain.numSlices() == 1) return ;
@@ -739,4 +725,29 @@ void CoarseScaleModel::updatePositionVelocity(int msgType, int rsize, Real_t rda
 
   // Receive force data from L/R neighbor
   receiveDataNodes(msgType, size, xferFields, fieldData, rdata);    
-} 
+}
+
+void CoarseScaleModel::makeADump(bool forceDump)
+{
+#ifdef SILO
+   int debug_topology = 0; //Eventually pull this out
+   int sampling = this->use_adaptive_sampling; //Verify these are the same
+   //int sampling = 1;
+   if ((this->visit_data_interval != 0) and ( (lulesh->domain.cycle() % this->visit_data_interval == 0) or forceDump)) {
+      DumpDomain(&(lulesh->domain), lulesh->domain.sliceLoc(), lulesh->domain.numSlices(), 
+                 ((lulesh->domain.numSlices() == 1) ? this->file_parts : 0), sampling, debug_topology ) ;
+   }
+#endif
+}
+
+
+void CoarseScaleModel::setSiloParams(int numParts, int dataInterval)
+{
+  this->file_parts = numParts;
+  this->visit_data_interval = dataInterval;
+}
+
+void CoarseScaleModel::setRemoteDB(bool remoteDB)
+{
+  this->remoteDB = remoteDB;
+}

@@ -24,7 +24,10 @@ void parse_input(string input_file, Input *in)
 
       file.close();
       boost::property_tree::read_json(buffer, pt);
-    }
+  } else {
+      std::cerr << "Could not open json file " << input_file << std::endl;
+      CkExit();
+ }
   try
     {
       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.CoarseScaleModel"))
@@ -48,6 +51,16 @@ void parse_input(string input_file, Input *in)
           {
             in->stopTime = v.second.get<Real_t>("value");
             CkPrintf("stop time                         %e\n", in->stopTime);
+          }
+        if (v.second.get<std::string>("id") == "file parts")
+          {
+            in->file_parts = v.second.get<int>("value");
+            CkPrintf("file parts                        %e\n", in->file_parts);
+          }
+        if (v.second.get<std::string>("id") == "visit data interval")
+          {
+            in->visit_data_interval = v.second.get<int>("value");
+            CkPrintf("visit data interval               %e\n", in->visit_data_interval);
           }
       }
 
@@ -123,6 +136,11 @@ void parse_input(string input_file, Input *in)
           {
             in->dbCount = v.second.get<int>("value");
             CkPrintf("DB count                %d\n", in->dbCount);
+          }
+        if (v.second.get<std::string>("id") == "remote")
+          {
+            in->dbRemote = v.second.get<int>("value");
+            CkPrintf("Remote DB                %d\n", in->dbRemote);
           }
        }
 

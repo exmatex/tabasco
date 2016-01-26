@@ -6,9 +6,12 @@
 #include "Interpolate.h"
 #include "Evaluate.h"
 #include "DBInterface.h"
+#include "DBMap.h"
+#include "DBVecMessage.h"
 #include "input.h"
 
 #include <cstring>
+#include <vector>
 
 /* readonly */ CProxy_Main mainProxy;
 /* readonly */ CProxy_CoarseScaleModel coarseScaleArray;
@@ -34,6 +37,10 @@
 /*readonly*/ int evalCount;
 /*readonly*/ int dbType;
 /*readonly*/ int dbCount;
+/*readonly*/ bool dbRemote; //Do we need to declare this anywhere else for charm purposes?
+
+/*readonly*/ int file_parts; //Do we need to declare this anywhere else for charm purposes?
+/*readonly*/ int visit_data_interval; //Do we need to declare this anywhere else for charm purposes?
 
 // Entry point of Charm++ application
 Main::Main(CkArgMsg* msg)
@@ -57,6 +64,10 @@ Main::Main(CkArgMsg* msg)
   // chare object).
   mainProxy = thisProxy;
 
+  if(msg->argc < 2){
+    std::cerr << "Missing argument (json file)" << std::endl;
+    CkExit();
+  }
   // Get input values from json file
   Input in;
   char input_file[1024];
@@ -87,7 +98,9 @@ Main::Main(CkArgMsg* msg)
 
   // Get DBInterface parameters
   dbType = in.dbType;
-  dbCount = in.dbCount;
+  int tempDBCount;
+  tempDBCount = in.dbCount;
+  dbRemote = (in.dbRemote != 0) ? true : false;
 
   // Get simulation stop time
   stopTime = in.stopTime;
@@ -95,6 +108,32 @@ Main::Main(CkArgMsg* msg)
   // Neighbor limit
   NBR_LIMIT = 10;
 
+  // Get SILO parameters
+  file_parts = (in.file_parts != 0) ? in.file_parts : 1;
+  visit_data_interval = in.visit_data_interval;
+
+  //Set DBCount before moving forward for output purposes
+  // Create DB interfaces with desired backend, if we need them
+  if(dbRemote == true)
+  {
+    int numDBs = tempDBCount;
+    if(CmiCpuTopologyEnabled())
+    {
+        numDBs = std::min(CmiNumPhysicalNodes(), tempDBCount);
+    }
+    //CkPrintf("numDBs = %d\n", numDBs);
+    CProxy_DBMap DBMapProxy = CProxy_DBMap::ckNew(numDBs);
+    //Create array options for DB Interface
+    CkArrayOptions dbMapOptions(numDBs);
+    dbMapOptions.setMap(DBMapProxy);
+
+    DBArray = CProxy_DBInterface::ckNew(dbType, dbMapOptions);
+    dbCount = numDBs;
+  }
+  else
+  {
+    dbCount = 0;
+  }
 
   // Set other parameters
 
@@ -116,11 +155,14 @@ Main::Main(CkArgMsg* msg)
            "  Evaluate type: %d\n"
            "  Evaluate count: %d\n"
            "  DBInterface type: %d\n"
-           "  DBInterface count: %d\n",
+           "  DBInterface count: %d\n"
+           "  Use Remote DB %d\n"
+           "  Number of SILO Files for Single Domain: %d\n"
+           "  Visit Data Interval: %d\n",
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
           fineType, nnsType, nnsCount, pointDim, numTrees,
-          interpType, interpCount, evalType, evalCount, dbType, dbCount);
+          interpType, interpCount, evalType, evalCount, dbType, dbCount, dbRemote, file_parts, visit_data_interval);
 
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
@@ -129,11 +171,12 @@ Main::Main(CkArgMsg* msg)
   CkArrayOptions coarseOpts(coarseCount);
   coarseOpts.setMap(rrMap);
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(coarseOpts);
-    
-/*
-  // Create DB interfaces
-  DBArray = CProxy_DBInterface::ckNew(opts);
-*/
+#ifdef SILO
+  coarseScaleArray.setSiloParams(file_parts, visit_data_interval);
+#endif
+  coarseScaleArray.setRemoteDB(dbRemote);
+
+
 
   // Create Nearest Neighbor Searches
   CkArrayOptions nnsOpts(nnsCount);

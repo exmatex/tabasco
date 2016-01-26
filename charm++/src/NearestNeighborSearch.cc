@@ -1,6 +1,11 @@
 #include "TabaSCo.decl.h"
 #include "NearestNeighborSearch.h"
 #include "DBInterface.h"
+#include <stdexcept>
+
+// Approximate nearest neighbor search options
+#include "ApproxNearestNeighborsFLANN.h"
+#include "ApproxNearestNeighborsMTree.h"
 
 extern CProxy_Main mainProxy;
 extern CProxy_DBInterface DBArray;
@@ -125,7 +130,8 @@ void NearestNeighborSearch::initialize(int ntype, int dim, int ntrees)
 #ifdef FLANN
     int nchecks = 20;
     ann = (ApproxNearestNeighbors*)(new ApproxNearestNeighborsFLANN(dim, ntrees, nchecks));
-    //printf("FLANN NNS creatd.\n");
+#else
+    throw std::runtime_error("FLANN not compiled in"); 
 #endif
   }
   else
@@ -136,7 +142,6 @@ void NearestNeighborSearch::initialize(int ntype, int dim, int ntrees)
                                                                     mtreeDirectoryName,
                                                                     &(std::cout),
                                                                     false));
-    //printf("MTree NNS created.\n");
   }
 
 }

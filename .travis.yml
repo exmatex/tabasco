@@ -1,0 +1,42 @@
+language: cpp
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - ccache
+      - gfortan #for silo
+      - libhdf5-serial-dev #for silo
+      - liblapack-dev
+      - libblas-dev
+      - libboost-dev
+
+env:
+  matrix: 
+    - SILO=yes FLANN=no   REDIS=no
+    - SILO=yes FLANN=yes  REDIS=no
+    - SILO=yes FLANN=no   REDIS=yes
+    - SILO=yes FLANN=yes  REDIS=yes
+    - SILO=no  FLANN=no   REDIS=no
+
+before_script:
+  - export PATH="/usr/lib/ccache:$PATH"
+  - wget -O - http://charm.cs.illinois.edu/distrib/charm-6.6.1.tar.gz | tar -xz 
+  - cd charm && ./build charm++ net-linux-x86_64 -j4 && export CHARM_ROOT=$PWD && cd ..
+
+script:
+  - make -j2 REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} CHARM_ROOT=${CHARM_ROOT} && 
+    make get_reference &&
+    { [[ ${SILO} = no ]] || make test REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO}; }
+
+cache:
+  directories:
+    - $HOME/.ccache
+
+compiler:
+  - gcc
+
+notifications:
+  email:
+    - tabasco-dev@lanl.gov  

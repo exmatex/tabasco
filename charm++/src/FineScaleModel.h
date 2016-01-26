@@ -55,6 +55,7 @@ class FineScaleModel : public CBase_FineScaleModel {
     int nnsIndex;
     int interpIndex;
     int dbIndex;
+    bool remoteDB;
     int evalIndex;
 
     size_t stateSize;
@@ -71,7 +72,7 @@ class FineScaleModel : public CBase_FineScaleModel {
   ModelDatabase * modelDB;
 
   FineScaleModel();
-  FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex, int evalIndex);
+  FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex, bool remoteDB, int evalIndex);
   FineScaleModel(CkMigrateMessage *msg);
   ~FineScaleModel();
   void pup(PUP::er &p);

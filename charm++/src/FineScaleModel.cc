@@ -14,6 +14,7 @@
 #include "MurmurHash3.h"
 
 #include "ModelDB_HashMap.h"
+#include "ModelDB_Charm.h"
 
 #define MURMUR_SEED 42
 
@@ -28,7 +29,7 @@ extern CProxy_DBInterface DBArray;
 FineScaleModel::FineScaleModel()
 {}
 
-FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex, int evalIndex) : stateSize(state_size), nnsIndex(nnsIndex), interpIndex(interpIndex), dbIndex(dbIndex), evalIndex(evalIndex) 
+FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int nnsIndex, int interpIndex, int dbIndex, bool remoteDB, int evalIndex) : stateSize(state_size), nnsIndex(nnsIndex), interpIndex(interpIndex), dbIndex(dbIndex), remoteDB(remoteDB), evalIndex(evalIndex)
 {
   // Ordering for a 2D array chare is x, y 
 /*
@@ -69,7 +70,14 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
 #endif
 #endif
 
-   modelDB = new ModelDB_HashMap(); 
+   if(remoteDB == false)
+   {
+     modelDB = new ModelDB_HashMap(); 
+   }
+   else
+   {
+     modelDB = new ModelDB_Charm(dbIndex); 
+   }
   // Construct the equation of state
   EOS* eos_model;
   /* 
@@ -96,7 +104,8 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
 //#ifndef NNS_AS_CHARE
                                                  ann, 
 //#endif
-                                                 L, bulk_modulus, shear_modulus, eos_model,
+                                                 modelDB,
+						 L, bulk_modulus, shear_modulus, eos_model,
                                                  plasticity_model, use_adaptive_sampling, stateSize));
   em = (ElastoViscoPlasticity*) cm;
 }
@@ -123,6 +132,7 @@ void FineScaleModel::pup(PUP::er &p)
   p|interpIndex;
   p|dbIndex;
   p|evalIndex;
+  p|remoteDB;
   p|stateSize;
 }
 
@@ -577,7 +587,7 @@ bool FineScaleModel::interpolate(double            * value,
 
          } else {
 
-            InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelDB->extract(model_key);
+            InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelDB->extract(model_key,(InterpolationModelFactoryPointer *)&cm->m_sampler->m_interp->_modelFactory);
 
             //
             // check if can interpolate; need a valid model for this
@@ -783,7 +793,7 @@ bool FineScaleModel::interpolate(double            * value,
 
         } else {
 
-          const InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelDB->extract(model_key);
+          const InterpolationModelPtr hintKrigingModel = cm->m_sampler->m_interp->_modelDB->extract(model_key,(InterpolationModelFactoryPointer *)&cm->m_sampler->m_interp->_modelFactory);
 
           //
           // check the distance between hintKrigingModel and point
@@ -1050,7 +1060,7 @@ void FineScaleModel::insert(int               & hint,
         uint128_t model_key = cm->m_sampler->m_interp->_ann.getKey(hint);
 #endif
 
-        InterpolationModelPtr krigingModel = cm->m_sampler->m_interp->_modelDB->extract(model_key);
+        InterpolationModelPtr krigingModel = cm->m_sampler->m_interp->_modelDB->extract(model_key,(InterpolationModelFactoryPointer *)&cm->m_sampler->m_interp->_modelFactory);
 
         //
         // check the size of the model; if the next point would put
@@ -1289,7 +1299,7 @@ FineScaleModel::findClosestCoKrigingModel(
            
            uint128_t model_key = keys[0];
 
-           closestKrigingModel = modelDB->extract(model_key);
+           closestKrigingModel = modelDB->extract(model_key,(InterpolationModelFactoryPointer *)&modelFactory);
 
            closestKrigingModelId = ids[0];
         }
@@ -1369,7 +1379,7 @@ exit(1);
 
               uint128_t model_key = keys[iter];
 
-              InterpolationModelPtr krigingModel = modelDB->extract(model_key);
+              InterpolationModelPtr krigingModel = modelDB->extract(model_key,(InterpolationModelFactoryPointer *)&_modelFactory);
               //
               // skip invalid models
               //
@@ -1473,7 +1483,7 @@ FineScaleModel::findBestCoKrigingModel(
 
               uint128_t model_key = keys[iter];
 
-              InterpolationModelPtr krigingModel = modelDB->extract(model_key);
+              InterpolationModelPtr krigingModel = modelDB->extract(model_key,(InterpolationModelFactoryPointer *)&_modelFactory);
 
               //
               // skip if invalid model
@@ -1514,7 +1524,7 @@ FineScaleModel::findBestCoKrigingModel(
            
            uint128_t model_key = keys[0];
 
-           InterpolationModelPtr krigingModel = modelDB->extract(model_key);
+           InterpolationModelPtr krigingModel = modelDB->extract(model_key,(InterpolationModelFactoryPointer *)&_modelFactory);
 
            return std::make_pair(ids[0], krigingModel);
 

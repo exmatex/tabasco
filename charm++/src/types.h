@@ -68,7 +68,10 @@ typedef struct {
   int evalCount;
   int dbType;
   int dbCount;
+  int dbRemote;
   Real_t stopTime;
+  int file_parts;
+  int visit_data_interval;
 } Save_Input;
 /** struct containing the 2D field
  * **/
@@ -94,6 +97,8 @@ void pup(PUP::er &p)
   p | dbType;
   p | dbCount;
   p | stopTime;
+  p | file_parts;
+  p | visit_data_interval;
 }
 };
 
@@ -164,4 +169,5 @@ inline void xy_to_index(int x, int y, int* index, Input in)
   *index = x + y * in.dim_x;
 */
 }
+
 #endif

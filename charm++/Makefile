@@ -1,12 +1,28 @@
 SRCDIR=src
 
+ifneq ($(shell which charmc), )
+CHARM_ROOT=$(dir $(shell which charmc))..
+endif
+
 ##############CHARM##########
 ifeq (,$(CHARM_ROOT))
 $(info Please establish Charmm++ environment variables before using this Makefile.)
 $(info E.g. by running setting CHARM_ROOT or run 'module load charm++')
 $(error CHARM_ROOT is not set)
+else
+$(info using CHARM_ROOT=$(CHARM_ROOT))
 endif
+
+ifneq ($(wildcard $(CHARM_ROOT)/include/*/charm.h), )
+CHARMINC=$(dir $(wildcard $(CHARM_ROOT)/include/*/charm.h))
+$(info using CHARMINC=$(CHARMINC))
+else
 CHARMINC=$(CHARM_ROOT)/include/
+endif
+
+
+
+
 CHARMBIN=$(CHARM_ROOT)/bin
 CXX=$(CHARMBIN)/charmc
 OBJDIR=charm_obj
@@ -17,9 +33,9 @@ OPTFLAGS= -g -O3 -I../CoEVP -I../CoEVP/CM/include -std=c++0x
 #other features
 #DEFS=-DTRACE
 
-#ifneq ($(wildcard /usr/include/boost/foreach.hpp), )
-#BOOST_INCLUDES=/usr/include
-#endif
+ifneq ($(wildcard /usr/include/boost/foreach.hpp), )
+BOOST_INCLUDES=/usr/include
+endif
 
 ifeq ($(BOOST_INCLUDES), )
 $(error Set BOOST_INCLUDES or run 'module load boost' first)
@@ -35,7 +51,7 @@ ifeq ($(LINALG_LDFLAG), )
 LINALG_LDFLAG= -llapack -lblas
 endif
 
-OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o Evaluate.o DBInterface.o input.o Main.o)
+OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o Evaluate.o DBInterface.o input.o Main.o DBVecMessage.o DBMap.o ModelDB_Charm.o)
 # ../CoEVP/LULESH/lulesh.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
 ifeq ($(NNS_AS_CHARE), yes)
@@ -51,16 +67,35 @@ ifeq ($(EVAL_AS_CHARE), yes)
 CXXFLAGS += -DEVAL_AS_CHARE
 endif
 
+
+ifneq ($(strip $(FLANN_LOC)),)
+CXXFLAGS += -DFLANN -I$(realpath $(FLANN_LOC)) -I$(realpath $(FLANN_LOC))/flann
+endif
+
+ifneq ($(strip $(REDIS_LOC)),)
+CXXFLAGS += -DREDIS -I$(realpath $(REDIS_LOC))
+endif
+
 #LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 #LDFLAGS= -tracemode projections -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
+ifneq ($(strip $(SILO_LOC)),)
+CXXFLAGS += -DSILO
+LDFLAGS += -Wl,-rpath,$(realpath $(SILO_LOC))/lib -L$(realpath $(SILO_LOC))/lib -lsiloh5
+endif
 
-LULESH_OBJ=../CoEVP/LULESH/lulesh.o
+LULESH_OBJ=../CoEVP/LULESH/lulesh.o ../CoEVP/LULESH/siloDump.o
 
 #target
 NAME=$(BINDIR)/TabaSCo
 default: all
 all: $(SUBDIRS) $(OBJDIR) $(NAME)
+
+dummy: ;
+
+$(OBJDIR)/.cxxflags: dummy
+	@[ -f $@ ] || touch $@
+	@echo "CXXFLAGS=$(CXXFLAGS)" | cmp -s $@ - || echo "CXXFLAGS=$(CXXFLAGS)" > $@
 
 $(OBJDIR)/%.d: $(SRCDIR)/%.cc
 	@#1. sed:  put one file per line * * -> *\\\n*
@@ -100,7 +135,7 @@ $(NAME): $(OBJS) $(LULESH_OBJ)
 	@mv charmrun $(BINDIR)/
 
 #GNU make implicit rule
-$(OBJDIR)/%.o: $(SRCDIR)/%.cc
+$(OBJDIR)/%.o: $(SRCDIR)/%.cc $(OBJDIR)/.cxxflags
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 .PHONY: $(SUBDIRS)
