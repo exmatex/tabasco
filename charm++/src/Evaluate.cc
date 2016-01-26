@@ -5,6 +5,7 @@
 
 extern CProxy_Main mainProxy;
 extern CProxy_FineScaleModel fineScaleArray;
+extern CProxy_Evaluate evaluateArray;
 
 eval_message::eval_message(std::vector<double>& val) : size(val.size())
 {
@@ -58,9 +59,10 @@ eval_message::unpack(void *inbuf)
 void
 eval_message::copyTo(std::vector<double>& val)
 {
+  // It is assumed that the std::vector val has been sized
   for (int i = 0; i < size; i++)
   {
-    val.push_back(value[i]);
+    val[i] = value[i];
   }
 }
 
@@ -169,7 +171,7 @@ Evaluate::Evaluate(CkMigrateMessage *msg)
 
 Evaluate::~Evaluate()
 {
-
+  if (pm != NULL) delete pm;
 }
 
 void Evaluate::pup(PUP::er &p)

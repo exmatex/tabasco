@@ -47,7 +47,6 @@ class Evaluate : public CBase_Evaluate {
 
   public:
     Plasticity *pm;
-    Taylor *tm;
 
   Evaluate();
   Evaluate(CkMigrateMessage *msg);

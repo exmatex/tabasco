@@ -19,6 +19,7 @@
 
 extern CProxy_Main mainProxy;
 extern CProxy_CoarseScaleModel coarseScaleArray;
+extern CProxy_FineScaleModel fineScaleArray;
 extern CProxy_NearestNeighborSearch nnsArray;
 extern CProxy_Interpolate interpolateArray;
 extern CProxy_Evaluate evaluateArray;
@@ -121,6 +122,7 @@ void FineScaleModel::pup(PUP::er &p)
   p|nnsIndex;
   p|interpIndex;
   p|dbIndex;
+  p|evalIndex;
   p|stateSize;
 }
 
