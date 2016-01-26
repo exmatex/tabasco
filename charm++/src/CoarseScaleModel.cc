@@ -6,7 +6,9 @@
 #include "Constitutive.h"
 #include "tensor.h"
 
+#ifdef SILO
 #include "LULESH/siloDump.h"
+#endif
 
 extern CProxy_Main mainProxy;
 extern CProxy_CoarseScaleModel coarseScaleArray;
