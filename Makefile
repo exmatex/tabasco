@@ -13,11 +13,12 @@ ifeq ($(SILO),yes)
 SILO_LOC=../CoEVP/silo/silo
 SILODIFF=CoEVP/silo/silo/bin/silodiff
 endif
+TWEMPROXY=no
 
 all: tabasco
 
 libcm:
-	${MAKE} -C CoEVP FLANN=$(FLANN) REDIS=$(REDIS) SILO=$(SILO) CHARM=yes
+	${MAKE} -C CoEVP FLANN=$(FLANN) REDIS=$(REDIS) SILO=$(SILO) TWEMPROXY=$(TWEMPROXY) CHARM=yes 
 
 tabasco: charm++/charm_bin/TabaSCo
 
