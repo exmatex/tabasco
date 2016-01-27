@@ -24,7 +24,7 @@ endif
 
 
 CHARMBIN=$(CHARM_ROOT)/bin
-CXX=$(CHARMBIN)/charmc
+CHARMCXX=$(CHARMBIN)/charmc
 OBJDIR=charm_obj
 BINDIR=charm_bin
 
@@ -121,7 +121,7 @@ $(OBJDIR)/%.d: $(SRCDIR)/%.cc
 #Charmm++ ci files
 $(SRCDIR)/%.decl.h $(SRCDIR)/%.def.h: $(SRCDIR)/%.ci
 	@#charmc writes to pwd only
-	cd $(<D) && $(CXX) $(<F)
+	cd $(<D) && $(CHARMCXX) $(<F)
 
 DEPS=$(OBJS:.o=.d)
 ifneq "$(MAKECMDGOALS)" "clean"
@@ -143,12 +143,12 @@ $(OBJDIR):
 ##--- Executable ---##
 
 $(NAME): $(OBJS) $(LULESH_OBJ)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+	$(CHARMCXX) -o $@ $^ $(LDFLAGS)
 	@mv charmrun $(BINDIR)/
 
 #GNU make implicit rule
 $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(OBJDIR)/.cxxflags
-	$(CXX) -c $(CXXFLAGS) $< -o $@
+	$(CHARMCXX) -c $(CXXFLAGS) $< -o $@
 
 .PHONY: $(SUBDIRS)
 $(SUBDIRS):
