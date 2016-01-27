@@ -148,7 +148,7 @@ $(NAME): $(OBJS) $(LULESH_OBJ)
 
 #GNU make implicit rule
 $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(OBJDIR)/.cxxflags
-	$(CHARMCXX) -c $(CXXFLAGS) $< -o $@
+	$(CHARMCXX) -c $(CXXFLAGS) $(CCFLAGS) $< -o $@
 
 .PHONY: $(SUBDIRS)
 $(SUBDIRS):
