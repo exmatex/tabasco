@@ -300,12 +300,16 @@ void CoarseScaleModel::updateAdvanceResults(int elemNum, ConstitutiveData cm_dat
 
   const Tensor2Sym& sigma_prime = cm_data.sigma_prime;
 
-  lulesh->domain.sx(elemNum) = sigma_prime(1,1);
-  lulesh->domain.sy(elemNum) = sigma_prime(2,2);
-  lulesh->domain.txy(elemNum) = sigma_prime(2,1);
-  lulesh->domain.txz(elemNum) = sigma_prime(3,1);
-  lulesh->domain.tyz(elemNum) = sigma_prime(3,2);
+  Real_t sx  = lulesh->domain.sx(elemNum) = sigma_prime(1,1);
+  Real_t sy  = lulesh->domain.sy(elemNum) = sigma_prime(2,2);
+  Real_t sz  = - sx - sy;
+  Real_t txy = lulesh->domain.txy(elemNum) = sigma_prime(2,1);
+  Real_t txz = lulesh->domain.txz(elemNum) = sigma_prime(3,1);
+  Real_t tyz = lulesh->domain.tyz(elemNum) = sigma_prime(3,2);
   
+  lulesh->domain.mises(elemNum) = SQRT( Real_t(0.5) * ( (sy - sz)*(sy - sz) + (sz - sx)*(sz - sx) + (sx - sy)*(sx - sy) )
+                    + Real_t(3.0) * ( txy*txy + txz*txz + tyz*tyz) );
+
   if (max_local_newton_iters > max_nonlinear_iters)
   {
     max_nonlinear_iters = max_local_newton_iters;
