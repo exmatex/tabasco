@@ -21,11 +21,15 @@
         {"id": "type",                 "value": "0"},
         {"id": "count",                "value": "10"}
     ],
+    "Evaluate": [
+        {"id": "type",                 "value": "0"}, 
+        {"id": "count",                "value": "1"} 
+    ],
     "DBInterface": [
         {"id": "type",                 "value": "0"},
         {"id": "count",                "value": "10"},
 		{"id": "nodes",                 "value": "1"},
-        {"id": "remote",                "value": "0"}
+        {"id": "remote",                "value": "1"}
     ]
   }
 }
