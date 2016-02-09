@@ -246,7 +246,7 @@ mainmodule TabaSCo {
 
   // DB interface
   array [1D] DBInterface {
-    entry DBInterface(int backType);
+    entry DBInterface(int numDBNodes, int backType);
     entry void push(uint128_t key, std::vector<double> buf, unsigned long key_length);
     entry [sync] DBVecMessage * pull(uint128_t key);
     entry [sync] DBVecMessage * pull_key(uint128_t key);
@@ -255,7 +255,7 @@ mainmodule TabaSCo {
 
   // Processor Pinned DB interface
   group DBMap : CkArrayMap {
-    entry DBMap(int dbNodeCount);
+    entry DBMap(int dbCount, int dbNodeCount);
     entry DBMap(std::vector<int> nodeList);
   };
 

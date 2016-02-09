@@ -17,10 +17,11 @@
     arrayProxy = CProxy_DBInterface::ckNew(mapOptions);
 */
 
-DBMap::DBMap(int dbNodeCount)
+DBMap::DBMap(int dbCount, int dbNodeCount)
 {
     //Specify the number of Database Nodes/Chares
     this->dbNodeCount = dbNodeCount;
+	this->dbCount = dbCount;
     this->useNodeList = false;
 }
 
@@ -59,8 +60,9 @@ int DBMap::procNum(int, const CkArrayIndex &iIndex)
         }
         else
         {
-            //Just round-robin the physical nodes
-            int physNode = index[0] % CmiNumPhysicalNodes();
+            //Just round-robin the physical nodes up to the desired count
+			int nodeRange = std::min(CmiNumPhysicalNodes(), this->dbNodeCount);
+            int physNode = index[0] % nodeRange;
             proc = CmiGetFirstPeOnPhysicalNode(physNode);
             ///WARNING: Is there an issue with pinning multiple chares to a single PE?
         }

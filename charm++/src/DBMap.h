@@ -8,13 +8,14 @@
 class DBMap : public CkArrayMap {
   private:
 
+  int dbCount;
   int dbNodeCount;
   bool useNodeList;
   std::vector<int> nodeList;
 
   public:
 
-  DBMap(int dbNodeCount);
+  DBMap(int dbCount, int dbNodeCount);
   DBMap(std::vector<int> nodeList);
 
   inline int procNum(int, const CkArrayIndex &iIndex);

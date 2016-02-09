@@ -132,6 +132,11 @@ void parse_input(string input_file, Input *in)
             in->dbType = v.second.get<int>("value");
             CkPrintf("DB type                 %d\n", in->dbType);
           }
+        if (v.second.get<std::string>("id") == "nodes")
+          {
+            in->dbNodeCount = v.second.get<int>("value");
+            CkPrintf("Number of DB Nodes                %d\n", in->dbNodeCount);
+          }
         if (v.second.get<std::string>("id") == "count")
           {
             in->dbCount = v.second.get<int>("value");

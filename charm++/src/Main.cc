@@ -37,6 +37,7 @@
 /*readonly*/ int evalCount;
 /*readonly*/ int dbType;
 /*readonly*/ int dbCount;
+/*readonly*/ int dbNodeCount; //Do we need to declare this anywhere else for charm purposes?
 /*readonly*/ bool dbRemote; //Do we need to declare this anywhere else for charm purposes?
 
 /*readonly*/ int file_parts; //Do we need to declare this anywhere else for charm purposes?
@@ -100,6 +101,8 @@ Main::Main(CkArgMsg* msg)
   dbType = in.dbType;
   int tempDBCount;
   tempDBCount = in.dbCount;
+  int tempDBNodeCount;
+  tempDBNodeCount = in.dbNodeCount;
   dbRemote = (in.dbRemote != 0) ? true : false;
 
   // Get simulation stop time
@@ -117,22 +120,28 @@ Main::Main(CkArgMsg* msg)
   if(dbRemote == true)
   {
     int numDBs = tempDBCount;
+	int numDBNodes = tempDBNodeCount;
+	//If possible, only have as many DB nodes as we have nodes
     if(CmiCpuTopologyEnabled())
     {
-        numDBs = std::min(CmiNumPhysicalNodes(), tempDBCount);
+        numDBNodes = std::min(CmiNumPhysicalNodes(), tempDBNodeCount);
     }
+	//Also, only have as many DB nodes as we have DB chares
+	numDBNodes = std::min(numDBNodes, numDBs);
     //CkPrintf("numDBs = %d\n", numDBs);
-    CProxy_DBMap DBMapProxy = CProxy_DBMap::ckNew(numDBs);
+    CProxy_DBMap DBMapProxy = CProxy_DBMap::ckNew(numDBs, numDBNodes);
     //Create array options for DB Interface
     CkArrayOptions dbMapOptions(numDBs);
     dbMapOptions.setMap(DBMapProxy);
 
-    DBArray = CProxy_DBInterface::ckNew(dbType, dbMapOptions);
     dbCount = numDBs;
+	dbNodeCount = numDBNodes;
+    DBArray = CProxy_DBInterface::ckNew(dbNodeCount, dbType, dbMapOptions);
   }
   else
   {
     dbCount = 0;
+	dbNodeCount = 0;
   }
 
   // Set other parameters
@@ -156,13 +165,14 @@ Main::Main(CkArgMsg* msg)
            "  Evaluate count: %d\n"
            "  DBInterface type: %d\n"
            "  DBInterface count: %d\n"
+           "  Number of DBInterface Nodes: %d\n"
            "  Use Remote DB %d\n"
            "  Number of SILO Files for Single Domain: %d\n"
            "  Visit Data Interval: %d\n",
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
           fineType, nnsType, nnsCount, pointDim, numTrees,
-          interpType, interpCount, evalType, evalCount, dbType, dbCount, dbRemote, file_parts, visit_data_interval);
+          interpType, interpCount, evalType, evalCount, dbType, dbCount, dbNodeCount, dbRemote, file_parts, visit_data_interval);
 
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();

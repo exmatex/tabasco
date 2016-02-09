@@ -28,6 +28,7 @@
     "DBInterface": [
         {"id": "type",                 "value": "1"},
         {"id": "count",                "value": "10"},
+		{"id": "nodes",      "value": "1"},
         {"id": "remote",                "value": "1"}
     ]
   }

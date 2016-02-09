@@ -67,6 +67,7 @@ typedef struct {
   int evalType;
   int evalCount;
   int dbType;
+  int dbNodeCount;
   int dbCount;
   int dbRemote;
   Real_t stopTime;

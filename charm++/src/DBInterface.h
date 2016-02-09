@@ -4,15 +4,15 @@
 #include "TabaSCo.decl.h"
 
 #include "DBVecMessage.h"
-#include "SingletonDB.h"
+#include "SingletonDB_Backend.h"
 
 
 class DBInterface : public CBase_DBInterface {
   private:
-      SingletonDB & dbRef;
+      SingletonDB_Backend * dbRef;
   public:
 
-  DBInterface(int backType=0);
+  DBInterface(int numDBNodes, int backType=0);
   DBInterface(CkMigrateMessage *msg);
   ~DBInterface();
   void pup(PUP::er &p);
