@@ -4,6 +4,8 @@ sudo: false
 
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       - ccache
       - gfortan #for silo
@@ -11,6 +13,8 @@ addons:
       - liblapack-dev
       - libblas-dev
       - libboost-dev
+      - gcc-4.9
+      - g++-4.9
 
 env:
   matrix: 
@@ -21,6 +25,7 @@ env:
     - SILO=no  FLANN=no   REDIS=no  TWEMPROXY=no
 
 before_script:
+  - export CXX="g++-4.9" CC="gcc-4.9";
   - export PATH="/usr/lib/ccache:$PATH"
   - wget -O - http://charm.cs.illinois.edu/distrib/charm-6.6.1.tar.gz | tar -xz 
   - cd charm && ./build charm++ net-linux-x86_64 -j4 && export CHARM_ROOT=$PWD && cd ..
