@@ -143,7 +143,7 @@ $(OBJDIR):
 ##--- Executable ---##
 
 $(NAME): $(OBJS) $(LULESH_OBJ)
-	$(CHARMCXX) -o $@ $^ $(LDFLAGS)
+	$(CHARMCXX) -o $@ $^ $(LDFLAGS) $(EXTRA_LIBS)
 	@mv charmrun $(BINDIR)/
 
 #GNU make implicit rule
