@@ -90,7 +90,7 @@ endif
 
 #LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 #LDFLAGS= -tracemode projections -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
-LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) $(EXTRA_LDFLAGS) -lm -lrt 
+LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) $(EXTRA_LIBS) -lm -lrt 
 ifneq ($(strip $(SILO_LOC)),)
 CXXFLAGS += -DSILO
 LDFLAGS += -Wl,-rpath,$(realpath $(SILO_LOC))/lib -L$(realpath $(SILO_LOC))/lib -lsiloh5
@@ -143,7 +143,7 @@ $(OBJDIR):
 ##--- Executable ---##
 
 $(NAME): $(OBJS) $(LULESH_OBJ)
-	$(CHARMCXX) -o $@ $^ $(LDFLAGS) $(EXTRA_LIBS)
+	$(CHARMCXX) -o $@ $^ $(LDFLAGS)
 	@mv charmrun $(BINDIR)/
 
 #GNU make implicit rule
