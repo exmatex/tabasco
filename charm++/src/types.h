@@ -72,6 +72,8 @@ typedef struct {
   Real_t stopTime;
   int file_parts;
   int visit_data_interval;
+  int edgeElems;
+  int heightElems;
 } Save_Input;
 /** struct containing the 2D field
  * **/
@@ -99,6 +101,8 @@ void pup(PUP::er &p)
   p | stopTime;
   p | file_parts;
   p | visit_data_interval;
+  p | edgeElems;
+  p | heightElems;
 }
 };
 

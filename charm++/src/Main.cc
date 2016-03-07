@@ -41,6 +41,9 @@
 
 /*readonly*/ int file_parts; //Do we need to declare this anywhere else for charm purposes?
 /*readonly*/ int visit_data_interval; //Do we need to declare this anywhere else for charm purposes?
+/*readonly*/ int edgeElems; //See above comment
+/*readonly*/ int heightElems; //See above comment
+
 
 // Entry point of Charm++ application
 Main::Main(CkArgMsg* msg)
@@ -77,7 +80,10 @@ Main::Main(CkArgMsg* msg)
   // Get coarse model parameters - type, count, adptive sampling flag
   coarseType = in.coarseType;
   coarseCount = in.coarseCount;
-  useAdaptiveSampling = (in.useAdaptiveSampling == 1) ? true : false; 
+  useAdaptiveSampling = (in.useAdaptiveSampling == 1) ? true : false;
+  stopTime = in.stopTime;
+  edgeElems = in.edgeElems;
+  heightElems = in.heightElems;
 
   // Get fine model parameters - type
   fineType = in.fineType;
@@ -101,9 +107,6 @@ Main::Main(CkArgMsg* msg)
   int tempDBCount;
   tempDBCount = in.dbCount;
   dbRemote = (in.dbRemote != 0) ? true : false;
-
-  // Get simulation stop time
-  stopTime = in.stopTime;
 
   // Neighbor limit
   NBR_LIMIT = 10;
@@ -145,6 +148,8 @@ Main::Main(CkArgMsg* msg)
            "  Coarse count: %d\n"
            "  UseAdaptiveSampling: %d\n"
            "  Simulation stop time: %e\n"
+		   "  Simulation Height Elems: %d\n"
+		   "  Simulation Edge Elems: %d\n"
            "  Fine type: %d\n"
            "  NNS type: %d\n"
            "  NNS count: %d\n"
@@ -160,7 +165,7 @@ Main::Main(CkArgMsg* msg)
            "  Number of SILO Files for Single Domain: %d\n"
            "  Visit Data Interval: %d\n",
           coarseType, coarseCount, 
-          ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
+          ((useAdaptiveSampling == true) ? 1 : 0), stopTime, heightElems, edgeElems,
           fineType, nnsType, nnsCount, pointDim, numTrees,
           interpType, interpCount, evalType, evalCount, dbType, dbCount, dbRemote, file_parts, visit_data_interval);
 
