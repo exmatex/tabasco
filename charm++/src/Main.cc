@@ -9,6 +9,7 @@
 #include "DBMap.h"
 #include "DBVecMessage.h"
 #include "input.h"
+#include "ModelDB_Enums.h"
 
 #include <cstring>
 #include <vector>
@@ -154,7 +155,7 @@ Main::Main(CkArgMsg* msg)
            "  Interpolate count: %d\n"
            "  Evaluate type: %d\n"
            "  Evaluate count: %d\n"
-           "  DBInterface type: %d\n"
+           "  DBInterface type: %s\n"
            "  DBInterface count: %d\n"
            "  Use Remote DB %d\n"
            "  Number of SILO Files for Single Domain: %d\n"
@@ -162,7 +163,7 @@ Main::Main(CkArgMsg* msg)
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime,
           fineType, nnsType, nnsCount, pointDim, numTrees,
-          interpType, interpCount, evalType, evalCount, dbType, dbCount, dbRemote, file_parts, visit_data_interval);
+          interpType, interpCount, evalType, evalCount, SingletonDBBackendStrings[dbType], dbCount, dbRemote, file_parts, visit_data_interval);
 
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
