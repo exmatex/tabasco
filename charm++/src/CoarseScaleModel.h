@@ -64,7 +64,7 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   int* calcRange(int chareCount);
 
   // Entry methods
-  void initialize(int numRanks, bool useAdaptiveSampling, Real_t stopTime);
+  void initialize(int numRanks, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime);
   void ConstructFineScaleModel(bool useAdaptiveSampling);
   void LagrangeNodal1();
   void LagrangeNodal2();

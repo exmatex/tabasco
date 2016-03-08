@@ -62,6 +62,16 @@ void parse_input(string input_file, Input *in)
             in->visit_data_interval = v.second.get<int>("value");
             CkPrintf("visit data interval               %e\n", in->visit_data_interval);
           }
+        if (v.second.get<std::string>("id") == "edge elems")
+          {
+            in->edgeElems = v.second.get<int>("value");
+            CkPrintf("Number of Edge ELems               %e\n", in->edgeElems);
+          }
+        if (v.second.get<std::string>("id") == "height elems")
+          {
+            in->heightElems = v.second.get<int>("value");
+            CkPrintf("Number of Height ELems               %e\n", in->heightElems);
+          }
       }
 
       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.FineScaleModel"))
