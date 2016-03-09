@@ -7,8 +7,8 @@
         {"id": "stop time",             "value": "1e-01"},
         {"id": "visit data interval",   "value": "20"},
         {"id": "file parts",            "value": "4"},
-		{"id": "edge elems",            "value": "16"},
-		{"id": "height elems",          "value": "26"}
+	{"id": "edge elems",            "value": "16"},
+	{"id": "height elems",          "value": "26"}
     ],
     "FineScaleModel": [
         {"id": "type",                 "value": "0"} 

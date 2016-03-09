@@ -121,7 +121,7 @@ void CoarseScaleModel::pup(PUP::er &p)
   p|use_adaptive_sampling;
 }
 
-void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime)
+void CoarseScaleModel::initialize(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime)
 {
   lulesh->Initialize(thisIndex, numRanks, edgeElems, heightElems, stopTime);
 
@@ -132,11 +132,11 @@ void CoarseScaleModel::initialize(int numRanks, bool useAdaptiveSampling, int ed
 
   state_size = new size_t[numElems];
   use_adaptive_sampling = (useAdaptiveSampling) ? 1 : 0;
-  ConstructFineScaleModel(useAdaptiveSampling);
+  ConstructFineScaleModel(numRanks, nnsCount, interpCount, evalCount, dbCount, useAdaptiveSampling);
 
 }
 
-void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
+void CoarseScaleModel::ConstructFineScaleModel(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling)
 {
   ModelDatabase * global_modelDB = nullptr;
   ApproxNearestNeighbors* global_ann = nullptr;
@@ -150,10 +150,10 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
   // Now create 2-D fine scale model chares
   numElems = lulesh->domain.numElem();
 
-  int* nnsRange = calcRange(nnsCount);
-  int* interpRange = calcRange(interpCount);
-  int* dbRange = calcRange(dbCount);
-  int* evalRange = calcRange(evalCount);
+  int* nnsRange = calcRange(nnsCount, numRanks);
+  int* interpRange = calcRange(interpCount, numRanks);
+  int* dbRange = calcRange(dbCount, numRanks);
+  int* evalRange = calcRange(evalCount, numRanks);
 
   printf("CoarseScaleModel %d: nns %d %d\n", thisIndex, nnsRange[0], nnsRange[1]);
   printf("CoarseScaleModel %d: interpolate %d %d\n", thisIndex, interpRange[0], interpRange[1]);
@@ -182,15 +182,17 @@ void CoarseScaleModel::ConstructFineScaleModel(bool useAdaptiveSampling)
   printf("%d FineScaleModels created count = %d\n", thisIndex, numElems);
 }
 
-int* CoarseScaleModel::calcRange(int chareCount)
+int* CoarseScaleModel::calcRange(int chareCount, int numRanks)
 {
   int* crange = new int[2];
-  int perCoarseChare = chareCount / coarseCount;
+
+  int perCoarseChare = chareCount / numRanks;
   crange[0] = perCoarseChare * thisIndex;
   crange[1] = crange[0] + perCoarseChare;
-  if (crange[1] >= chareCount)
+  if (crange[1] > chareCount)
     crange[1] = chareCount; 
-
+  if (thisIndex == numRanks-1 && crange[1] < chareCount)
+    crange[1] = chareCount;
   return crange;
 }
 

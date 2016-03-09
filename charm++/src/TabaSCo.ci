@@ -26,10 +26,10 @@ mainmodule TabaSCo {
     entry Main(CkArgMsg *msg);
     entry [reductiontarget] void done();
 
-    entry void run(int numRanks, bool useAdaptiveSampling, Real_t stopTime) {
+    entry void run(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling, Real_t stopTime) {
 
       serial {
-        coarseScaleArray.initialize(numRanks, useAdaptiveSampling, edgeElems, heightElems, stopTime);
+        coarseScaleArray.initialize(numRanks, nnsCount, interpCount, evalCount, dbCount, useAdaptiveSampling, edgeElems, heightElems, stopTime);
       }
 
       // Run simulation
@@ -52,7 +52,7 @@ mainmodule TabaSCo {
     entry [reductiontarget] void reduceIters(int reducedIters);
     entry [reductiontarget] void reduceTotal(int n, int total[n]);
 
-    entry void initialize(int numRanks, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime);
+    entry void initialize(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime);
     entry void setSiloParams(int numParts, int dataInterval);
     entry void setRemoteDB(bool remoteDB);
 

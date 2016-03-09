@@ -206,7 +206,7 @@ Main::Main(CkArgMsg* msg)
   fineScaleArray.doneInserting();
 
   // Start simulation
-  run(coarseCount, useAdaptiveSampling, stopTime);
+  run(coarseCount, nnsCount, interpCount, evalCount, dbCount, useAdaptiveSampling, stopTime);
 
 }
   

@@ -61,11 +61,11 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
   CoarseScaleModel(CkMigrateMessage *msg);
   ~CoarseScaleModel();
   void pup(PUP::er &p);
-  int* calcRange(int chareCount);
+  int* calcRange(int chareCount, int numRanks);
 
   // Entry methods
-  void initialize(int numRanks, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime);
-  void ConstructFineScaleModel(bool useAdaptiveSampling);
+  void initialize(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime);
+  void ConstructFineScaleModel(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling);
   void LagrangeNodal1();
   void LagrangeNodal2();
   void LagrangeElements();
