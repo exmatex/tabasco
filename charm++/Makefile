@@ -63,7 +63,7 @@ endif
 
 LINALG_LDFLAG += $(LAPACK)
 
-OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o Evaluate.o DBInterface.o input.o Main.o DBVecMessage.o DBMap.o ModelDB_Charm.o)
+OBJS:=$(addprefix $(OBJDIR)/, CoarseScaleModel.o FineScaleModel.o NearestNeighborSearch.o Interpolate.o Evaluate.o DBInterface.o input.o Main.o DBVecMessage.o DBMap.o ModelDB_Charm.o ModelDB_CharmLocal.o)
 # ../CoEVP/LULESH/lulesh.o)
 CXXFLAGS+=$(OPTFLAGS) $(BOOST_CFLAG) $(DEFS)
 ifneq ($(NNS_AS_CHARE), no)
