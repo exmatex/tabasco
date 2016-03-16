@@ -13,6 +13,28 @@ mainmodule TabaSCo {
   readonly CProxy_Evaluate evaluateArray;            // array of evaluates
   readonly CProxy_DBInterface DBArray;               // array of DB interfaces
 
+readonly int coarseType;
+readonly int coarseCount;
+readonly int NBR_LIMIT;
+readonly bool useAdaptiveSampling;
+readonly Real_t stopTime;
+readonly int fineType;
+readonly int nnsType;
+readonly int nnsCount;
+readonly int pointDim;
+readonly int numTrees;
+readonly int interpType;
+readonly int interpCount;
+readonly int evalType;
+readonly int evalCount;
+readonly int dbType;
+readonly int dbCount;
+readonly bool dbRemote; //Do we need to declare this anywhere else for charm purposes?
+readonly int file_parts; //Do we need to declare this anywhere else for charm purposes?
+readonly int visit_data_interval; //Do we need to declare this anywhere else for charm purposes?
+readonly int edgeElems; //See above comment
+readonly int heightElems; 
+
   message Msg;
   message DBVecMessage;
   message knn_message;
@@ -138,7 +160,6 @@ mainmodule TabaSCo {
           LagrangeNodal2();
           sendPositionVelocity();
         }
-
         if (numRanks > 1 && thisIndex < numRanks-1) {
           when receivePositionVelocity(int msgType, int rsize, Real_t rdata[rsize]) serial {
             updatePositionVelocity(msgType, rsize, rdata);
