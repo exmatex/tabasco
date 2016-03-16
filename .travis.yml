@@ -22,6 +22,10 @@ env:
     - SILO=yes FLANN=yes  REDIS=no  TWEMPROXY=no
     - SILO=yes FLANN=no   REDIS=yes TWEMPROXY=yes
     - SILO=yes FLANN=yes  REDIS=yes TWEMPROXY=yes
+    - SILO=yes FLANN=no   REDIS=no  TWEMPROXY=no   TESTFILE=reftest4.json
+    - SILO=yes FLANN=yes  REDIS=no  TWEMPROXY=no   TESTFILE=reftest4.json
+    - SILO=yes FLANN=no   REDIS=yes TWEMPROXY=yes  TESTFILE=reftest4.json
+    - SILO=yes FLANN=yes  REDIS=yes TWEMPROXY=yes  TESTFILE=reftest4.json
     - SILO=no  FLANN=no   REDIS=no  TWEMPROXY=no
 
 before_script:
@@ -33,7 +37,7 @@ before_script:
 script:
   - make -j2 REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} CHARM_ROOT=${CHARM_ROOT} && 
     make get_reference &&
-    { [[ ${SILO} = no ]] || make test REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO}; }
+    { [[ ${SILO} = no ]] || make test REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} ${TESTFILE:+TESTFILE=${TESTFILE}}; }
 
 cache:
   directories:
