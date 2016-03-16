@@ -55,22 +55,22 @@ void parse_input(string input_file, Input *in)
         if (v.second.get<std::string>("id") == "file parts")
           {
             in->file_parts = v.second.get<int>("value");
-            CkPrintf("file parts                        %e\n", in->file_parts);
+            CkPrintf("file parts                        %d\n", in->file_parts);
           }
         if (v.second.get<std::string>("id") == "visit data interval")
           {
             in->visit_data_interval = v.second.get<int>("value");
-            CkPrintf("visit data interval               %e\n", in->visit_data_interval);
+            CkPrintf("visit data interval               %d\n", in->visit_data_interval);
           }
         if (v.second.get<std::string>("id") == "edge elems")
           {
             in->edgeElems = v.second.get<int>("value");
-            CkPrintf("Number of Edge ELems               %e\n", in->edgeElems);
+            CkPrintf("Number of Edge ELems               %d\n", in->edgeElems);
           }
         if (v.second.get<std::string>("id") == "height elems")
           {
             in->heightElems = v.second.get<int>("value");
-            CkPrintf("Number of Height ELems               %e\n", in->heightElems);
+            CkPrintf("Number of Height ELems               %d\n", in->heightElems);
           }
       }
 

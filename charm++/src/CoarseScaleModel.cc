@@ -413,7 +413,6 @@ void CoarseScaleModel::sendDataNodes(int xferFields, Real_t **fieldData)
       Real_t *srcAddr = fieldData[fi] ;
       for (Index_t ii=0; ii<size; ++ii) {
         destAddr[ii] = srcAddr[iset[ii]] ;
-        //printf("%d to M1 %d %d = %e\n", lulesh->domain.sliceLoc(), ii, iset[ii], srcAddr[iset[ii]]);
       }
       destAddr += size ;
     }
@@ -437,7 +436,6 @@ void CoarseScaleModel::sendDataNodes(int xferFields, Real_t **fieldData)
       Real_t *srcAddr = &fieldData[fi][offset] ;
       for (Index_t ii=0; ii<size; ++ii) {
         destAddr[ii] = srcAddr[iset[ii]] ;
-        //printf("%d to P1 %d %d = %e\n", lulesh->domain.sliceLoc(), ii, iset[ii], srcAddr[iset[ii]]);
       }
       destAddr += size ;
     }
@@ -448,10 +446,6 @@ void CoarseScaleModel::sendDataNodes(int xferFields, Real_t **fieldData)
       thisProxy(thisIndex+1).receiveNodalMass(NBR_P1, xferFields*size, sdataP1);
     else if (xferFields == 3)
       thisProxy(thisIndex+1).receiveForce(NBR_P1, xferFields*size, sdataP1);
-/*
-    else if (xferFields == 6)
-      thisProxy(thisIndex+1).receivePositionVelocity(NBR_P1, xferFields*size, sdataP1);
-*/
     else
       printf("No send P1!\n");
   }
@@ -494,18 +488,16 @@ void CoarseScaleModel::sendDataElems(int xferFields, Real_t **fieldData)
       Real_t *srcAddr = fieldData[fi] ;
       for (Index_t ii=0; ii<size; ++ii) {
         destAddr[ii] = srcAddr[iset[ii]] ;
-        //printf("%d to M1 %d %d = %e\n", lulesh->domain.sliceLoc(), ii, iset[ii], srcAddr[iset[ii]]);
       }
       destAddr += size ;
     }
     destAddr -= xferFields*size ;
 
-    // Send to myRank+1 neighbor
+    // Send to myRank-1 neighbor
     if (xferFields == 1)
       thisProxy(thisIndex-1).receiveVelocityGrad(NBR_M1, xferFields*size, sdataM1);
     else
       printf("No where to send!\n");
-
   }
 
   if (planeMax) {
@@ -514,7 +506,6 @@ void CoarseScaleModel::sendDataElems(int xferFields, Real_t **fieldData)
       Real_t *srcAddr = &fieldData[fi][offset] ;
       for (Index_t ii=0; ii<size; ++ii) {
         destAddr[ii] = srcAddr[iset[ii]] ;
-        //printf("%d to P1 %d %d = %e\n", lulesh->domain.sliceLoc(), ii, iset[ii], srcAddr[iset[ii]]);
       }
       destAddr += size ;
     }
@@ -559,22 +550,19 @@ void CoarseScaleModel::receiveDataNodes(int msgType, int size, int xferFields,
   /* ASSUMING ONE DOMAIN PER RANK, CONSTANT BLOCK SIZE HERE */
   Real_t *srcAddr;
   if (msgType == NBR_P1) {
-    //printf("%d received from rank-1 size = %d xferfields = %d\n", lulesh->domain.sliceLoc(), size, xferFields);
     srcAddr = rdata;
     for (Index_t fi=0 ; fi<xferFields; ++fi) {
       Real_t *destAddr = fieldData[fi] ;
       for (Index_t i=0; i<size; ++i) {
         if (xferFields < 6)
-        destAddr[iset[i]] += srcAddr[i] ;
+          destAddr[iset[i]] += srcAddr[i] ;
         else
-        destAddr[iset[i]] = srcAddr[i] ;
-        //printf("%d from M1 %d %d = %e\n", lulesh->domain.sliceLoc(), i, iset[i], srcAddr[i]);
+          destAddr[iset[i]] = srcAddr[i] ;
       }
       srcAddr += size ;
     }
   }
   else if (msgType == NBR_M1) {
-    //printf("%d received from rank+1  size = %d xferfields = %d\n", lulesh->domain.sliceLoc(), size, xferFields);
     srcAddr = rdata;
     for (Index_t fi=0 ; fi<xferFields; ++fi) {
       Real_t *destAddr = &(fieldData[fi][offset]) ;
@@ -583,7 +571,10 @@ void CoarseScaleModel::receiveDataNodes(int msgType, int size, int xferFields,
         destAddr[iset[i]] += srcAddr[i] ;
         else
         destAddr[iset[i]] = srcAddr[i] ; 
-        //printf("%d from P1 %d %d = %e\n", lulesh->domain.sliceLoc(), i, iset[i], srcAddr[i]);
+#ifdef COMM_TEST
+        if (lulesh->domain.sliceLoc() == 0)
+            printf("receiveDataNodes: %d %d %d %d from P1  %d %d %d = %.10e %.10e\n", lulesh->domain.sliceLoc(), xferFields, fi, offset, size, i, iset[i], srcAddr[i], destAddr[iset[i]]);
+#endif
       }
       srcAddr += size ;
     }
@@ -610,30 +601,28 @@ void CoarseScaleModel::receiveDataElems(int msgType, int size, int xferFields,
   /* ASSUMING ONE DOMAIN PER RANK, CONSTANT BLOCK SIZE HERE */
   Real_t *srcAddr;
   if (msgType == NBR_P1) {
-    //printf("%d received from rank-1 size = %d xferfields = %d\n", lulesh->domain.sliceLoc(), size, xferFields);
     srcAddr = rdata;
-    //fieldData[0] += size;
     for (Index_t fi=0 ; fi<xferFields; ++fi) {
       Real_t *destAddr = fieldData[fi] ;
       for (Index_t i=0; i<size; ++i) {
         destAddr[i] = srcAddr[i] ;
-        //destAddr[iset[i]] = srcAddr[i] ;
-        //printf("%d from P1 %d %d = %e\n", lulesh->domain.sliceLoc(), i, iset[i], srcAddr[i]);
       }
       srcAddr += size ;
       fieldData[fi] += size;
     }
   }
-  else if (msgType == NBR_M1) {
-    //printf("%d received from rank+1  size = %d xferfields = %d\n", lulesh->domain.sliceLoc(), size, xferFields);
+  else if (msgType == NBR_M1 ) {
     srcAddr = rdata;
+    // Need to add size for ranks that are not 0
+    if (lulesh->domain.sliceLoc() > 0) fieldData[0] += size;
     for (Index_t fi=0 ; fi<xferFields; ++fi) {
       Real_t *destAddr = fieldData[fi] ;
-      //Real_t *destAddr = &(fieldData[fi][offset]) ;
       for (Index_t i=0; i<size; ++i) {
         destAddr[i] = srcAddr[i] ;
-        //destAddr[iset[i]] = srcAddr[i] ;
-        //printf("%d from P1 %d %d = %e\n", lulesh->domain.sliceLoc(), i, iset[i], srcAddr[i]);
+#ifdef COMM_TEST
+        if (lulesh->domain.sliceLoc() == 0)
+            printf("receiveDataElems: %d %d %d %d from P1  %d %d %d = %.10e\n", lulesh->domain.sliceLoc(), xferFields, fi, offset, size, i, i, srcAddr[i]);
+#endif
       }
       srcAddr += size ;
       fieldData[fi] += size ;
@@ -657,7 +646,7 @@ void CoarseScaleModel::sendForce()
 
 void CoarseScaleModel::updateForce(int msgType, int rsize, Real_t rdata[])
 {
-  //printf("%d In updateForce\n", thisIndex);
+  //printf("step %d rank = %d In updateForce msg = %d\n", lulesh->domain.cycle(), thisIndex, msgType);
 
   int xferFields = 3;
   int size = lulesh->domain.commNodes();
@@ -686,7 +675,7 @@ void CoarseScaleModel::sendVelocityGrad()
 
 void CoarseScaleModel::updateVelocityGrad(int msgType, int rsize, Real_t rdata[])
 {
-  //printf("%d In updateVelocityGrad\n", thisIndex);
+  //printf("step %d rank %d In updateVelocityGrad %d\n", lulesh->domain.cycle(), thisIndex, msgType);
 
   int xferFields = 1;
   int size = lulesh->domain.commElems();
