@@ -38,12 +38,12 @@
 /*readonly*/ int evalCount;
 /*readonly*/ int dbType;
 /*readonly*/ int dbCount;
-/*readonly*/ bool dbRemote; //Do we need to declare this anywhere else for charm purposes?
+/*readonly*/ bool dbRemote; 
 
-/*readonly*/ int file_parts; //Do we need to declare this anywhere else for charm purposes?
-/*readonly*/ int visit_data_interval; //Do we need to declare this anywhere else for charm purposes?
-/*readonly*/ int edgeElems; //See above comment
-/*readonly*/ int heightElems; //See above comment
+/*readonly*/ int file_parts; 
+/*readonly*/ int visit_data_interval; 
+/*readonly*/ int edgeElems; 
+/*readonly*/ int heightElems;
 
 
 // Entry point of Charm++ application

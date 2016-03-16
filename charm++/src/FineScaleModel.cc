@@ -13,8 +13,8 @@
 #include "Database.h"
 #include "MurmurHash3.h"
 
-#include "ModelDB_HashMap.h"
 #include "ModelDB_Charm.h"
+#include "ModelDB_CharmLocal.h"
 
 #define MURMUR_SEED 42
 
@@ -25,6 +25,8 @@ extern CProxy_NearestNeighborSearch nnsArray;
 extern CProxy_Interpolate interpolateArray;
 extern CProxy_Evaluate evaluateArray;
 extern CProxy_DBInterface DBArray;
+
+extern int dbType;
 
 FineScaleModel::FineScaleModel()
 {}
@@ -72,7 +74,7 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
 
    if(remoteDB == false)
    {
-     modelDB = new ModelDB_HashMap(); 
+     modelDB = new ModelDB_CharmLocal(SingletonDBBackendEnum(dbType)); 
    }
    else
    {
