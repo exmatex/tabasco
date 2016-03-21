@@ -121,9 +121,9 @@ void CoarseScaleModel::pup(PUP::er &p)
   p|use_adaptive_sampling;
 }
 
-void CoarseScaleModel::initialize(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime)
+void CoarseScaleModel::initialize(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime, int maxSteps)
 {
-  lulesh->Initialize(thisIndex, numRanks, edgeElems, heightElems, stopTime);
+  lulesh->Initialize(thisIndex, numRanks, edgeElems, heightElems, stopTime, maxSteps);
 
   lulesh->domain.stoptime() = stopTime;
 
