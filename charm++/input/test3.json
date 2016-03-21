@@ -3,12 +3,12 @@
     "CoarseScaleModel": [
         {"id": "type",                  "value": "0"},
         {"id": "count",                 "value": "1"},
-        {"id": "use adaptive sampling", "value": "0"},
+        {"id": "use adaptive sampling", "value": "1"},
         {"id": "stop time",             "value": "1e-01"},
         {"id": "visit data interval",   "value": "20"},
         {"id": "file parts",            "value": "4"},
-	{"id": "edge elems",            "value": "16"},
-	{"id": "height elems",          "value": "26"}
+        {"id": "edge elems",            "value": "16"},
+        {"id": "height elems",          "value": "26"}
     ],
     "FineScaleModel": [
         {"id": "type",                 "value": "0"} 
@@ -28,7 +28,7 @@
         {"id": "count",                "value": "2912"}
     ],
     "DBInterface": [
-        {"id": "type",                 "value": "0"},
+        {"id": "type",                 "value": "1"},
         {"id": "count",                "value": "2912"},
         {"id": "remote",                "value": "0"}
     ]
