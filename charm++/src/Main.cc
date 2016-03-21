@@ -27,6 +27,7 @@
 /*readonly*/ int NBR_LIMIT;
 /*readonly*/ bool useAdaptiveSampling;
 /*readonly*/ Real_t stopTime;
+/*readonly*/ int maxSteps;
 /*readonly*/ int fineType;
 /*readonly*/ int nnsType;
 /*readonly*/ int nnsCount;
@@ -83,6 +84,7 @@ Main::Main(CkArgMsg* msg)
   coarseCount = in.coarseCount;
   useAdaptiveSampling = (in.useAdaptiveSampling == 1) ? true : false;
   stopTime = in.stopTime;
+  maxSteps = in.maxSteps;
   edgeElems = in.edgeElems;
   heightElems = in.heightElems;
 
@@ -158,8 +160,9 @@ Main::Main(CkArgMsg* msg)
            "  Coarse count: %d\n"
            "  UseAdaptiveSampling: %d\n"
            "  Simulation stop time: %e\n"
-		   "  Simulation Height Elems: %d\n"
-		   "  Simulation Edge Elems: %d\n"
+           "  Simulations max steps: %d\n"
+	   "  Simulation Height Elems: %d\n"
+	   "  Simulation Edge Elems: %d\n"
            "  Fine type: %d\n"
            "  NNS type: %d\n"
            "  NNS count: %d\n"
@@ -175,9 +178,11 @@ Main::Main(CkArgMsg* msg)
            "  Number of SILO Files for Single Domain: %d\n"
            "  Visit Data Interval: %d\n",
           coarseType, coarseCount, 
-          ((useAdaptiveSampling == true) ? 1 : 0), stopTime, heightElems, edgeElems,
-          fineType, nnsType, nnsCount, pointDim, numTrees,
-          interpType, interpCount, evalType, evalCount, SingletonDBBackendStrings[dbType], dbCount, dbRemote, file_parts, visit_data_interval);
+          ((useAdaptiveSampling == true) ? 1 : 0), stopTime, maxSteps, heightElems, 
+          edgeElems, fineType, nnsType, nnsCount, pointDim, numTrees,
+          interpType, interpCount, evalType, evalCount, 
+          SingletonDBBackendStrings[dbType], dbCount, dbRemote, file_parts, 
+          visit_data_interval);
 
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
@@ -215,7 +220,7 @@ Main::Main(CkArgMsg* msg)
   fineScaleArray.doneInserting();
 
   // Start simulation
-  run(coarseCount, nnsCount, interpCount, evalCount, dbCount, useAdaptiveSampling, stopTime);
+  run(coarseCount, nnsCount, interpCount, evalCount, dbCount, useAdaptiveSampling, stopTime, maxSteps);
 
 }
   

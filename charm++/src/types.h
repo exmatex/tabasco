@@ -70,6 +70,7 @@ typedef struct {
   int dbCount;
   int dbRemote;
   Real_t stopTime;
+  int maxSteps;
   int file_parts;
   int visit_data_interval;
   int edgeElems;
@@ -99,6 +100,7 @@ void pup(PUP::er &p)
   p | dbType;
   p | dbCount;
   p | stopTime;
+  p | maxSteps;
   p | file_parts;
   p | visit_data_interval;
   p | edgeElems;

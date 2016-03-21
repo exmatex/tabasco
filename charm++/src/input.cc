@@ -52,6 +52,11 @@ void parse_input(string input_file, Input *in)
             in->stopTime = v.second.get<Real_t>("value");
             CkPrintf("stop time                         %e\n", in->stopTime);
           }
+        if (v.second.get<std::string>("id") == "max steps")
+          {
+            in->maxSteps = v.second.get<int>("value");
+            CkPrintf("max steps                         %d\n", in->maxSteps);
+          }
         if (v.second.get<std::string>("id") == "file parts")
           {
             in->file_parts = v.second.get<int>("value");
