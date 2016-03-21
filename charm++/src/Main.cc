@@ -104,10 +104,19 @@ Main::Main(CkArgMsg* msg)
   evalCount = in.evalCount;
 
   // Get DBInterface parameters
-  dbType = in.dbType;
   int tempDBCount;
   tempDBCount = in.dbCount;
   dbRemote = (in.dbRemote != 0) ? true : false;
+  if(dbRemote == false and ( in.dbType == 0 or in.dbType == 4))
+  {
+	//Specifically ensure we can't have local redis
+	CkError("WARNING: Non-Remote Redis is Not Supported\n");
+	dbType = 1;
+  }
+  else
+  {
+	  dbType = in.dbType;
+  }
 
   // Neighbor limit
   NBR_LIMIT = 10;
