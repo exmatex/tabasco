@@ -45,6 +45,7 @@
 /*readonly*/ int visit_data_interval; 
 /*readonly*/ int edgeElems; 
 /*readonly*/ int heightElems;
+/*readonly*/ int timerRate;
 
 
 // Entry point of Charm++ application
@@ -87,6 +88,7 @@ Main::Main(CkArgMsg* msg)
   maxSteps = in.maxSteps;
   edgeElems = in.edgeElems;
   heightElems = in.heightElems;
+  timerRate = in.timerRate;
 
   // Get fine model parameters - type
   fineType = in.fineType;
@@ -161,8 +163,8 @@ Main::Main(CkArgMsg* msg)
            "  UseAdaptiveSampling: %d\n"
            "  Simulation stop time: %e\n"
            "  Simulations max steps: %d\n"
-	   "  Simulation Height Elems: %d\n"
-	   "  Simulation Edge Elems: %d\n"
+           "  Simulation Height Elems: %d\n"
+           "  Simulation Edge Elems: %d\n"
            "  Fine type: %d\n"
            "  NNS type: %d\n"
            "  NNS count: %d\n"
@@ -176,13 +178,14 @@ Main::Main(CkArgMsg* msg)
            "  DBInterface count: %d\n"
            "  Use Remote DB %d\n"
            "  Number of SILO Files for Single Domain: %d\n"
-           "  Visit Data Interval: %d\n",
+           "  Visit Data Interval: %d\n"
+           "  Adaptive Timer Sampling Rate: %d\n",
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime, maxSteps, heightElems, 
           edgeElems, fineType, nnsType, nnsCount, pointDim, numTrees,
           interpType, interpCount, evalType, evalCount, 
           SingletonDBBackendStrings[dbType], dbCount, dbRemote, file_parts, 
-          visit_data_interval);
+          visit_data_interval, timerRate);
 
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
@@ -220,7 +223,7 @@ Main::Main(CkArgMsg* msg)
   fineScaleArray.doneInserting();
 
   // Start simulation
-  run(coarseCount, nnsCount, interpCount, evalCount, dbCount, useAdaptiveSampling, stopTime, maxSteps);
+  run(coarseCount, nnsCount, interpCount, evalCount, dbCount, useAdaptiveSampling, stopTime, maxSteps, timerRate);
 
 }
   
