@@ -77,6 +77,11 @@ void parse_input(string input_file, Input *in)
             in->heightElems = v.second.get<int>("value");
             CkPrintf("Number of Height ELems               %d\n", in->heightElems);
           }
+        if (v.second.get<std::string>("id") == "timer sampling rate")
+          {
+            in->timerRate = v.second.get<int>("value");
+            CkPrintf("Sampling Rate of Timer               %d\n", in->timerRate);
+		  } 
       }
 
       BOOST_FOREACH(const boost::property_tree::ptree::value_type & v, pt.get_child("parameter.FineScaleModel"))

@@ -75,6 +75,7 @@ typedef struct {
   int visit_data_interval;
   int edgeElems;
   int heightElems;
+  int timerRate;
 } Save_Input;
 /** struct containing the 2D field
  * **/

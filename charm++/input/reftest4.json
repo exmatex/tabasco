@@ -9,7 +9,8 @@
         {"id": "visit data interval",   "value": "20"},
         {"id": "file parts",            "value": "4"},
 	{"id": "edge elems",            "value": "16"},
-	{"id": "height elems",          "value": "26"}
+	{"id": "height elems",          "value": "26"},
+        {"id": "timer sampling rate",   "value": "0"}
     ],
     "FineScaleModel": [
         {"id": "type",                 "value": "0"} 
