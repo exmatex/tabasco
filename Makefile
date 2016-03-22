@@ -60,7 +60,6 @@ test/.tabascoopts: dummy
 STEPS=0500
 #bit hackish, but let's assume we have $(STEPS) steps
 test/taylor_$(STEPS).silo: charm++/charm_bin/TabaSCo test/.charmflags test/.tabascoopts
-	@[ "$(SILO)" = "yes" ] || { echo "make test needs SILO=yes" && exit 1; }
 	mkdir -p test
 	cd test && $(CHARMRUN) ../charm++/charm_bin/TabaSCo $(TABASCO_OPTS)
 
