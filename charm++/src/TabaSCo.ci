@@ -52,7 +52,7 @@ readonly int heightElems;
     entry void run(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling, Real_t stopTime, int maxSteps, int timerSampleRate) {
 
       serial {
-        coarseScaleArray.initialize(numRanks, nnsCount, interpCount, evalCount, dbCount, useAdaptiveSampling, edgeElems, heightElems, stopTime, timerSampleRate);
+        coarseScaleArray.initialize(numRanks, nnsCount, interpCount, evalCount, dbCount, useAdaptiveSampling, edgeElems, heightElems, stopTime, maxSteps, timerSampleRate);
       }
 
       // Run simulation
@@ -75,7 +75,7 @@ readonly int heightElems;
     entry [reductiontarget] void reduceIters(int reducedIters);
     entry [reductiontarget] void reduceTotal(int n, int total[n]);
 
-    entry void initialize(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime, int timerSampleRate);
+    entry void initialize(int numRanks, int nnsCount, int interpCount, int evalCount, int dbCount, bool useAdaptiveSampling, int edgeElems, int heightElems, Real_t stopTime, int maxSteps, int timerSampleRate);
     entry void setSiloParams(int numParts, int dataInterval);
     entry void setRemoteDB(bool remoteDB);
 
@@ -129,7 +129,7 @@ readonly int heightElems;
       serial { printf("%d %e %e\n", thisIndex, lulesh->domain.time(), lulesh->domain.stoptime()); }
 
       while (lulesh->domain.time() < lulesh->domain.stoptime() &&
-             lulesh->domain.cycle() < maxSteps) {
+             lulesh->domain.cycle() < lulesh->domain.stopcycle()) {
         serial {
           makeADump(false);
           TimeIncrement();
