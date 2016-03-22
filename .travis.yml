@@ -37,7 +37,7 @@ before_script:
 script:
   - make -j2 REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} CHARM_ROOT=${CHARM_ROOT} && 
     make get_reference &&
-    make test REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} ${TESTFILE:+TESTFILE=${TESTFILE}} ${SILODIFF:+SILODIFF=${SILODIFF}; 
+    make test REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} ${TESTFILE:+TESTFILE=${TESTFILE}} ${SILODIFF:+SILODIFF=${SILODIFF}} 
 
 cache:
   directories:
