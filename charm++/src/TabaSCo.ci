@@ -138,6 +138,7 @@ readonly int heightElems;
         // Global reduction of delta time
         if (numRanks > 1 && lulesh->domain.cycle() > 0) {
           when reduceTimeIncrement(Real_t reducedt) serial {
+            lulesh->OutputTiming();
             updateTimeIncrement(reducedt);
           }
         }
@@ -211,7 +212,7 @@ readonly int heightElems;
         }
      
         if (thisIndex == 0) serial {
-          if (useAdaptiveSampling)
+		  if (useAdaptiveSampling)
             printf("step = %d, time = %e, dt=%e, Interpolation efficiency = %e\n",
               lulesh->domain.cycle(), double(lulesh->domain.time()), double(lulesh->domain.deltatime()), (double)total_interpolations / (double)total_samples ) ;
           else

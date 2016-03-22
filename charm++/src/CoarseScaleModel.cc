@@ -270,9 +270,6 @@ void CoarseScaleModel::TimeIncrement2()
 
 void CoarseScaleModel::UpdateStressForElems()
 {
-
-	lulesh->OutputTiming();
-
   // For this Coarse model's elements
   total_samples = 0;
   total_interpolations = 0;
