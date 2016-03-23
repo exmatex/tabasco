@@ -138,10 +138,12 @@ readonly int heightElems;
         // Global reduction of delta time
         if (numRanks > 1 && lulesh->domain.cycle() > 0) {
           when reduceTimeIncrement(Real_t reducedt) serial {
-            lulesh->OutputTiming();
             updateTimeIncrement(reducedt);
           }
         }
+		serial{
+            lulesh->OutputTiming();
+		}
 
         // Send force to rank-1 and rank+1
         serial {
