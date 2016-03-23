@@ -227,6 +227,7 @@ readonly int heightElems;
 
       // Time steps done
       serial {
+	  lulesh->FinalTime();
         contribute(0,NULL,CkReduction::nop,CkCallback(CkReductionTarget(Main,done),mainProxy));
 		makeADump(true);
       }
