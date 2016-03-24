@@ -191,15 +191,27 @@ Main::Main(CkArgMsg* msg)
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
   
   // Setup chare array size
+/*
   CkArrayOptions coarseOpts(coarseCount);
   coarseOpts.setMap(rrMap);
   coarseScaleArray = CProxy_CoarseScaleModel::ckNew(coarseOpts);
+*/
+
+  // Evenly distribute CoarseScaleModels across PEs
+  coarseScaleArray = CProxy_CoarseScaleModel::ckNew();
+  int inc = CkNumPes() / coarseCount;
+  int whichPE = 0;
+  for (int i = 0; i < coarseCount; i++)
+  {
+    coarseScaleArray(i).insert(whichPE);
+    whichPE += inc;
+  }
+  coarseScaleArray.doneInserting();
+  
 #ifdef SILO
   coarseScaleArray.setSiloParams(file_parts, visit_data_interval);
 #endif
   coarseScaleArray.setRemoteDB(dbRemote);
-
-
 
   // Create Nearest Neighbor Searches
   CkArrayOptions nnsOpts(nnsCount);
