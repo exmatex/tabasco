@@ -144,8 +144,10 @@ void CoarseScaleModel::ConstructFineScaleModel(int numRanks, int nnsCount, int i
   int flann_n_trees=1;
   int flann_n_checks=20; 
   int global_ns=0;
+  int use_vpsc=0;
+  double c_scaling=1.0;
   // Create Lulesh-local parts of fine scale models
-  lulesh->ConstructFineScaleModel(useAdaptiveSampling,global_modelDB,global_ann,flanning,flann_n_trees,flann_n_checks,global_ns);
+  lulesh->ConstructFineScaleModel(useAdaptiveSampling,global_modelDB,global_ann,flanning,flann_n_trees,flann_n_checks,global_ns,use_vpsc,c_scaling);
 
   // Now create 2-D fine scale model chares
   numElems = lulesh->domain.numElem();
