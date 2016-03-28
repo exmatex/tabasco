@@ -27,6 +27,7 @@ extern CProxy_Evaluate evaluateArray;
 extern CProxy_DBInterface DBArray;
 
 extern int dbType;
+extern int fineType;
 
 FineScaleModel::FineScaleModel()
 {}
@@ -44,11 +45,22 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
   ConstitutiveGlobal cm_global;
 
   // Construct the fine-scale plasticity model
-  double D_0 = 1.e-2;
-  double m = 1./20.;
-  double g = 2.e-3; // (Mbar)
-  Plasticity* plasticity_model = (Plasticity*)(new Taylor(D_0, m, g));
+  Plasticity* plasticity_model;
 
+  // Taylor
+  if (fineType == 0)
+  {
+    double D_0 = 1.e-2;
+    double m = 1./20.;
+    double g = 2.e-3; // (Mbar)
+    plasticity_model = (Plasticity*)(new Taylor(D_0, m, g));
+  }
+  // VPSC
+  else if (fineType == 1)
+  {
+
+  }
+ 
   // Construct the approximate nearest neighbors search
   int point_dimension = plasticity_model->pointDimension();
 
