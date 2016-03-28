@@ -6,6 +6,7 @@
 #include "DBInterface.h"
 
 #include "Taylor.h"
+#include "vpsc.h"
 #include "MieGruneisen.h"
 #include "KrigingDataBase.h"
 #include "InterpolationDataBase.h"
@@ -47,7 +48,10 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
   double D_0 = 1.e-2;
   double m = 1./20.;
   double g = 2.e-3; // (Mbar)
-  Plasticity* plasticity_model = (Plasticity*)(new Taylor(D_0, m, g));
+  //Plasticity* plasticity_model = (Plasticity*)(new Taylor(D_0, m, g));
+
+  double c_scaling=1.0;
+  vpsc* plasticity_model = (vpsc*)(new vpsc(c_scaling));
 
   // Construct the approximate nearest neighbors search
   int point_dimension = plasticity_model->pointDimension();
