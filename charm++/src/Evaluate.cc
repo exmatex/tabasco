@@ -2,6 +2,7 @@
 #include "FineScaleModel.h"
 #include "Evaluate.h"
 #include "Taylor.h"
+#include "vpsc.h"
 
 extern CProxy_Main mainProxy;
 extern CProxy_FineScaleModel fineScaleArray;
@@ -182,6 +183,7 @@ void Evaluate::pup(PUP::er &p)
 void Evaluate::initialize(int etype)
 {
   evalType = etype;
+double c_scaling = 1.0;
 
   // Taylor plasticity model
   if (evalType == 0) {
@@ -196,7 +198,7 @@ void Evaluate::initialize(int etype)
 
   // VPSC plasticity model
   else {
-
+         pm = (vpsc*) (new vpsc(c_scaling));
   }
 
 }
@@ -204,7 +206,7 @@ void Evaluate::initialize(int etype)
 void Evaluate::eval(std::vector<double> point, const CkCallback &cb)
 {
   // Taylor plasticity model
-  if (evalType == 0) {
+  //if (evalType == 0) {
     std::vector<double> value(pm->valueAndDerivativeDimension());
 
     pm->evaluate(point, value);
@@ -212,17 +214,17 @@ void Evaluate::eval(std::vector<double> point, const CkCallback &cb)
     eval_message* msg = new eval_message(value);
 
     cb.send(msg);
-  }
+  //}
   // VPSC plasticity model
-  else {
+  //else {
 
-  }
+  //}
 }
 
 void Evaluate::evalNative(Tensor2Sym in, const CkCallback &cb)
 {
   // Taylor plasticity model
-  if (evalType == 0) {
+  //if (evalType == 0) {
     Tensor2Sym out_value;
     Tensor4LSym out_derivative;
 
@@ -230,8 +232,8 @@ void Evaluate::evalNative(Tensor2Sym in, const CkCallback &cb)
     evaln_message* msg = new evaln_message(out_value, out_derivative);
 
     cb.send(msg);
-  }
-  else {
+  //}
+  //else {
 
-  }
+  //}
 }
