@@ -165,11 +165,22 @@ void CoarseScaleModel::ConstructFineScaleModel(int numRanks, int nnsCount, int i
   int dbIndex = dbRange[0];
   int evalIndex = evalRange[0];
 
+  // Number of PEs for a domain
+  int dcount = CkNumPes() / coarseCount;
+  int startPE = thisIndex * dcount;
+  int endPE = startPE + dcount;
+  startPE++;
+  int whichPE = startPE;
+
   for (Index_t i = 0; i < numElems; ++i) {
     state_size[i] = lulesh->domain.cm(i)->getStateSize();
 
-    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex, remoteDB, evalIndex);
+    fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex, remoteDB, evalIndex, whichPE);
+  //  fineScaleArray(thisIndex, i).insert(state_size[i], useAdaptiveSampling, nnsIndex, interpIndex, dbIndex, remoteDB, evalIndex);
     
+    whichPE++;
+    if (whichPE >= endPE) whichPE = startPE;
+
     nnsIndex++;
     if (nnsIndex >= nnsRange[1]) nnsIndex = nnsRange[0];
     interpIndex++;

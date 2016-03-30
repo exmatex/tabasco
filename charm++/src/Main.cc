@@ -214,10 +214,12 @@ Main::Main(CkArgMsg* msg)
   coarseScaleArray.setRemoteDB(dbRemote);
 
   // Create Nearest Neighbor Searches
+#ifdef NNS_AS_CHARE
   CkArrayOptions nnsOpts(nnsCount);
   nnsOpts.setMap(rrMap);
   nnsArray = CProxy_NearestNeighborSearch::ckNew(nnsOpts);
   nnsArray.initialize(nnsType, pointDim, numTrees);
+#endif
 
 /*
   // Create interpolates
@@ -225,10 +227,12 @@ Main::Main(CkArgMsg* msg)
 */
 
   // Create Evaluates
+#ifdef EVAL_AS_CHARE
   CkArrayOptions evalOpts(evalCount);
   evalOpts.setMap(rrMap);
   evaluateArray = CProxy_Evaluate::ckNew(evalOpts);
   evaluateArray.initialize(evalType);
+#endif
 
   // Create fine scale models
   fineScaleArray = CProxy_FineScaleModel::ckNew();  
