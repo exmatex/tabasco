@@ -169,7 +169,7 @@ void CoarseScaleModel::ConstructFineScaleModel(int numRanks, int nnsCount, int i
   int dcount = CkNumPes() / coarseCount;
   int startPE = thisIndex * dcount;
   int endPE = startPE + dcount;
-  startPE++;
+  if (dcount > 1) startPE++;
   int whichPE = startPE;
 
   for (Index_t i = 0; i < numElems; ++i) {
