@@ -1,6 +1,12 @@
+sudo: false
+
 language: cpp
 
-sudo: false
+compiler:
+  - gcc
+
+install:
+  - export CXX="g++-4.9" CC="gcc-4.9" FC="gfortran-4.9"
 
 addons:
   apt:
@@ -15,6 +21,7 @@ addons:
       - libboost-dev
       - gcc-4.9
       - g++-4.9
+      - gfortran-4.9
 
 env:
   matrix: 
@@ -33,22 +40,18 @@ env:
     - SILO=no  FLANN=no   REDIS=no  TWEMPROXY=no SILODIFF=/bin/true
 
 before_script:
-  - export CXX="g++-4.9" CC="gcc-4.9";
   - export PATH="/usr/lib/ccache:$PATH"
   - wget -O - http://charm.cs.illinois.edu/distrib/charm-6.6.1.tar.gz | tar -xz 
   - cd charm && ./build charm++ net-linux-x86_64 -j4 && export CHARM_ROOT=$PWD && cd ..
 
 script:
-  - make -j2 REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} CHARM_ROOT=${CHARM_ROOT} && 
+  - make -j2 REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} CHARM_ROOT=${CHARM_ROOT} FC="${FC}" && 
     make get_reference &&
     make test REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} ${TESTFILE:+TESTFILE=${TESTFILE}} ${SILODIFF:+SILODIFF=${SILODIFF}}
 
 cache:
   directories:
     - $HOME/.ccache
-
-compiler:
-  - gcc
 
 notifications:
   email:
