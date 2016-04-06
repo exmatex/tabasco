@@ -88,13 +88,20 @@ ifneq ($(strip $(REDIS_LOC)),)
 CXXFLAGS += -DREDIS -I$(realpath $(REDIS_LOC))
 endif
 
+FORTRAN_LIBS = -lgfortran -lquadmath
+# intel compiler
+ifeq ($(COMPILER),intel)
+FORTRAN_LIBS = -lifcore
+endif
+
 #LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
 #LDFLAGS= -tracemode projections -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
-LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) $(EXTRA_LIBS) -lm -lrt 
+LDFLAGS= -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) $(EXTRA_LIBS) -lm -lrt
 ifneq ($(strip $(SILO_LOC)),)
 CXXFLAGS += -DSILO
 LDFLAGS += -Wl,-rpath,$(realpath $(SILO_LOC))/lib -L$(realpath $(SILO_LOC))/lib -lsiloh5
 endif
+LDFLAGS += $(FORTRAN_LIBS)
 
 LULESH_OBJ=../CoEVP/LULESH/lulesh.o ../CoEVP/LULESH/siloDump.o
 
