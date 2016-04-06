@@ -20,9 +20,15 @@ else
 CHARMINC=$(CHARM_ROOT)/include/
 endif
 
-
-
 CXX ?= g++
+
+FORTRAN_LIBS = -lgfortran -lquadmath
+# intel compiler
+ifeq ($(COMPILER),intel)
+FORTRAN_LIBS = -lifcore
+CXX=icc
+endif
+
 CHARMBIN=$(CHARM_ROOT)/bin
 CHARMCXX=$(CHARMBIN)/charmc -c++ $(CXX) -ld++ $(CXX)
 OBJDIR=charm_obj
@@ -86,12 +92,6 @@ endif
 
 ifneq ($(strip $(REDIS_LOC)),)
 CXXFLAGS += -DREDIS -I$(realpath $(REDIS_LOC))
-endif
-
-FORTRAN_LIBS = -lgfortran -lquadmath
-# intel compiler
-ifeq ($(COMPILER),intel)
-FORTRAN_LIBS = -lifcore
 endif
 
 #LDFLAGS= -tracemode summary -L../CoEVP/CM/lib -lcm $(LINALG_LDFLAG) -lm -lrt 
