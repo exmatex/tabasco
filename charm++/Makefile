@@ -22,9 +22,9 @@ endif
 
 
 
-
+CXX ?= g++
 CHARMBIN=$(CHARM_ROOT)/bin
-CHARMCXX=$(CHARMBIN)/charmc
+CHARMCXX=$(CHARMBIN)/charmc -c++ $(CXX) -ld++ $(CXX)
 OBJDIR=charm_obj
 BINDIR=charm_bin
 
@@ -121,7 +121,7 @@ $(OBJDIR)/%.d: $(SRCDIR)/%.cc
 	@#2. sed gcc -MG does not know that missing files will be in $(SRCDIR)
 	@# no path -> SRCDIR
 	@echo g++ -MM -MG -MT $(OBJDIR)/$*.o $(CXXFLAGS) -I$(SRCDIR) -I$(CHARMINC) $< \> $@
-	@g++ -MM -MG -MT $(OBJDIR)/$*.o $(CXXFLAGS) -I$(SRCDIR) -I$(CHARMINC) $< | \
+	@$(CXX) -MM -MG -MT $(OBJDIR)/$*.o $(CXXFLAGS) -I$(SRCDIR) -I$(CHARMINC) $< | \
 	sed 's/\([^[:space:]]\) \([^\\[:space:]]\)/\1 \\\n \2/g' | \
 	sed '/^[^/]*.\(def\|decl\)\./s@[^[:space:]]@$(SRCDIR)/&@' > $@
 
