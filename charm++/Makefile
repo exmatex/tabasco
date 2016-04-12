@@ -20,17 +20,14 @@ else
 CHARMINC=$(CHARM_ROOT)/include/
 endif
 
-CXX ?= g++
-
 FORTRAN_LIBS = -lgfortran -lquadmath
 # intel compiler
 ifeq ($(COMPILER),intel)
 FORTRAN_LIBS = -lifcore
-CXX=icc
 endif
 
 CHARMBIN=$(CHARM_ROOT)/bin
-CHARMCXX=$(CHARMBIN)/charmc -c++ $(CXX) -ld++ $(CXX)
+CHARMCXX=$(CHARMBIN)/charmc
 OBJDIR=charm_obj
 BINDIR=charm_bin
 

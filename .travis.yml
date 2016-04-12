@@ -46,7 +46,7 @@ before_script:
   - cd charm && ./build charm++ net-linux-x86_64 -j4 && export CHARM_ROOT=$PWD && cd ..
 
 script:
-  - make -j2 REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} CHARM_ROOT=${CHARM_ROOT} FC="${FC}" && 
+  - make -j2 REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} CHARM_ROOT=${CHARM_ROOT} CHARMCXX="${CHARM_ROOT}/bin/charmc -c++ ${CXX} -ld++ ${CXX}" FC="${FC}" && 
     make get_reference &&
     make test REDIS=${REDIS} FLANN=${FLANN} SILO=${SILO} ${TESTFILE:+TESTFILE=${TESTFILE}} ${SILODIFF:+SILODIFF=${SILODIFF}}
 
