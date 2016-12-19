@@ -75,7 +75,7 @@ void CoarseScaleModel::updateTimeIncrement(Real_t reducedt)
 
 }
 
-CoarseScaleModel::CoarseScaleModel()
+CoarseScaleModel::CoarseScaleModel(int * haswellArr, int nHaswells)
 {
   
   printf("CoarseScaleModel created on PE %d Index %d\n", 
@@ -90,6 +90,11 @@ CoarseScaleModel::CoarseScaleModel()
 
   total_samples = 0;
   total_interpolations = 0;
+
+  for(int i = 0; i < nHaswells; i++)
+  {
+	this->haswellVec.push_back(haswellArr[i]);
+  }
 
 }
 
@@ -168,8 +173,10 @@ void CoarseScaleModel::ConstructFineScaleModel(int numRanks, int nnsCount, int i
   int evalIndex = evalRange[0];
 
   // Number of PEs for a domain
-  int dcount = CkNumPes() / coarseCount;
-  int startPE = thisIndex * dcount;
+  int dcount = haswellVec.size() / coarseCount;
+  ///TODO: Dangerous logic?
+  ///TODO: Also, why not just use a map?
+  int startPE = haswellVec[thisIndex * dcount];
   int endPE = startPE + dcount;
   if (dcount > 1) startPE++;
   int whichPE = startPE;

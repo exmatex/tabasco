@@ -11,6 +11,7 @@ class Main : public CBase_Main {
     int doneCount;
     int totalChares;
 
+    bool isNodeKaswell(int physNodeID);
   public:
 
   /// Constructors ///

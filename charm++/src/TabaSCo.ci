@@ -12,6 +12,9 @@ mainmodule TabaSCo {
   readonly CProxy_Interpolate interpolateArray;      // array of interpolations
   readonly CProxy_Evaluate evaluateArray;            // array of evaluates
   readonly CProxy_DBInterface DBArray;               // array of DB interfaces
+  readonly CProxy_KaswellMap KaswellMapProxy;
+  readonly CProxy_HaswellMap HaswellMapProxy;
+
 
 readonly int coarseType;
 readonly int coarseCount;
@@ -70,7 +73,7 @@ readonly int heightElems;
 
   // Coarse scale model - Lulesh
   array [1D] CoarseScaleModel {
-    entry CoarseScaleModel();
+    entry CoarseScaleModel(int haswellArr[nHaswells], int nHaswells);
     entry [reductiontarget] void reduceTimeIncrement(Real_t reducedt);
     entry [reductiontarget] void reduceIters(int reducedIters);
     entry [reductiontarget] void reduceTotal(int n, int total[n]);
@@ -285,5 +288,16 @@ readonly int heightElems;
     entry DBMap(int dbNodeCount);
     entry DBMap(std::vector<int> nodeList);
   };
+
+	group KaswellMap : CkArrayMap
+	{
+		entry KaswellMap(std::vector<int> nodeList);
+	};
+
+	group HaswellMap : CkArrayMap
+	{
+		entry HaswellMap(std::vector<int> nodeList);
+	};
+
 
 };

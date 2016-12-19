@@ -5,6 +5,8 @@
 
 #include "LULESH/lulesh.h"
 
+#include <vector>
+
 class Msg : public CMessage_Msg
 {
   public:
@@ -55,9 +57,10 @@ class CoarseScaleModel : public CBase_CoarseScaleModel {
 
     bool remoteDB;
      
+	std::vector<int> haswellVec;
   public:
   
-  CoarseScaleModel();
+  CoarseScaleModel(int * haswellArr, int nHaswells);
   CoarseScaleModel(CkMigrateMessage *msg);
   ~CoarseScaleModel();
   void pup(PUP::er &p);

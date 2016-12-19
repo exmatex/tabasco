@@ -10,6 +10,7 @@
 #include "DBVecMessage.h"
 #include "input.h"
 #include "ModelDB_Enums.h"
+#include "NodeMaps.h"
 
 #include <cstring>
 #include <vector>
@@ -21,6 +22,8 @@
 /* readonly */ CProxy_Interpolate interpolateArray;
 /* readonly */ CProxy_Evaluate evaluateArray;
 /* readonly */ CProxy_DBInterface DBArray;
+/* readonly */ CProxy_KaswellMap KaswellMapProxy;
+/* readonly */ CProxy_HaswellMap HaswellMapProxy;
 
 /*readonly*/ int coarseType;
 /*readonly*/ int coarseCount;
@@ -46,6 +49,9 @@
 /*readonly*/ int edgeElems; 
 /*readonly*/ int heightElems;
 /*readonly*/ int timerRate;
+
+///TODO: Make these less static
+const int NUM_Kaswell_RANKS = 8;
 
 
 // Entry point of Charm++ application
@@ -131,6 +137,7 @@ Main::Main(CkArgMsg* msg)
 
   //Set DBCount before moving forward for output purposes
   // Create DB interfaces with desired backend, if we need them
+  ///TODO: Probably should merge the db and kaswell map because we may not want redis on a kaswell...
   if(dbRemote == true)
   {
     int numDBs = tempDBCount;
@@ -153,6 +160,66 @@ Main::Main(CkArgMsg* msg)
   }
 
   // Set other parameters
+
+  // Build Kaswell map
+	std::vector<int> kaswellVec;
+	std::vector<int> haswellVec;
+  for(int node = 0; node < CmiNumPhysicalNodes(); node++)
+  {
+    if(this->isNodeKaswell(node) == true)
+    {
+      //Push to kaswell list
+	  int * peList;
+	  int nPEs;
+	  CmiGetPesOnPhysicalNode(node, &peList, &nPEs);
+	  for(int i = 0; i < nPEs; i++)
+	  {
+        kaswellVec.push_back(peList[i]);
+	  }
+    }
+	else
+	{
+	  int * peList;
+	  int nPEs;
+	  CmiGetPesOnPhysicalNode(node, &peList, &nPEs);
+	  for(int i = 0; i < nPEs; i++)
+	  {
+        haswellVec.push_back(peList[i]);
+	  }
+	}
+  }
+  //Add safety so that this can work even if not on hybrid platform
+  //If no kaswells, everything is a kaswell
+  if(kaswellVec.size() == 0)
+  {
+	for(int node = 0; node < CmiNumPhysicalNodes(); node++)
+	{
+	  int * peList;
+	  int nPEs;
+	  CmiGetPesOnPhysicalNode(node, &peList, &nPEs);
+	  for(int i = 0; i < nPEs; i++)
+	  {
+        kaswellVec.push_back(peList[i]);
+	  }
+	}
+  }
+  //And if no haswells, everything is a haswell
+  if(haswellVec.size() == 0)
+  {
+	for(int node = 0; node < CmiNumPhysicalNodes(); node++)
+	{
+	  int * peList;
+	  int nPEs;
+	  CmiGetPesOnPhysicalNode(node, &peList, &nPEs);
+	  for(int i = 0; i < nPEs; i++)
+	  {
+        haswellVec.push_back(peList[i]);
+	  }
+	}
+  }
+  //Build maps
+	KaswellMapProxy = CProxy_KaswellMap::ckNew(kaswellVec);
+	HaswellMapProxy = CProxy_HaswellMap::ckNew(haswellVec);
 
   // Display of some basic information
   // Elements breakdown
@@ -179,13 +246,15 @@ Main::Main(CkArgMsg* msg)
            "  Use Remote DB %d\n"
            "  Number of SILO Files for Single Domain: %d\n"
            "  Visit Data Interval: %d\n"
-           "  Adaptive Timer Sampling Rate: %d\n",
+           "  Adaptive Timer Sampling Rate: %d\n"
+		   "  Number of Kaswell PEs: %d\n"
+		   "  Number of Haswell PEs: %d\n",
           coarseType, coarseCount, 
           ((useAdaptiveSampling == true) ? 1 : 0), stopTime, maxSteps, heightElems, 
           edgeElems, fineType, nnsType, nnsCount, pointDim, numTrees,
           interpType, interpCount, evalType, evalCount, 
           SingletonDBBackendStrings[dbType], dbCount, dbRemote, file_parts, 
-          visit_data_interval, timerRate);
+          visit_data_interval, timerRate, kaswellVec.size(), haswellVec.size());
 
   //Setup round robin map
   CProxy_RRMap rrMap = CProxy_RRMap::ckNew();
@@ -198,7 +267,10 @@ Main::Main(CkArgMsg* msg)
 */
 
   // Evenly distribute CoarseScaleModels across PEs
-  coarseScaleArray = CProxy_CoarseScaleModel::ckNew();
+  CkArrayOptions coarseScaleOptions(coarseCount);
+  coarseScaleOptions.setMap(HaswellMapProxy);
+  coarseScaleArray = CProxy_CoarseScaleModel::ckNew(haswellVec.data(), haswellVec.size(), coarseCount);
+  /*
   int inc = CkNumPes() / coarseCount;
   int whichPE = 0;
   for (int i = 0; i < coarseCount; i++)
@@ -206,6 +278,14 @@ Main::Main(CkArgMsg* msg)
     coarseScaleArray(i).insert(whichPE);
     whichPE += inc;
   }
+  */
+  /*
+  for(int i = 0; i < coarseCount; i++)
+  {
+	int whichPE = haswellVec[i % haswellVec.size()];
+	coarseScaleArray(i).insert(haswellVec.data(), haswellVec.size(), whichPE);
+  }
+  */
   coarseScaleArray.doneInserting();
   
 #ifdef SILO
@@ -216,7 +296,7 @@ Main::Main(CkArgMsg* msg)
   // Create Nearest Neighbor Searches
 #ifdef NNS_AS_CHARE
   CkArrayOptions nnsOpts(nnsCount);
-  nnsOpts.setMap(rrMap);
+  nnsOpts.setMap(HaswellMapProxy);
   nnsArray = CProxy_NearestNeighborSearch::ckNew(nnsOpts);
   nnsArray.initialize(nnsType, pointDim, numTrees);
 #endif
@@ -229,7 +309,7 @@ Main::Main(CkArgMsg* msg)
   // Create Evaluates
 #ifdef EVAL_AS_CHARE
   CkArrayOptions evalOpts(evalCount);
-  evalOpts.setMap(rrMap);
+  evalOpts.setMap(KaswellMapProxy);
   evaluateArray = CProxy_Evaluate::ckNew(evalOpts);
   evaluateArray.initialize(evalType);
 #endif
@@ -247,6 +327,20 @@ Main::Main(CkArgMsg* msg)
 // // NOTE: This constructor does not need to appear in the ".ci" file
 Main::Main(CkMigrateMessage* msg)
 {
+}
+
+bool Main::isNodeKaswell(int physNodeID)
+{
+	///TODO: Consider a more robust check to determine if this is a ``kaswell'' node
+	int nRanks = CmiNumPesOnPhysicalNode(physNodeID);
+	if(nRanks == NUM_Kaswell_RANKS)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 #include "TabaSCo.def.h"
