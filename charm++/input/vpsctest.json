@@ -3,7 +3,7 @@
     "CoarseScaleModel": [
         {"id": "type",                  "value": "0"},
         {"id": "count",                 "value": "1"},
-        {"id": "use adaptive sampling", "value": "1"},
+        {"id": "use adaptive sampling", "value": "0"},
         {"id": "stop time",             "value": "1e-01"},
         {"id": "max steps",             "value": "1000"},
         {"id": "visit data interval",   "value": "20"},
@@ -13,7 +13,7 @@
         {"id": "timer sampling rate",   "value": "10"}
     ],
     "FineScaleModel": [
-        {"id": "type",                 "value": "1"} 
+        {"id": "type",                 "value": "0"} 
     ],
     "NearestNeighborSearch": [
         {"id": "type",                 "value": "1"},
@@ -31,8 +31,8 @@
     ],
     "DBInterface": [
         {"id": "type",                 "value": "1"},
-        {"id": "count",                "value": "2912"},
-        {"id": "remote",                "value": "0"}
+        {"id": "count",                "value": "10"},
+        {"id": "remote",                "value": "1"}
     ]
   }
 }

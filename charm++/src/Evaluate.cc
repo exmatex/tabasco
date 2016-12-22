@@ -183,12 +183,12 @@ void Evaluate::pup(PUP::er &p)
 void Evaluate::initialize(int etype)
 {
    evalType = etype;
-
-   if (evalType == 0) {
-   // Taylor plasticity model
       double D_0 = 1.e-2;
       double m = 1./20.;
       double g = 2.e-3; // (Mbar)
+
+   if (evalType == 0) {
+   // Taylor plasticity model
 
       if (pm == NULL) {
          pm = (Plasticity*)(new Taylor(D_0, m, g));
@@ -198,7 +198,7 @@ void Evaluate::initialize(int etype)
    // VPSC plasticity model
       double c_scaling = 1.0;
       if (pm == NULL) {
-         pm = (vpsc*) (new vpsc(c_scaling));
+         pm = (vpsc*) (new vpsc(D_0,m,g,c_scaling));
       }
 
    }

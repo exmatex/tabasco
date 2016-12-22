@@ -47,20 +47,20 @@ FineScaleModel::FineScaleModel(int state_size, bool use_adaptive_sampling, int n
 
   // Construct the fine-scale plasticity model
   Plasticity* plasticity_model;
+    double D_0 = 1.e-2;
+    double m = 1./20.;
+    double g = 2.e-3; // (Mbar)
 
   // Taylor
   if (fineType == 0)
   {
-    double D_0 = 1.e-2;
-    double m = 1./20.;
-    double g = 2.e-3; // (Mbar)
     plasticity_model = (Plasticity*)(new Taylor(D_0, m, g));
   }
   // VPSC
   else if (fineType == 1)
   {
       double c_scaling=1.0;
-      plasticity_model = (vpsc*)(new vpsc(c_scaling));
+	  plasticity_model = (vpsc*)(new vpsc(D_0,m,g,c_scaling));
   }
  
   // Construct the approximate nearest neighbors search
