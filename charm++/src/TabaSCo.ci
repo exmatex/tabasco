@@ -38,6 +38,7 @@ readonly int file_parts;
 readonly int visit_data_interval; 
 readonly int edgeElems; 
 readonly int heightElems; 
+readonly int NUM_Kaswell_RANKS;
 
   message Msg;
   message DBVecMessage;

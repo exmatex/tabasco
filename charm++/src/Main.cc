@@ -50,9 +50,7 @@
 /*readonly*/ int heightElems;
 /*readonly*/ int timerRate;
 
-///TODO: Make these less static
-const int NUM_Kaswell_RANKS = 8;
-
+/*readonly*/ int NUM_Kaswell_RANKS;
 
 // Entry point of Charm++ application
 Main::Main(CkArgMsg* msg)
@@ -79,6 +77,15 @@ Main::Main(CkArgMsg* msg)
   if(msg->argc < 2){
     std::cerr << "Missing argument (json file)" << std::endl;
     CkExit();
+  }
+  ///TODO: Probably should make this an input file parameter, but for current sweep purposes this is faster
+  if(msg->argc == 3)
+  {
+	NUM_Kaswell_RANKS = atoi(msg->argv[2]);
+  }
+  else
+  {
+	NUM_Kaswell_RANKS = 0;
   }
   // Get input values from json file
   Input in;
